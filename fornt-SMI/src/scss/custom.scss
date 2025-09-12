@@ -1,0 +1,75 @@
+@use "sass:map";
+
+@use "@coreui/coreui/scss/coreui" with (
+  $primary: #78C043
+);
+
+// Exemple pour forcer la couleur du texte des boutons
+.btn {
+  color: #fff;
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: #fff;
+  }
+}
+
+.hover-card {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.hover-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  z-index: 1;
+}
+
+.c-alert {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    // transform: scale(1.01);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    z-index: 2;
+  }
+}
+.c-toast-body {
+  background-color: rgba(var(--cui-body-bg-rgb), 0.85);
+  color: var(--cui-secondary-color);
+  border-color: var(--cui-border-color-translucent);
+}
+
+.custom-badge {
+  background-color: light !important; 
+  margin-left: 1rem !important;
+  color: #292c30 !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 50rem !important;
+}
+
+.status_badge {
+  width: 10rem;
+}
+
+.card-list-hover {
+  transition: box-shadow 0.2s, transform 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: 0 2px 10px rgba(120, 192, 67, 0.15); // ombre verte légère
+    // transform: scale(1.01);
+    border-color: #78C043;
+  }
+
+  &.active {
+    box-shadow: 0 4px 32px rgba(120, 192, 67, 0.25);
+    border: 2px solid #78C043;
+    background-color: #f6fff1;
+  }
+}
+
+
+
