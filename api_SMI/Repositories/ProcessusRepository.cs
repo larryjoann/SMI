@@ -14,11 +14,23 @@ namespace api_SMI.Repositories
         }
 
         public List<Processus> GetAll()
-            => _context.Set<Processus>().ToList();
+            => _context.Set<Processus>()
+                .Include(p => p.CategorieProcessus) // Ajout ici
+                .Include(p => p.Pilotes)
+                    .ThenInclude(pilote => pilote.Collaborateur)
+                .Include(p => p.Copilotes)
+                    .ThenInclude(copilote => copilote.Collaborateur)
+                .ToList();
 
         public Processus? GetById(int id)
         {
-            return _context.Set<Processus>().FirstOrDefault(p => p.Id == id);
+            return _context.Set<Processus>()
+                .Include(p => p.CategorieProcessus) // Ajout ici
+                .Include(p => p.Pilotes)
+                    .ThenInclude(pilote => pilote.Collaborateur)
+                .Include(p => p.Copilotes)
+                    .ThenInclude(copilote => copilote.Collaborateur)
+                .FirstOrDefault(p => p.Id == id);
         }
 
         public void Add(Processus processus)
@@ -48,6 +60,7 @@ namespace api_SMI.Repositories
                 _context.SaveChanges();
             }
         }
+
 
         public void DeleteAll()
         {

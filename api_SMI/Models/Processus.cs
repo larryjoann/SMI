@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace api_SMI.Models
 {
@@ -10,31 +11,32 @@ namespace api_SMI.Models
         [Column("id")]
         public int Id { get; set; }
 
+        [Required(ErrorMessage = "Le nom du processus est obligatoire.")]
         [Column("nom")]
         public string? Nom { get; set; }
 
+        [Required(ErrorMessage = "Le sigle est obligatoire.")]
         [Column("sigle")]
         public string? Sigle { get; set; }
 
-        [Column("pseudo_pilote")]
-        public string? PseudoPilote { get; set; }
-
-        [Column("matricule_pilote")]
-        public string? MatriculePilote { get; set; }
-
-        [Column("pseudo_copilote")]
-        public string? PseudoCopilote { get; set; }
-
-        [Column("matricule_copilote")]
-        public string? MatriculeCopilote { get; set; }
-
+        [BindRequired]
+        [Required(ErrorMessage = "La catégorie du processus est obligatoire.")]
         [Column("id_categorie_processus")]
-        public int IdCategorieProcessus { get; set; }
+        public int? IdCategorieProcessus { get; set; }
+
+        [ForeignKey("IdCategorieProcessus")]
+        public CategorieProcessus? CategorieProcessus { get; set; }
 
         [Column("contexte")]
         public string? Contexte { get; set; }
 
         [Column("finalite")]
         public string? Finalite { get; set; }
+
+        // Navigation vers plusieurs pilotes
+        public ICollection<Pilote>? Pilotes { get; set; }
+
+        // Navigation vers plusieurs copilotes
+        public ICollection<Copilote>? Copilotes { get; set; }
     }
 }

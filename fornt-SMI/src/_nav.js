@@ -56,7 +56,7 @@ const _nav = [
       {
         component: CNavItem,
         name: 'Déclarer un NC',
-        to: '/#',
+        to: '/nc/form',
       },
       {
         component: CNavItem,

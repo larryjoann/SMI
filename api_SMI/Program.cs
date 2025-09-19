@@ -71,6 +71,23 @@ builder.Services.AddScoped<ILdapService, LdapService>();
 builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<CategorieProcessusRepository>();
 builder.Services.AddScoped<CategorieProcessusService>();
+builder.Services.AddScoped<ProcessusRepository>();
+builder.Services.AddScoped<ProcessusService>();
+builder.Services.AddScoped<CategoriePermissionRepository>();
+builder.Services.AddScoped<CategoriePermissionService>();
+builder.Services.AddScoped<PermissionRepository>();
+builder.Services.AddScoped<PermissionService>();
+builder.Services.AddScoped<RoleRepository>();
+builder.Services.AddScoped<RoleService>();
+builder.Services.AddScoped<RolePermissionRepository>();
+builder.Services.AddScoped<RolePermissionService>();    
+builder.Services.AddScoped<RoleCollaborateurRepository>();
+builder.Services.AddScoped<RoleCollaborateurService>(); 
+builder.Services.AddScoped<PiloteRepository>();
+builder.Services.AddScoped<PiloteService>();            
+builder.Services.AddScoped<CopiloteRepository>();
+builder.Services.AddScoped<CopiloteService>();  
+    
 
 
 var app = builder.Build();

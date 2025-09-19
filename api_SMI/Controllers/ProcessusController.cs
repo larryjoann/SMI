@@ -1,6 +1,7 @@
 using api_SMI.Models;
 using api_SMI.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace api_SMI.Controllers
 {
@@ -39,6 +40,9 @@ namespace api_SMI.Controllers
         [HttpPut("{id}")]
         public IActionResult Update(int id, Processus processus)
         {
+            Console.WriteLine($"Update déclenché pour le processus ID: {id}");
+            Console.WriteLine("Données du processus :");
+            Console.WriteLine(JsonSerializer.Serialize(processus));
             if (id != processus.Id) return BadRequest();
             _service.Update(processus);
             return NoContent();

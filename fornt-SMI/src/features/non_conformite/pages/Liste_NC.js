@@ -14,7 +14,7 @@ import { cilTrash} from '@coreui/icons'
 
 import DeclarationsPanel from '../components/DeclarationsPanel'
 import BrouillonsPanel from '../components/BrouillonsPanel'
-import RattachePanel from '../components/RattachePanel'
+import TousPanel from '../components/TousPanel'
 
 const Liste_NC = () => {
     return(
@@ -49,8 +49,8 @@ const Liste_NC = () => {
                             <h6 className='m-1'>Mes déclarations</h6>
                             <CBadge className="custom-badge" >1</CBadge>
                         </CTab>
-                        <CTab itemKey="rattache" className="d-flex align-items-center">
-                            <h6 className='m-1'>Rattaché</h6>
+                        <CTab itemKey="tous" className="d-flex align-items-center">
+                            <h6 className='m-1'>Tous</h6>
                             <CBadge className="custom-badge" >1</CBadge>
                         </CTab>
                     </CTabList>
@@ -63,8 +63,8 @@ const Liste_NC = () => {
                         <CTabPanel className="p-3" itemKey="declaration">
                           <DeclarationsPanel />
                         </CTabPanel>
-                        <CTabPanel className="p-3" itemKey="rattache">
-                            <RattachePanel />
+                        <CTabPanel className="p-3" itemKey="tous">
+                            <TousPanel />
                         </CTabPanel>
                     </CTabContent>
                 </CCardBody>

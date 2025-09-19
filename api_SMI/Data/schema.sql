@@ -22,16 +22,28 @@ CREATE TABLE Processus (
     id INT IDENTITY PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     sigle VARCHAR(10) NOT NULL,
-    pseudo_pilote VARCHAR(250),
-    matricule_pilote VARCHAR(50) NOT NULL, 
-    pseudo_copilote VARCHAR(250),
-    matricule_copilote VARCHAR(50) NOT NULL, 
     id_categorie_processus INT NOT NULL,
     contexte VARCHAR(MAX),
     finalite VARCHAR(MAX),
     FOREIGN KEY(matricule_pilote) REFERENCES Collaborateur(matricule),
     FOREIGN KEY(matricule_copilote) REFERENCES Collaborateur(matricule),
     FOREIGN KEY(id_categorie_processus) REFERENCES Categorie_processus(id)
+);
+
+CREATE TABLE Pilote (
+    id INT IDENTITY PRIMARY KEY,
+    matricule_collaborateur VARCHAR(50) NOT NULL, 
+    id_processus INT NOT NULL,
+    FOREIGN KEY(id_processus) REFERENCES Processus(id),
+    FOREIGN KEY(matricule_collaborateur) REFERENCES Collaborateur(matricule)
+);
+
+CREATE TABLE Copilote (
+    id INT IDENTITY PRIMARY KEY,
+    matricule_collaborateur VARCHAR(50) NOT NULL, 
+    id_processus INT NOT NULL,
+    FOREIGN KEY(id_processus) REFERENCES Processus(id),
+    FOREIGN KEY(matricule_collaborateur) REFERENCES Collaborateur(matricule)
 );
 
 

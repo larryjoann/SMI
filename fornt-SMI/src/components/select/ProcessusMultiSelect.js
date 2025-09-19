@@ -2,18 +2,17 @@ import React, { useEffect, useState } from 'react'
 import Select from 'react-select'
 import API_URL from '../../api/API_URL'
 
-function CollaborateurSelect({ placeholder = 'Liste des collaborateurs', onChange, value }) {
+function ProcessusMultiSelect({ placeholder = 'Sélectionner des processus', onChange, value, invalid }) {
   const [options, setOptions] = useState([])
 
   useEffect(() => {
-    fetch(`${API_URL}/Collaborateur`)
+    fetch(`${API_URL}/Processus`)
       .then(res => res.json())
       .then(data => {
-        // Si data est un tableau, sinon adapte selon la structure de la réponse
         const opts = Array.isArray(data)
-          ? data.map(col => ({
-              value: col.matricule,
-              label: col.nomComplet + " " + "("+col.departement+")",
+          ? data.map(proc => ({
+              value: proc.id,
+              label: `${proc.nom} (${proc.sigle})`,
             }))
           : []
         setOptions(opts)
@@ -25,12 +24,14 @@ function CollaborateurSelect({ placeholder = 'Liste des collaborateurs', onChang
     <Select
       placeholder={placeholder}
       isSearchable
-      isClearable  
+      isClearable
+      isMulti
       options={options}
       onChange={onChange}
       value={value}
+      className={invalid ? 'is-invalid' : ''}
     />
   )
 }
 
-export default CollaborateurSelect
+export default ProcessusMultiSelect

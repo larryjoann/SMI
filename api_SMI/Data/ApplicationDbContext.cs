@@ -19,5 +19,7 @@ namespace api_SMI.Data
         public DbSet<RolePermission> RolePermission { get; set; }
         public DbSet<RoleCollaborateur> RoleCollaborateur { get; set; }
         // Ajoute d'autres DbSet si besoin
+        public DbSet<Pilote> Pilotes { get; set; }
+        public DbSet<Copilote> Copilotes { get; set; }
     }
 }

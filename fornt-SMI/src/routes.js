@@ -6,6 +6,7 @@ const Notifications = React.lazy(() => import('./features/notifications/pages/Li
 // Pilotage
 const Cartographie = React.lazy(() => import('./features/pilotage/pages/Cartographie'))
 const FormProcessus = React.lazy(() => import('./features/pilotage/pages/FormProcessus'))
+const FicheProcessus = React.lazy(() => import('./features/pilotage/pages/FicheProcessus'))
 
 // Indicateurs
 const Liste_indicateur = React.lazy(() => import('./features/indicateur/pages/Tableau_indicateur'))
@@ -13,6 +14,7 @@ const Form_indicateur = React.lazy(() => import('./features/indicateur/pages/For
 
 // Non conformité
 const Liste_NC = React.lazy(() => import('./features/non_conformite/pages/Liste_NC'))
+const Form_NC = React.lazy(() => import('./features/non_conformite/pages/FormNC'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -22,6 +24,8 @@ const routes = [
   { path: '/pilotage', name: 'Pilotage', element: Cartographie, exact: true },
   { path: '/pilotage/cartographie', name: 'Cartographie des processus', element: Cartographie },
   { path: '/pilotage/formprocessus', name: 'Form processus', element: FormProcessus },
+  { path: '/pilotage/formprocessus/:id', name: 'Form processus', element: FormProcessus },
+  { path: '/pilotage/ficheprocessus/:id', name: 'Fiche processus', element: FicheProcessus },
 
   { path: '/indicateur', name: 'Indicateur', element: Liste_indicateur, exact: true },
   { path: '/indicateur/tableau', name: 'Tableau indicateur', element: Liste_indicateur },
@@ -29,6 +33,7 @@ const routes = [
 
   { path: '/nc', name: 'Non conformité', element: Liste_NC, exact: true },
   { path: '/nc/list', name: 'Mes non-conformité', element: Liste_NC },
+  { path: '/nc/form', name: 'Form non-conformité', element: Form_NC },
 ]
 
 export default routes

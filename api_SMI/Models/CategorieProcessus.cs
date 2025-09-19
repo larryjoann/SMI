@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace api_SMI.Models
 {
@@ -12,5 +13,8 @@ namespace api_SMI.Models
 
         [Column("nom")]
         public string? Nom { get; set; }
+
+        [JsonIgnore]
+        public ICollection<Processus>? Processus { get; set; }
     }
 }
