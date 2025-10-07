@@ -1,6 +1,5 @@
 using api_SMI.Models;
 using api_SMI.Repositories;
-using System.Text.Json;
 
 namespace api_SMI.Services
 {
@@ -39,7 +38,6 @@ namespace api_SMI.Services
 
         public void Delete(int id)
         {
-            // Supprimer les pilotes et copilotes liés
             var pilotes = _piloteRepository.GetByProcessus(id);
             foreach (var pilote in pilotes)
                 _piloteRepository.Delete(pilote.Id);

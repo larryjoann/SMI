@@ -38,7 +38,7 @@ const Liste_NC = () => {
             </CCol>
         </CRow>
         <CCard className='mb-4'>
-            <CTabs defaultActiveItemKey="brouillon" className="text-center">
+            <CTabs defaultActiveItemKey="declaration" className="text-center">
                 <CCardHeader style={{ padding: 0, borderBottom: 'none'}}>
                     <CTabList variant="tabs">
                         <CTab itemKey="brouillon" className="d-flex align-items-center">

@@ -11,7 +11,7 @@ import CIcon from '@coreui/icons-react'
 import { cilPlus } from '@coreui/icons'
 import CategorieProcessusSection from '../components/CategorieProcessusSection'
 import API_URL from '../../../api/API_URL'
-import CategorieProcessusSelect from '../../../components/select/CategorieProcessusSelect'
+import CategorieProcessusSelect from '../../../components/champs/CategorieProcessusSelect'
 import { Pop_up } from '../../../components/notification/Pop_up' // Ajoute l'import
 
 const Cartographie = () => {

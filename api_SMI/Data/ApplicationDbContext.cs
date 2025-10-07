@@ -21,5 +21,13 @@ namespace api_SMI.Data
         // Ajoute d'autres DbSet si besoin
         public DbSet<Pilote> Pilotes { get; set; }
         public DbSet<Copilote> Copilotes { get; set; }
+        public DbSet<Lieu> Lieux { get; set; }
+        public DbSet<TypeNc> TypeNcs { get; set; }
+        public DbSet<NonConformite> NonConformites { get; set; }
+        public DbSet<ProcessusConcerneNc> ProcessusConcerneNcs { get; set; }
+        public DbSet<StatusNc> StatusNcs { get; set; }
+        public DbSet<PrioriteNc> PrioriteNcs { get; set; }
+        public DbSet<PieceJointeNc> PieceJointeNcs { get; set; }
+        
     }
 }

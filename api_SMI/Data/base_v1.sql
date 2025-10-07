@@ -133,18 +133,19 @@ CREATE TABLE Role_collaborateur (
 -- =========================
 -- 4. Non-conformité
 -- =========================
-
-CREATE TABLE lieu (
+--ok
+CREATE TABLE Lieu (
+    id INT IDENTITY PRIMARY KEY,
+    nom VARCHAR(50) NOT NULL,
+    abr VARCHAR(10) NOT NULL    
+);
+--ok
+CREATE TABLE Type_nc (
     id INT IDENTITY PRIMARY KEY,
     nom VARCHAR(50) NOT NULL
 );
-
-CREATE TABLE type_nc (
-    id INT IDENTITY PRIMARY KEY,
-    nom VARCHAR(50) NOT NULL
-);
-
-CREATE TABLE non_conformite (
+--ok
+CREATE TABLE Non_conformite (
     id INT IDENTITY PRIMARY KEY,
     date DATE DEFAULT CAST(GETDATE() AS DATE),
     datetime_fait DATETIME DEFAULT GETDATE(),
@@ -152,8 +153,8 @@ CREATE TABLE non_conformite (
     action_curative VARCHAR(MAX),
     id_lieu INT NOT NULL,
     id_type_nc INT NOT NULL,
-    FOREIGN KEY(id_lieu) REFERENCES lieu(id),
-    FOREIGN KEY(id_type_nc) REFERENCES type_nc(id)
+    FOREIGN KEY(id_lieu) REFERENCES Lieu(id),
+    FOREIGN KEY(id_type_nc) REFERENCES Type_nc(id)
 );
 
 CREATE TABLE piece_jointe_nc (
@@ -174,13 +175,13 @@ CREATE TABLE emetteur_nc (
     FOREIGN KEY(id_personnel) REFERENCES personnel(id),
     FOREIGN KEY(id_nc) REFERENCES non_conformite(id)
 );
-
-CREATE TABLE processus_concerne_nc (
+--ok
+CREATE TABLE Processus_concerne_nc (
     id INT IDENTITY PRIMARY KEY,
     id_nc INT NOT NULL,
     id_processus INT NOT NULL,
-    FOREIGN KEY(id_nc) REFERENCES non_conformite(id),
-    FOREIGN KEY(id_processus) REFERENCES processus(id)
+    FOREIGN KEY(id_nc) REFERENCES Non_conformite(id),
+    FOREIGN KEY(id_processus) REFERENCES Processus(id)
 );
 
 CREATE TABLE nc_brouillon (
@@ -195,10 +196,9 @@ CREATE TABLE nc_actif (
     id_nc INT NOT NULL,
     FOREIGN KEY(id_nc) REFERENCES non_conformite(id)
 );
-
-CREATE TABLE status_nc (
+--ok
+CREATE TABLE Status_nc (
     id INT IDENTITY PRIMARY KEY,
-    ordre INT,
     nom VARCHAR(50),
     descr VARCHAR(MAX)
 );
@@ -211,9 +211,10 @@ CREATE TABLE status_nc_nc (
     FOREIGN KEY(id_nc) REFERENCES non_conformite(id),
     FOREIGN KEY(id_status_nc) REFERENCES status_nc(id)
 );
-
-CREATE TABLE priorite_nc (
+--ok
+CREATE TABLE Priorite_nc (
     id INT IDENTITY PRIMARY KEY,
+    degre INT,
     nom VARCHAR(50),
     descr VARCHAR(MAX)
 );

@@ -86,9 +86,24 @@ builder.Services.AddScoped<RoleCollaborateurService>();
 builder.Services.AddScoped<PiloteRepository>();
 builder.Services.AddScoped<PiloteService>();            
 builder.Services.AddScoped<CopiloteRepository>();
-builder.Services.AddScoped<CopiloteService>();  
-    
+builder.Services.AddScoped<CopiloteService>();
+builder.Services.AddScoped<ILieuService, LieuService>();
+builder.Services.AddScoped<LieuRepository>();   
+builder.Services.AddScoped<ITypeNcService, TypeNcService>();
+builder.Services.AddScoped<TypeNcRepository>();
+builder.Services.AddScoped<INonConformiteService, NonConformiteService>();
+builder.Services.AddScoped<NonConformiteRepository>();        
+builder.Services.AddScoped<IProcessusConcerneNcService, ProcessusConcerneNcService>();
+builder.Services.AddScoped<ProcessusConcerneNcRepository>();
+builder.Services.AddScoped<IStatusNcService, StatusNcService>();
+builder.Services.AddScoped<StatusNcRepository>();
+builder.Services.AddScoped<IPrioriteNcService, PrioriteNcService>();
+builder.Services.AddScoped<PrioriteNcRepository>();
+builder.Services.AddScoped<IPieceJointeNcService, PieceJointeNcService>();
+builder.Services.AddScoped<PieceJointeNcRepository>();
+builder.Services.AddScoped<INCDetailsService, NCDetailsService>();
 
+    
 
 var app = builder.Build();
 
