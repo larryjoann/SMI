@@ -28,7 +28,7 @@ namespace api_SMI.Services
 
         public void DraftToDeclare(NonConformite nonConformite)
         {
-            nonConformite.DateTimeDeclare = DateTime.Now; 
+            nonConformite.DateTimeDeclare = DateTime.Now;
             _repository.Update(nonConformite);
         }
 
@@ -41,5 +41,7 @@ namespace api_SMI.Services
         public void DeleteAll() => _repository.DeleteAll();
 
         public List<NonConformite> GetDrafts() => _repository.GetDrafts();
+        
+        public List<NonConformite> GetDeclare() => _repository.GetDeclare();
     }
 }

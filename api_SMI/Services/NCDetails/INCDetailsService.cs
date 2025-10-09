@@ -13,5 +13,9 @@ namespace api_SMI.Services
         void DraftToDeclare(NCDetails details);
 
         IEnumerable<NCDetails> GetDrafts();
+
+        IEnumerable<NCDetails> GetDeclare();
+
+
     }
 }

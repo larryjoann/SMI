@@ -75,5 +75,16 @@ namespace api_SMI.Repositories
                 .Where(nc => nc.DateTimeDeclare == null)
                 .ToList();
         }
+
+        public List<NonConformite> GetDeclare()
+        {
+            return _context.Set<NonConformite>()
+                .Include(nc => nc.Lieu)
+                .Include(nc => nc.TypeNc)
+                .Include(nc => nc.StatusNc)
+                .Include(nc => nc.PrioriteNc)
+                .Where(nc => nc.DateTimeDeclare != null)
+                .ToList();
+        }
     }
 }

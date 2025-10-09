@@ -15,6 +15,7 @@ const Form_indicateur = React.lazy(() => import('./features/indicateur/pages/For
 // Non conformité
 const Liste_NC = React.lazy(() => import('./features/non_conformite/pages/Liste_NC'))
 const Form_NC = React.lazy(() => import('./features/non_conformite/pages/FormNC'))
+const Fiche_NC = React.lazy(() => import('./features/non_conformite/pages/FicheNC'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -34,6 +35,7 @@ const routes = [
   { path: '/nc', name: 'Non conformité', element: Liste_NC, exact: true },
   { path: '/nc/list', name: 'Mes non-conformité', element: Liste_NC },
   { path: '/nc/form', name: 'Form non-conformité', element: Form_NC },
+  { path: '/nc/fiche/:id', name: 'Fiche non-conformité', element: Fiche_NC },
 ]
 
 export default routes

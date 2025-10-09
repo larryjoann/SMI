@@ -55,7 +55,7 @@ namespace api_SMI.Services
             return result;
         }
 
-         public IEnumerable<NCDetails> GetDrafts()
+        public IEnumerable<NCDetails> GetDrafts()
         {
             var allNc = _ncService.GetDrafts();
             var result = new List<NCDetails>();
@@ -75,6 +75,29 @@ namespace api_SMI.Services
 
             return result;
         }
+
+        public IEnumerable<NCDetails> GetDeclare()
+        {
+            var allNc = _ncService.GetDeclare();
+            var result = new List<NCDetails>();
+
+            foreach (var nc in allNc)
+            {
+                var pieces = _pjService.GetByNonConformite(nc.Id).ToList();
+                var processusConcerne = _processusConcerneService.GetByNonConformite(nc.Id).ToList();
+
+                result.Add(new NCDetails
+                {
+                    NC = nc,
+                    PiecesJointes = pieces,
+                    ProcessusConcerne = processusConcerne
+                });
+            }
+
+            return result;
+        }
+
+
 
         public void Declare(NCDetails details)
         {

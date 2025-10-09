@@ -31,6 +31,13 @@ namespace api_SMI.Controllers
             return Ok(drafts);
         }
 
+        [HttpGet("declare")]
+        public IActionResult GetDeclare()
+        {
+            var drafts = _service.GetDeclare();
+            return Ok(drafts);
+        }
+
         // GET: api/NCDetails/{id}
         [HttpGet("{id}")]
         public IActionResult GetDetails(int id)
