@@ -49,7 +49,7 @@ const Liste_NC = () => {
                     <CCardHeader style={{ padding: 0, borderBottom: 'none'}}>
                         <CTabList variant="tabs">
                             <CTab itemKey="brouillon" className="d-flex align-items-center">
-                                <h6 className='m-1'>Brouillons</h6>
+                                <h6 className='m-1'>Mes Brouillons</h6>
                                 <CBadge className="custom-badge">
                                     {loadingBrouillons ? '...' : brouillons.length}
                                 </CBadge>
@@ -61,7 +61,7 @@ const Liste_NC = () => {
                                 </CBadge>
                             </CTab>
                             <CTab itemKey="tous" className="d-flex align-items-center">
-                                <h6 className='m-1'>Tous</h6>
+                                <h6 className='m-1'>NC me concernant</h6>
                                 <CBadge className="custom-badge">
                                     {loadingall ? '...' : all.length}
                                 </CBadge>

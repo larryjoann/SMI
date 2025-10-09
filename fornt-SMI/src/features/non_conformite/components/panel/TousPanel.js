@@ -6,17 +6,18 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilTrash, cilOptions, cilPen } from '@coreui/icons'
+
 import FilterDropdown from '../filter/FilterDropdown'
 import DateFilterDropdown from '../filter/DateFilterDropdown'
 import { useProcessOptions, useTypeOptions, useStatusOptions } from '../filter/hooks/useFilterOptions'
-import { useGetAll } from './hooks/useNCData'
+import { useNavigate } from 'react-router-dom'
 
 
-const TousPanel = () => {
-  const { ncData, loading, error } = useGetAll();
+const TousPanel = ({ ncData = [], loading = false, error = null }) => {
   const processOptions = useProcessOptions();
   const typeOptions = useTypeOptions();
   const statusOptions = useStatusOptions();
+  const navigate = useNavigate();
 
   const [selectedProcesses, setSelectedProcesses] = useState([])
   const [selectedTypes, setSelectedTypes] = useState([])
@@ -99,7 +100,12 @@ const TousPanel = () => {
       </CRow>
       <hr />
       {paginatedNC.map((nc) => (
-        <CCard className="mb-2 card-list-hover" key={nc.id}>
+        <CCard
+          className="mb-2 card-list-hover"
+          key={nc.id}
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigate(`/nc/fiche/${nc.id}`)}
+        >
           <CCardBody>
             <CRow>
               <CCol xs={2}>{nc.labelProcesses?.join(', ')}</CCol>

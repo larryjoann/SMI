@@ -12,6 +12,8 @@ export async function getDeclaration() {
       date: nc.dateTimeCreation,
       type: nc.idTypeNc,
       labelType: nc.typeNc?.nom || '',
+      lieu: nc.idLieu || '',
+      labelLieu: nc.lieu?.nom || '',
       status: nc.idStatusNc,
       labelStatus: nc.statusNc?.nom || '',
       processes: processusConcerne.map(p => p.processus?.id),

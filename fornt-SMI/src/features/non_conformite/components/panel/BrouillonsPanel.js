@@ -7,16 +7,19 @@ import {
 import CIcon from '@coreui/icons-react'
 import { cilTrash, cilOptions, cilPen, cilSend } from '@coreui/icons'
 
+
 import FilterDropdown from '../filter/FilterDropdown'
 import DateFilterDropdown from '../filter/DateFilterDropdown'
 import { useProcessOptions, useTypeOptions } from '../filter/hooks/useFilterOptions'
-import { useGetBrouillon } from './hooks/useNCData'
+import { useNavigate } from 'react-router-dom'
 
 
-const BrouillonsPanel = () => {
-  const { ncData, loading, error } = useGetBrouillon();
+
+
+const BrouillonsPanel = ({ ncData = [], loading = false, error = null }) => {
   const processOptions = useProcessOptions();
   const typeOptions = useTypeOptions();
+  const navigate = useNavigate();
 
   const [selectedProcesses, setSelectedProcesses] = useState([])
   const [selectedTypes, setSelectedTypes] = useState([])
@@ -33,7 +36,7 @@ const BrouillonsPanel = () => {
 
   const filterNC = () => {
     return ncData.filter(item =>
-      selectedProcesses.includes('all') || item.processes.some(procId => selectedProcesses.includes(procId))
+      selectedProcesses.includes('all') || item.processes?.some(procId => selectedProcesses.includes(procId))
     ).filter(item =>
       selectedTypes.includes('all') || selectedTypes.includes(item.type)
     ).filter(item => {
@@ -85,7 +88,12 @@ const BrouillonsPanel = () => {
       </CRow>
       <hr/>
       {paginatedNC.map((nc) => (
-        <CCard className="mb-2 card-list-hover" key={nc.id}>
+        <CCard
+          className="mb-2 card-list-hover"
+          key={nc.id}
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigate(`/nc/fiche/${nc.id}`)}
+        >
           <CCardBody>
             <CRow>
               <CCol xs={2}>{nc.labelProcesses?.join(', ')}</CCol>
@@ -93,7 +101,7 @@ const BrouillonsPanel = () => {
               <CCol xs={3}>{new Date(nc.date).toLocaleString()}</CCol>
               <CCol xs={4} className="d-flex justify-content-end">
                 <CIcon icon={cilSend} className="text-primary mt-1 me-3" size='lg' />
-                <CDropdown variant="btn-group" direction="center">
+                <CDropdown variant="btn-group" direction="center" onClick={e => e.stopPropagation()}>
                   <CDropdownToggle caret={false} className="p-0">
                     <CIcon icon={cilOptions} className="text-dark" />
                   </CDropdownToggle>

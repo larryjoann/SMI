@@ -6,23 +6,26 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilTrash, cilOptions, cilPen } from '@coreui/icons'
+
 import FilterDropdown from '../filter/FilterDropdown'
 import DateFilterDropdown from '../filter/DateFilterDropdown'
-import { useProcessOptions, useTypeOptions, useStatusOptions } from '../filter/hooks/useFilterOptions'
-import { useGetDeclaration } from './hooks/useNCData'
+import { useProcessOptions, useTypeOptions, useStatusOptions , useLieuOptions } from '../filter/hooks/useFilterOptions'
+import { useNavigate } from 'react-router-dom'
+
 
 
 // Données NC dynamiques depuis l'API
-const DeclarationsPanel = () => {
-  const { ncData, loading, error } = useGetDeclaration();
 
-
+const DeclarationsPanel = ({ ncData = [], loading = false, error = null }) => {
   const processOptions = useProcessOptions();
   const typeOptions = useTypeOptions();
+  const lieuOptions = useLieuOptions();
   const statusOptions = useStatusOptions();
+  const navigate = useNavigate();
 
   const [selectedProcesses, setSelectedProcesses] = useState([])
   const [selectedTypes, setSelectedTypes] = useState([])
+  const [selectedLieu, setSelectedLieu] = useState([])
   const [selectedStatus, setSelectedStatus] = useState([])
   const [dateFilter, setDateFilter] = useState({ from: '', to: '' })
   const [page, setPage] = useState(1)
@@ -35,14 +38,19 @@ const DeclarationsPanel = () => {
     if (typeOptions.length > 0) setSelectedTypes(typeOptions.map(opt => opt.id))
   }, [typeOptions])
   useEffect(() => {
+    if (lieuOptions.length > 0) setSelectedLieu(lieuOptions.map(opt => opt.id))
+  }, [lieuOptions])
+  useEffect(() => {
     if (statusOptions.length > 0) setSelectedStatus(statusOptions.map(opt => opt.id))
   }, [statusOptions])
 
   const filterNC = () => {
     return ncData.filter(item =>
-      selectedProcesses.includes('all') || item.processes.some(procId => selectedProcesses.includes(procId))
+      selectedProcesses.includes('all') || item.processes?.some(procId => selectedProcesses.includes(procId))
     ).filter(item =>
       selectedTypes.includes('all') || selectedTypes.includes(item.type)
+    ).filter(item =>
+      selectedLieu.includes('all') || selectedLieu.includes(item.type)
     ).filter(item =>
       selectedStatus.includes('all') || selectedStatus.includes(item.status)
     ).filter(item => {
@@ -55,7 +63,6 @@ const DeclarationsPanel = () => {
       return true
     })
   }
-
 
   if (loading) return <div>Chargement...</div>;
   if (error) return <div>Erreur lors du chargement des NC</div>;
@@ -75,7 +82,7 @@ const DeclarationsPanel = () => {
             onChange={setSelectedProcesses}
           />
         </CCol>
-        <CCol xs={3}>
+        <CCol xs={2}>
           <FilterDropdown
             label="Types"
             options={typeOptions}
@@ -83,7 +90,15 @@ const DeclarationsPanel = () => {
             onChange={setSelectedTypes}
           />
         </CCol>
-        <CCol xs={3}>
+        <CCol xs={2}>
+          <FilterDropdown
+            label="Lieu"
+            options={lieuOptions}
+            selected={selectedLieu}
+            onChange={setSelectedLieu}
+          />
+        </CCol>
+        <CCol xs={2}>
           <DateFilterDropdown
             label="Date"
             fromDate={dateFilter.from}
@@ -103,12 +118,18 @@ const DeclarationsPanel = () => {
       </CRow>
       <hr />
       {paginatedNC.map((nc) => (
-        <CCard className="mb-2 card-list-hover" key={nc.id}>
+        <CCard
+          className="mb-2 card-list-hover"
+          key={nc.id}
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigate(`/nc/fiche/${nc.id}`)}
+        >
           <CCardBody>
             <CRow>
               <CCol xs={2}>{nc.labelProcesses.join(', ')}</CCol>
-              <CCol xs={3}>{nc.labelType}</CCol>
-              <CCol xs={3}>{new Date(nc.date).toLocaleString()}</CCol>
+              <CCol xs={2}>{nc.labelType}</CCol>
+              <CCol xs={2}>{nc.labelStatus}</CCol>
+              <CCol xs={2}>{new Date(nc.date).toLocaleString()}</CCol>
               <CCol xs={3}>
                 <CBadge
                   color={nc.status === 's1' ? 'success' : nc.status === 's2' ? 'danger' : 'info'}
@@ -119,7 +140,7 @@ const DeclarationsPanel = () => {
                 </CBadge>
               </CCol>
               <CCol xs={1} className="d-flex justify-content-end">
-                <CDropdown variant="btn-group" direction="center">
+                <CDropdown variant="btn-group" direction="center" onClick={e => e.stopPropagation()}>
                   <CDropdownToggle caret={false} className="p-0">
                     <CIcon icon={cilOptions} className="text-dark" />
                   </CDropdownToggle>

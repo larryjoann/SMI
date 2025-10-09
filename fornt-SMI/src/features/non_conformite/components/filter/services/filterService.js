@@ -32,3 +32,14 @@ export async function fetchStatusOptions() {
       ]
     : [{ id: 'all', label: 'Tous' }]
 }
+
+export async function fetchLieuOptions() {
+  const res = await fetch(`${API_URL}/lieu`)
+  const data = await res.json()
+  return Array.isArray(data)
+    ? [
+        { id: 'all', label: 'Tous' },
+        ...data.map(status => ({ id: status.id, label: status.nom }))
+      ]
+    : [{ id: 'all', label: 'Tous' }]
+}
