@@ -18,11 +18,13 @@ namespace api_SMI.Services
 
         public void Declare(NonConformite nonConformite)
         {
+            nonConformite.Status = true;
             _repository.Add(nonConformite);
         }
 
         public void Draft(NonConformite nonConformite)
         {
+            nonConformite.Status = true;
             _repository.Add(nonConformite);
         }
 
@@ -36,12 +38,20 @@ namespace api_SMI.Services
 
         public void Update(NonConformite nonConformite) => _repository.Update(nonConformite);
 
+
         public void Delete(int id) => _repository.Delete(id);
 
         public void DeleteAll() => _repository.DeleteAll();
 
         public List<NonConformite> GetDrafts() => _repository.GetDrafts();
-        
+
         public List<NonConformite> GetDeclare() => _repository.GetDeclare();
+        
+        public void Archiver(int id)
+        {
+            _repository.Archiver(id);
+        }
+        
+
     }
 }

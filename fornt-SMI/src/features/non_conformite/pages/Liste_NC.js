@@ -16,7 +16,7 @@ import { cilTrash} from '@coreui/icons'
 import DeclarationsPanel from '../components/panel/DeclarationsPanel'
 import BrouillonsPanel from '../components/panel/BrouillonsPanel'
 import TousPanel from '../components/panel/TousPanel'
-import { useGetDeclaration, useGetBrouillon , useGetAll } from '../services/useNCData'
+import { useGetDeclaration, useGetBrouillon , useGetAll } from '../hooks/useNCData'
 
 
 const Liste_NC = () => {

@@ -6,9 +6,25 @@ import {
   CButton , CFormFeedback ,CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilArrowLeft} from '@coreui/icons'
+import { cilArrowLeft , cilHistory} from '@coreui/icons'
+import { useParams } from 'react-router-dom'
+import { useNCDetails } from '../hooks/useNCDetails'
+
 
 const FicheNC = () => {
+  const { id } = useParams();
+  const { data, loading, error } = useNCDetails(id);
+
+  if (loading) return <CAlert color="info" className="text-center rounded-pill">Chargement...</CAlert>;
+  if (error) return <CAlert color="danger" className="text-center rounded-pill">{error}</CAlert>;
+  if (!data) return null;
+
+  const { nc, piecesJointes, processusConcerne } = data;
+
+  // Format date/heure
+  const dateFait = nc?.dateTimeFait ? new Date(nc.dateTimeFait) : null;
+  const dateStr = dateFait ? dateFait.toLocaleDateString() : '';
+  const heureStr = dateFait ? dateFait.toLocaleTimeString() : '';
 
   return (
     <>
@@ -26,10 +42,20 @@ const FicheNC = () => {
         <CCol xs={6}> 
           <h3 className="text-center">Détails du non-conformité</h3>
         </CCol> 
-        <CCol xs={3}>
-        </CCol>     
+        <CCol xs={3} className="d-flex justify-content-end">
+            <CButton
+            color='secondary'
+            className="mb-3"
+            href=''
+            >
+            <CIcon icon={cilHistory} className="me-2" />
+            Histo-activité
+            </CButton>
+        </CCol>    
       </CRow>
-    <CAlert color="success" className="text-center">Cloturé</CAlert>
+      {nc.statusNc?.id && (
+        <CAlert color={nc.statusNc.color} className="text-center rounded-pill">{nc.statusNc.nom}</CAlert>
+      )}
       <CForm >
         <CCard className='mb-4'>
           <CCardHeader className="text-center">
@@ -38,18 +64,18 @@ const FicheNC = () => {
           <CCardBody>
             <CRow>
               <CCol xs={12} sm={6} md={6} className='mb-3'>
-                <CFormLabel htmlFor="type">Type :</CFormLabel>
-                
-                
+                <span className='h6' >Type :</span>
+                <a> {nc.typeNc?.nom || ''}</a>
               </CCol>
               <CCol xs={12} sm={6} md={6} className='mb-3'>
-                <CFormLabel htmlFor="site">Site :</CFormLabel>
-                
+                <span className='h6' >Site :</span>
+                <a> {nc.lieu?.nom || ''}</a>
               </CCol>
             </CRow>
             <CRow>
               <CCol xs={12} sm={12} md={12} className='mb-3'>
-                <CFormLabel htmlFor="type">Processus concerné(s) :</CFormLabel>
+                <span className='h6'>Processus concerné(s) :</span>
+                <a> {processusConcerne?.map(p => p.processus?.nom).filter(Boolean).join(' , ')}</a>
               </CCol>
             </CRow>
           </CCardBody>
@@ -62,24 +88,27 @@ const FicheNC = () => {
           <CCardBody>
             <CRow>
               <CCol xs={12} sm={6} md={4} className='mb-3'>
-                <CFormLabel htmlFor="date">Date :</CFormLabel>
-            
+                <span className='h6'>Date : </span>
+                <a> {dateStr}</a>
               </CCol>
               <CCol xs={12} sm={6} md={4} className='mb-3'>
-                <CFormLabel htmlFor="heure">Heure :</CFormLabel>
-                
+                <span className='h6'>Heure : </span>
+                <a> {heureStr}</a>
               </CCol>
               <CCol xs={12} sm={12} md={12} className='mb-3'>
-                <CFormLabel htmlFor="description">Description du fait :</CFormLabel>
-                
+                <span className='h6'>Description du fait :</span>
+                <div
+                //   style={{ border: '1px solid #eee', borderRadius: 6, padding: 8, minHeight: 40, background: '#fafbfc' }}
+                  dangerouslySetInnerHTML={{ __html: nc.descr || '' }}
+                />
               </CCol>
               <CCol xs={12} sm={12} md={12} className='mb-3'>
-                <CFormLabel htmlFor="curative">Pièces jointes :</CFormLabel>
-                
+                <span className='h6'>Pièces jointes :</span>
+                <a> {piecesJointes && piecesJointes.length > 0 ? piecesJointes.map(pj => pj.nomFichier).join(' , ') : 'Aucune'}</a>
               </CCol>
               <CCol xs={12} sm={12} md={12} className='mb-3'>
-                <CFormLabel htmlFor="curative">Action curative :</CFormLabel>
-                
+                <span className='h6'>Action curative :</span>
+                <a>{nc.actionCurative || ''}</a>
               </CCol>
             </CRow>
           </CCardBody>

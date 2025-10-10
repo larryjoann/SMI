@@ -112,6 +112,7 @@ CREATE TABLE Non_conformite (
     id_type_nc INT NOT NULL,
     id_status_nc INT NOT NULL,      -- Foreign key vers Status_nc
     id_priorite_nc INT NOT NULL,    -- Foreign key vers Priorite_nc
+    status boolean DEFAULT true,
     FOREIGN KEY(id_lieu) REFERENCES Lieu(id),
     FOREIGN KEY(id_type_nc) REFERENCES Type_nc(id),
     FOREIGN KEY(id_status_nc) REFERENCES Status_nc(id),
@@ -128,6 +129,7 @@ CREATE TABLE Priorite_nc (
 CREATE TABLE Status_nc (
     id INT IDENTITY PRIMARY KEY,
     nom VARCHAR(50),
+    color VARCHAR(50),
     descr VARCHAR(MAX)
 );
 

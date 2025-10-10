@@ -15,5 +15,8 @@ namespace api_SMI.Models
 
         [Column("descr")]
         public string? Descr { get; set; }
+
+        [Column("color")]
+        public string? Color { get; set; }
     }
 }

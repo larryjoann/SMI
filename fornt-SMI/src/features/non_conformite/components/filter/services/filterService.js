@@ -28,7 +28,7 @@ export async function fetchStatusOptions() {
   return Array.isArray(data)
     ? [
         { id: 'all', label: 'Tous' },
-        ...data.map(status => ({ id: status.id, label: status.nom }))
+        ...data.map(status => ({ id: status.id, label: status.nom, color: status.color }))
       ]
     : [{ id: 'all', label: 'Tous' }]
 }

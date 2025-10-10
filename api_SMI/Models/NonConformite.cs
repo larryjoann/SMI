@@ -51,6 +51,10 @@ namespace api_SMI.Models
         [ForeignKey("IdPrioriteNc")]
         public PrioriteNc? PrioriteNc { get; set; } 
 
+        [Column("status")]
+        public bool? Status { get; set; }
+
+
         // Validation personnalisée
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

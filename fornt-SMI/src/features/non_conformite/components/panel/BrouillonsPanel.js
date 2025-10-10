@@ -8,9 +8,10 @@ import CIcon from '@coreui/icons-react'
 import { cilTrash, cilOptions, cilPen, cilSend } from '@coreui/icons'
 
 
+
 import FilterDropdown from '../filter/FilterDropdown'
 import DateFilterDropdown from '../filter/DateFilterDropdown'
-import { useProcessOptions, useTypeOptions } from '../filter/hooks/useFilterOptions'
+import { useProcessOptions, useTypeOptions, useLieuOptions } from '../filter/hooks/useFilterOptions'
 import { useNavigate } from 'react-router-dom'
 
 
@@ -19,10 +20,12 @@ import { useNavigate } from 'react-router-dom'
 const BrouillonsPanel = ({ ncData = [], loading = false, error = null }) => {
   const processOptions = useProcessOptions();
   const typeOptions = useTypeOptions();
+  const lieuOptions = useLieuOptions();
   const navigate = useNavigate();
 
   const [selectedProcesses, setSelectedProcesses] = useState([])
   const [selectedTypes, setSelectedTypes] = useState([])
+  const [selectedLieu, setSelectedLieu] = useState([])
   const [dateFilter, setDateFilter] = useState({ from: '', to: '' })
   const [page, setPage] = useState(1)
   const itemsPerPage = 10
@@ -33,12 +36,17 @@ const BrouillonsPanel = ({ ncData = [], loading = false, error = null }) => {
   useEffect(() => {
     if (typeOptions.length > 0) setSelectedTypes(typeOptions.map(opt => opt.id))
   }, [typeOptions])
+  useEffect(() => {
+    if (lieuOptions.length > 0) setSelectedLieu(lieuOptions.map(opt => opt.id))
+  }, [lieuOptions])
 
   const filterNC = () => {
     return ncData.filter(item =>
       selectedProcesses.includes('all') || item.processes?.some(procId => selectedProcesses.includes(procId))
     ).filter(item =>
       selectedTypes.includes('all') || selectedTypes.includes(item.type)
+    ).filter(item =>
+      selectedLieu.includes('all') || selectedLieu.includes(item.lieu)
     ).filter(item => {
       if (!dateFilter.from && !dateFilter.to) return true
       const itemDate = new Date(item.date)
@@ -68,7 +76,7 @@ const BrouillonsPanel = ({ ncData = [], loading = false, error = null }) => {
             onChange={setSelectedProcesses}
           />
         </CCol>
-        <CCol xs={3}>
+        <CCol xs={2}>
           <FilterDropdown
             label="Types"
             options={typeOptions}
@@ -76,7 +84,15 @@ const BrouillonsPanel = ({ ncData = [], loading = false, error = null }) => {
             onChange={setSelectedTypes}
           />
         </CCol>
-        <CCol xs={3}>
+        <CCol xs={2}>
+          <FilterDropdown
+            label="Lieu"
+            options={lieuOptions}
+            selected={selectedLieu}
+            onChange={setSelectedLieu}
+          />
+        </CCol>
+        <CCol xs={2}>
           <DateFilterDropdown
             label="Date"
             fromDate={dateFilter.from}
@@ -84,7 +100,7 @@ const BrouillonsPanel = ({ ncData = [], loading = false, error = null }) => {
             onChange={setDateFilter}
           />
         </CCol>
-        <CCol xs={4}></CCol>
+        <CCol xs={3}></CCol>
       </CRow>
       <hr/>
       {paginatedNC.map((nc) => (
@@ -97,8 +113,9 @@ const BrouillonsPanel = ({ ncData = [], loading = false, error = null }) => {
           <CCardBody>
             <CRow>
               <CCol xs={2}>{nc.labelProcesses?.join(', ')}</CCol>
-              <CCol xs={3}>{nc.labelType}</CCol>
-              <CCol xs={3}>{new Date(nc.date).toLocaleString()}</CCol>
+              <CCol xs={2}>{nc.labelType}</CCol>
+              <CCol xs={2}>{nc.labelLieu}</CCol>
+              <CCol xs={2}>{new Date(nc.date).toLocaleString()}</CCol>
               <CCol xs={4} className="d-flex justify-content-end">
                 <CIcon icon={cilSend} className="text-primary mt-1 me-3" size='lg' />
                 <CDropdown variant="btn-group" direction="center" onClick={e => e.stopPropagation()}>

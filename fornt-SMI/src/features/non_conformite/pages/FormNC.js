@@ -147,7 +147,10 @@ const FormNC = () => {
                 )}
               </CCol>
             </CRow>
-            <CRow className='mb-2'>
+          </CCardBody>
+        </CCard>
+
+        <CRow className='mb-4'>
               <CCol xs={12} className="d-flex justify-content-end">
                 <CButton color="secondary" type="button" className='me-2' onClick={handleDraft}>
                   Brouillon
@@ -157,8 +160,6 @@ const FormNC = () => {
                 </CButton>
               </CCol>
             </CRow>
-          </CCardBody>
-        </CCard>
       </CForm>
     </>
   )

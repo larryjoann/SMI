@@ -15,7 +15,6 @@ namespace api_SMI.Services
         void DeleteAll();
         List<NonConformite> GetDrafts();
         List<NonConformite> GetDeclare();
-        
-
+    void Archiver(int id);
     }
 }

@@ -1,14 +1,16 @@
 import React, { useEffect , useState } from 'react'
+import { useArchiveNC } from '../../hooks/useNCDetails'
 import {
   CRow, CCol, CCard, CCardBody, CBadge,
   CDropdown, CDropdownDivider, CDropdownItem, CDropdownMenu, CDropdownToggle,
   CPagination, CPaginationItem
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilTrash, cilOptions, cilPen } from '@coreui/icons'
+import { cilTrash, cilOptions, cilPen, cilCommentBubble } from '@coreui/icons'
 
 import FilterDropdown from '../filter/FilterDropdown'
 import DateFilterDropdown from '../filter/DateFilterDropdown'
+import BadgeFilterDropdown from '../filter/BadgeFilterDropdown'
 import { useProcessOptions, useTypeOptions, useStatusOptions , useLieuOptions } from '../filter/hooks/useFilterOptions'
 import { useNavigate } from 'react-router-dom'
 
@@ -22,7 +24,9 @@ const DeclarationsPanel = ({ ncData = [], loading = false, error = null }) => {
   const lieuOptions = useLieuOptions();
   const statusOptions = useStatusOptions();
   const navigate = useNavigate();
-
+  
+  const { archive, loading: archiving, error: archiveError, success: archiveSuccess } = useArchiveNC();
+  const [archivedId, setArchivedId] = useState(null);
   const [selectedProcesses, setSelectedProcesses] = useState([])
   const [selectedTypes, setSelectedTypes] = useState([])
   const [selectedLieu, setSelectedLieu] = useState([])
@@ -50,7 +54,7 @@ const DeclarationsPanel = ({ ncData = [], loading = false, error = null }) => {
     ).filter(item =>
       selectedTypes.includes('all') || selectedTypes.includes(item.type)
     ).filter(item =>
-      selectedLieu.includes('all') || selectedLieu.includes(item.type)
+      selectedLieu.includes('all') || selectedLieu.includes(item.lieu)
     ).filter(item =>
       selectedStatus.includes('all') || selectedStatus.includes(item.status)
     ).filter(item => {
@@ -64,8 +68,11 @@ const DeclarationsPanel = ({ ncData = [], loading = false, error = null }) => {
     })
   }
 
+
   if (loading) return <div>Chargement...</div>;
   if (error) return <div>Erreur lors du chargement des NC</div>;
+  if (archiving) return <div>Archivage en cours...</div>;
+  if (archiveError) return <div className="text-danger">Erreur lors de l'archivage : {archiveError}</div>;
 
   const filteredNC = filterNC();
   const pageCount = Math.ceil(filteredNC.length / itemsPerPage);
@@ -107,7 +114,7 @@ const DeclarationsPanel = ({ ncData = [], loading = false, error = null }) => {
           />
         </CCol>
         <CCol xs={3}>
-          <FilterDropdown
+          <BadgeFilterDropdown
             label="Status"
             options={statusOptions}
             selected={selectedStatus}
@@ -117,22 +124,22 @@ const DeclarationsPanel = ({ ncData = [], loading = false, error = null }) => {
         <CCol xs={1}></CCol>
       </CRow>
       <hr />
-      {paginatedNC.map((nc) => (
+  {paginatedNC.map((nc) => (
         <CCard
           className="mb-2 card-list-hover"
           key={nc.id}
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: 'pointer', opacity: archivedId === nc.id ? 0.5 : 1 }}
           onClick={() => navigate(`/nc/fiche/${nc.id}`)}
         >
           <CCardBody>
             <CRow>
               <CCol xs={2}>{nc.labelProcesses.join(', ')}</CCol>
               <CCol xs={2}>{nc.labelType}</CCol>
-              <CCol xs={2}>{nc.labelStatus}</CCol>
+              <CCol xs={2}>{nc.labelLieu}</CCol>
               <CCol xs={2}>{new Date(nc.date).toLocaleString()}</CCol>
               <CCol xs={3}>
                 <CBadge
-                  color={nc.status === 's1' ? 'success' : nc.status === 's2' ? 'danger' : 'info'}
+                  color={nc.colorStatus}
                   shape="rounded-pill"
                   className="status_badge"
                 >
@@ -141,13 +148,22 @@ const DeclarationsPanel = ({ ncData = [], loading = false, error = null }) => {
               </CCol>
               <CCol xs={1} className="d-flex justify-content-end">
                 <CDropdown variant="btn-group" direction="center" onClick={e => e.stopPropagation()}>
+                  <CIcon icon={cilCommentBubble} className="text-dark mt-1 me-3" size='lg' />
                   <CDropdownToggle caret={false} className="p-0">
                     <CIcon icon={cilOptions} className="text-dark" />
                   </CDropdownToggle>
                   <CDropdownMenu>
-                    <CDropdownItem href="#">
+                    <CDropdownItem
+                      href="#"
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        setArchivedId(nc.id);
+                        await archive(nc.id);
+                        // Optionnel: rafraîchir la liste ou masquer la NC archivée
+                      }}
+                    >
                       <CIcon icon={cilTrash} className="text-danger me-3" />
-                      <span className="text-danger">Supprimer</span>
+                      <span className="text-danger">Archiver</span>
                     </CDropdownItem>
                     <CDropdownDivider />
                     <CDropdownItem href="#">

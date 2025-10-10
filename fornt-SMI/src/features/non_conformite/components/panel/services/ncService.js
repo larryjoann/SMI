@@ -16,6 +16,7 @@ export async function getDeclaration() {
       labelLieu: nc.lieu?.nom || '',
       status: nc.idStatusNc,
       labelStatus: nc.statusNc?.nom || '',
+      colorStatus: nc.statusNc?.color || 'white',
       processes: processusConcerne.map(p => p.processus?.id),
       labelProcesses: processusConcerne.map(p => p.processus?.sigle || p.processus?.nom || ''),
     }
@@ -33,8 +34,11 @@ export async function getBrouillon() {
       date: nc.dateTimeCreation,
       type: nc.idTypeNc,
       labelType: nc.typeNc?.nom || '',
+      lieu: nc.idLieu || '',
+      labelLieu: nc.lieu?.nom || '',
       status: nc.idStatusNc,
       labelStatus: nc.statusNc?.nom || '',
+      colorStatus: nc.statusNc?.color || 'white',
       processes: processusConcerne.map(p => p.processus?.id),
       labelProcesses: processusConcerne.map(p => p.processus?.sigle || p.processus?.nom || ''),
     }
@@ -52,8 +56,11 @@ export async function getAll() {
       date: nc.dateTimeCreation,
       type: nc.idTypeNc,
       labelType: nc.typeNc?.nom || '',
+      lieu: nc.idLieu || '',
+      labelLieu: nc.lieu?.nom || '',
       status: nc.idStatusNc,
       labelStatus: nc.statusNc?.nom || '',
+      colorStatus: nc.statusNc?.color || 'white',
       processes: processusConcerne.map(p => p.processus?.id),
       labelProcesses: processusConcerne.map(p => p.processus?.sigle || p.processus?.nom || ''),
     }

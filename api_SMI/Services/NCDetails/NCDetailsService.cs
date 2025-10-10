@@ -2,6 +2,7 @@ using api_SMI.Models;
 
 namespace api_SMI.Services
 {
+
     public class NCDetailsService : INCDetailsService
     {
         private readonly INonConformiteService _ncService;
@@ -97,6 +98,11 @@ namespace api_SMI.Services
             return result;
         }
 
+
+         public void Archiver(int ncId)
+        {
+            _ncService.Archiver(ncId);
+        }
 
 
         public void Declare(NCDetails details)

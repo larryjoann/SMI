@@ -48,6 +48,13 @@ namespace api_SMI.Controllers
             return Ok(details);
         }
 
+        [HttpPut("archiver/{id}")]
+        public IActionResult Archive(int id)
+        {
+            _service.Archiver(id);
+            return NoContent();
+        }
+
         // POST: api/NCDetails/declare
         [HttpPost("declare")]
         public IActionResult Declare([FromBody] NCDetails details)

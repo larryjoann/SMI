@@ -13,12 +13,24 @@ namespace api_SMI.Repositories
             _context = context;
         }
 
+        public void Archiver(int id)
+        {
+            var entity = GetById(id);
+            if (entity != null)
+            {
+                entity.Status = false;
+                _context.Set<NonConformite>().Update(entity);
+                _context.SaveChanges();
+            }
+        }
+
         public List<NonConformite> GetAll()
             => _context.Set<NonConformite>()
                 .Include(nc => nc.Lieu)
                 .Include(nc => nc.TypeNc)
                 .Include(nc => nc.StatusNc)
                 .Include(nc => nc.PrioriteNc)
+                .Where(nc => nc.Status == true)
                 .ToList();
 
         public NonConformite? GetById(int id)
@@ -73,6 +85,7 @@ namespace api_SMI.Repositories
                 .Include(nc => nc.StatusNc)
                 .Include(nc => nc.PrioriteNc)
                 .Where(nc => nc.DateTimeDeclare == null)
+                .Where(nc => nc.Status == true)
                 .ToList();
         }
 
@@ -84,6 +97,7 @@ namespace api_SMI.Repositories
                 .Include(nc => nc.StatusNc)
                 .Include(nc => nc.PrioriteNc)
                 .Where(nc => nc.DateTimeDeclare != null)
+                .Where(nc => nc.Status == true)
                 .ToList();
         }
     }

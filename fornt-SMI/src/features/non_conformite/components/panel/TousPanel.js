@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import {
   CRow, CCol, CCard, CCardBody, CBadge,
-  CDropdown, CDropdownDivider, CDropdownItem, CDropdownMenu, CDropdownToggle,
   CPagination, CPaginationItem
 } from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-import { cilTrash, cilOptions, cilPen } from '@coreui/icons'
 
+import CIcon from '@coreui/icons-react'
+import { cilCommentBubble  } from '@coreui/icons'
+
+import BadgeFilterDropdown from '../filter/BadgeFilterDropdown'
 import FilterDropdown from '../filter/FilterDropdown'
 import DateFilterDropdown from '../filter/DateFilterDropdown'
-import { useProcessOptions, useTypeOptions, useStatusOptions } from '../filter/hooks/useFilterOptions'
+import { useProcessOptions, useTypeOptions, useStatusOptions, useLieuOptions } from '../filter/hooks/useFilterOptions'
 import { useNavigate } from 'react-router-dom'
 
 
@@ -17,10 +18,12 @@ const TousPanel = ({ ncData = [], loading = false, error = null }) => {
   const processOptions = useProcessOptions();
   const typeOptions = useTypeOptions();
   const statusOptions = useStatusOptions();
+  const lieuOptions = useLieuOptions();
   const navigate = useNavigate();
 
   const [selectedProcesses, setSelectedProcesses] = useState([])
   const [selectedTypes, setSelectedTypes] = useState([])
+  const [selectedLieu, setSelectedLieu] = useState([])
   const [selectedStatus, setSelectedStatus] = useState([])
   const [dateFilter, setDateFilter] = useState({ from: '', to: '' })
   const [page, setPage] = useState(1)
@@ -33,6 +36,9 @@ const TousPanel = ({ ncData = [], loading = false, error = null }) => {
     if (typeOptions.length > 0) setSelectedTypes(typeOptions.map(opt => opt.id))
   }, [typeOptions])
   useEffect(() => {
+    if (lieuOptions.length > 0) setSelectedLieu(lieuOptions.map(opt => opt.id))
+  }, [lieuOptions])
+  useEffect(() => {
     if (statusOptions.length > 0) setSelectedStatus(statusOptions.map(opt => opt.id))
   }, [statusOptions])
 
@@ -41,6 +47,8 @@ const TousPanel = ({ ncData = [], loading = false, error = null }) => {
       selectedProcesses.includes('all') || item.processes.some(procId => selectedProcesses.includes(procId))
     ).filter(item =>
       selectedTypes.includes('all') || selectedTypes.includes(item.type)
+    ).filter(item =>
+      selectedLieu.includes('all') || selectedLieu.includes(item.lieu)
     ).filter(item =>
       selectedStatus.includes('all') || selectedStatus.includes(item.status)
     ).filter(item => {
@@ -72,7 +80,7 @@ const TousPanel = ({ ncData = [], loading = false, error = null }) => {
             onChange={setSelectedProcesses}
           />
         </CCol>
-        <CCol xs={3}>
+        <CCol xs={2}>
           <FilterDropdown
             label="Types"
             options={typeOptions}
@@ -80,7 +88,15 @@ const TousPanel = ({ ncData = [], loading = false, error = null }) => {
             onChange={setSelectedTypes}
           />
         </CCol>
-        <CCol xs={3}>
+        <CCol xs={2}>
+          <FilterDropdown
+            label="Lieu"
+            options={lieuOptions}
+            selected={selectedLieu}
+            onChange={setSelectedLieu}
+          />
+        </CCol>
+        <CCol xs={2}>
           <DateFilterDropdown
             label="Date"
             fromDate={dateFilter.from}
@@ -89,14 +105,14 @@ const TousPanel = ({ ncData = [], loading = false, error = null }) => {
           />
         </CCol>
         <CCol xs={3}>
-          <FilterDropdown
+          <BadgeFilterDropdown
             label="Status"
             options={statusOptions}
             selected={selectedStatus}
             onChange={setSelectedStatus}
           />
         </CCol>
-        <CCol xs={1}></CCol>
+        <CCol xs={2}></CCol>
       </CRow>
       <hr />
       {paginatedNC.map((nc) => (
@@ -109,11 +125,12 @@ const TousPanel = ({ ncData = [], loading = false, error = null }) => {
           <CCardBody>
             <CRow>
               <CCol xs={2}>{nc.labelProcesses?.join(', ')}</CCol>
-              <CCol xs={3}>{nc.labelType}</CCol>
-              <CCol xs={3}>{new Date(nc.date).toLocaleString()}</CCol>
+              <CCol xs={2}>{nc.labelType}</CCol>
+              <CCol xs={2}>{nc.labelLieu}</CCol>
+              <CCol xs={2}>{new Date(nc.date).toLocaleString()}</CCol>
               <CCol xs={3}>
                 <CBadge
-                  color={nc.status === 's1' ? 'success' : nc.status === 's2' ? 'danger' : 'info'}
+                  color={nc.colorStatus}
                   shape="rounded-pill"
                   className="status_badge"
                 >
@@ -121,6 +138,7 @@ const TousPanel = ({ ncData = [], loading = false, error = null }) => {
                 </CBadge>
               </CCol>
               <CCol xs={1} className="d-flex justify-content-end">
+                <CIcon icon={cilCommentBubble} className="text-dark mt-1 me-3" size='lg' />
               </CCol>
             </CRow>
           </CCardBody>

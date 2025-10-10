@@ -10,6 +10,8 @@ namespace api_SMI.Services
 
         void Declare(NCDetails details);
 
+        void Archiver(int ncId);
+
         void DraftToDeclare(NCDetails details);
 
         IEnumerable<NCDetails> GetDrafts();

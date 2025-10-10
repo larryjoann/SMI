@@ -67,5 +67,14 @@ namespace api_SMI.Controllers
             _service.Delete(id);
             return NoContent();
         }
+
+        [HttpPut("archiver/{id}")]
+        public IActionResult Archiver(int id)
+        {
+            var nc = _service.GetById(id);
+            if (nc == null) return NotFound();
+            _service.Archiver(id);
+            return NoContent();
+        }
     }
 }
