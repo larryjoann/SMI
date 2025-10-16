@@ -102,6 +102,8 @@ builder.Services.AddScoped<PrioriteNcRepository>();
 builder.Services.AddScoped<IPieceJointeNcService, PieceJointeNcService>();
 builder.Services.AddScoped<PieceJointeNcRepository>();
 builder.Services.AddScoped<INCDetailsService, NCDetailsService>();
+builder.Services.AddScoped<IPhaseNcService, PhaseNcService>();
+builder.Services.AddScoped<PhaseNcRepository>();
 
     
 

@@ -35,8 +35,15 @@ const AppSidebar = () => {
     >
       <CSidebarHeader className="border-bottom p-0 bg-white d-flex justify-content-center">
         <CSidebarBrand to="#" className="d-flex align-items-center justify-content-center w-100">
-          <img src={myLogo} alt="Logo" height={62} className="sidebar-brand-full"/>
-          <img src={myLogo} alt="Logo" height={62} className="sidebar-brand-narrow" />
+          {/* Mode full: logo + titre */}
+          <span className="sidebar-brand-full d-flex align-items-center">
+            <span className="me-4 fw-bold h4 mb-0" style={{ color: '#6b7785' }}>S.M.I</span>
+            <img src={myLogo} alt="Logo" height={62} />
+          </span>
+          {/* Mode narrow: logo seul */}
+          <span className="sidebar-brand-narrow">
+            <img src={myLogo} alt="Logo" height={62} />
+          </span>
         </CSidebarBrand>
       </CSidebarHeader>
       <AppSidebarNav items={navigation} />

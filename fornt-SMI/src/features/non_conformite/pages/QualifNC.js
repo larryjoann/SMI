@@ -14,10 +14,10 @@ import SiteSelect from '../../../components/champs/SiteSelect'
 import WysiwygEditor from '../../../components/champs/WysiwygEditor'
 import FileUploader from '../../../components/champs/FileUploader'
 import CIcon from '@coreui/icons-react'
-import { cilArrowLeft } from '@coreui/icons'
+import { cilArrowLeft , cilX , cilCheck , cilInfo } from '@coreui/icons'
 
 
-const FormNC = () => {
+const QualifNC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -66,18 +66,18 @@ const FormNC = () => {
         {id && (
           <CCol xs={3} className="d-flex justify-content-start">
             <CButton
-              color='secondary'
-              className="mb-3"
-              onClick={() => navigate('/nc/list', { state: { defaultPanel: getDefaultPanel() } })}
+            color='secondary'
+            className="mb-3"
+            onClick={() => navigate(`/nc/fiche/${id}`)}
             >
-              <CIcon icon={cilArrowLeft} className="me-2" />
-              Retour
+            <CIcon icon={cilArrowLeft} className="me-2" />
+            Retour
             </CButton>
-          </CCol>
+           </CCol>
         )}
         <CCol xs={id ? 6 : 12}> 
           <h3 className="text-center">
-            {id ? 'Modification de non-conformité' : 'Déclaration de non-conformité'}
+            Qualification de la non-conformité
           </h3>
         </CCol>
         {id && <CCol xs={3}></CCol>}
@@ -107,25 +107,11 @@ const FormNC = () => {
               )} */}
               <CCol xs={12} sm={6} md={6} className='mb-3'>
                 <CFormLabel htmlFor="type">Type :</CFormLabel>
-                <TypeNCSelect
-                  value={typeNC}
-                  onChange={e => setTypeNC(e.target.value)}
-                  invalid={!!errors['NC.IdTypeNc']}
-                />
-                {errors['NC.IdTypeNc'] && (
-                  <CFormFeedback invalid>{errors['NC.IdTypeNc'][0]}</CFormFeedback>
-                )}
+                <CFormInput type="text" value={typeNC} disabled readOnly />
               </CCol>
               <CCol xs={12} sm={6} md={6} className='mb-3'>
                 <CFormLabel htmlFor="site">Site :</CFormLabel>
-                <SiteSelect
-                  value={site}
-                  onChange={e => setSite(e.target.value)}
-                  invalid={!!errors['NC.IdLieu']}
-                />
-                {errors['NC.IdLieu'] && (
-                  <CFormFeedback invalid>{errors['NC.IdLieu'][0]}</CFormFeedback>
-                )}
+                <CFormInput type="text" value={site} disabled readOnly />
               </CCol>
             </CRow>
             <CRow>
@@ -153,60 +139,63 @@ const FormNC = () => {
             <CRow>
               <CCol xs={12} sm={6} md={4} className='mb-3'>
                 <CFormLabel htmlFor="date">Date :</CFormLabel>
-                <CFormInput type='date' id="date" value={date} onChange={e => setDate(e.target.value)} invalid={!!errors['NC.DateTimeFait']}/>
-                  {errors['NC.DateTimeFait'] && (
-                  <CFormFeedback invalid>{errors['NC.DateTimeFait'][0]}</CFormFeedback>
-                )}
+                <CFormInput type='date' id="date" value={date} disabled readOnly />
               </CCol>
               <CCol xs={12} sm={6} md={4} className='mb-3'>
                 <CFormLabel htmlFor="heure">Heure :</CFormLabel>
-                <CFormInput type='time' id="heure" value={heure} onChange={e => setHeure(e.target.value)} invalid={!!errors['NC.DateTimeFait']}/>
+                <CFormInput type='time' id="heure" value={heure} disabled readOnly />
               </CCol>
               <CCol xs={12} sm={12} md={12} className='mb-3'>
                 <CFormLabel htmlFor="description">Description du fait :</CFormLabel>
-                <WysiwygEditor
-                  value={description}
-                  onChange={setDescription}
-                  invalid={!!errors['NC.Descr']}
-                  error={errors['NC.Descr'] ? errors['NC.Descr'][0] : ''}
-                />
+                <div className="form-control" style={{ minHeight: 40, background: '#fafbfc' }} dangerouslySetInnerHTML={{ __html: description || '' }} />
               </CCol>
               <CCol xs={12} sm={12} md={12} className='mb-3'>
                 <CFormLabel htmlFor="curative">Pièces jointes :</CFormLabel>
-                <FileUploader files={files} setFiles={setFiles} />
+                <div className="form-control" style={{ minHeight: 40, background: '#fafbfc' }}>
+                  {files && files.length > 0 ? files.map(f => f.name || f.nomFichier).join(' , ') : 'Aucune'}
+                </div>
               </CCol>
               <CCol xs={12} sm={12} md={12} className='mb-3'>
                 <CFormLabel htmlFor="curative">Action curative :</CFormLabel>
-                <CFormTextarea id="curative" rows={3} value={actionCurative} onChange={e => setActionCurative(e.target.value)} invalid={!!errors['NC.ActionCurative']}/>
-                {errors['NC.ActionCurative'] && (
-                  <CFormFeedback invalid>{errors['NC.ActionCurative'][0]}</CFormFeedback>
-                )}
+                <CFormTextarea id="curative" rows={3} value={actionCurative} disabled readOnly />
               </CCol>
             </CRow>
           </CCardBody>
         </CCard>
-
-        <CRow className='mb-4'>
-          <CCol xs={12} className="d-flex justify-content-end">
-            {id ? (
-              <CButton color="primary" type="button" onClick={handleUpdate}>
-                Enregistrer
-              </CButton>
-            ) : (
-              <>
-                <CButton color="secondary" type="button" className='me-2' onClick={handleDraft}>
-                  Brouillon
-                </CButton>
-                <CButton color="primary" onClick={handleSubmit}>
-                  Déclarer
-                </CButton>
-              </>
-            )}
-          </CCol>
-        </CRow>
       </CForm>
+      <CRow>
+        <CCol xs={4} className="d-flex justify-content-center">
+            <CButton
+                color='primary'
+                className="mb-3 w-100"
+            >
+                <CIcon icon={cilCheck} className="me-2" />
+                Reçevable
+            </CButton>
+        </CCol>
+        <CCol xs={4} className="d-flex justify-content-center">
+            <CButton
+                color='info'
+                className="mb-3 w-100"
+                >
+                <CIcon icon={cilInfo} className="me-2" />
+                Demander plus d'infos
+            </CButton>
+        </CCol>
+        <CCol xs={4} className="d-flex justify-content-center">
+            <CButton
+                color='danger'
+                className="mb-3 w-100"
+            >
+                <CIcon icon={cilX} className="me-2" />
+                Non-recevable   
+            </CButton>
+        </CCol>
+      </CRow>
     </>
   )
 }
 
-export default FormNC
+export default QualifNC
+
+

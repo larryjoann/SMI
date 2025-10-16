@@ -14,10 +14,13 @@ namespace api_SMI.Services
 
         void DraftToDeclare(NCDetails details);
 
+        void Update(NCDetails details);
+
         IEnumerable<NCDetails> GetDrafts();
 
         IEnumerable<NCDetails> GetDeclare();
 
+        
 
     }
 }

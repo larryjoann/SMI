@@ -1,12 +1,13 @@
-import React, { useEffect , useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useArchiveNC } from '../../hooks/useNCDetails'
+import { Pop_up } from '../../../../components/notification/Pop_up'
 import {
   CRow, CCol, CCard, CCardBody, CBadge,
   CDropdown, CDropdownDivider, CDropdownItem, CDropdownMenu, CDropdownToggle,
   CPagination, CPaginationItem
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilTrash, cilOptions, cilPen, cilCommentBubble } from '@coreui/icons'
+import { cilTrash, cilOptions, cilPen, cilCommentBubble, cilBadge } from '@coreui/icons'
 
 import FilterDropdown from '../filter/FilterDropdown'
 import DateFilterDropdown from '../filter/DateFilterDropdown'
@@ -14,19 +15,19 @@ import BadgeFilterDropdown from '../filter/BadgeFilterDropdown'
 import { useProcessOptions, useTypeOptions, useStatusOptions , useLieuOptions } from '../filter/hooks/useFilterOptions'
 import { useNavigate } from 'react-router-dom'
 
-
-
 // Données NC dynamiques depuis l'API
 
-const DeclarationsPanel = ({ ncData = [], loading = false, error = null }) => {
+const DeclarationsPanel = ({ ncData = [], loading = false, error = null, onReload }) => {
   const processOptions = useProcessOptions();
   const typeOptions = useTypeOptions();
   const lieuOptions = useLieuOptions();
   const statusOptions = useStatusOptions();
   const navigate = useNavigate();
-  
-  const { archive, loading: archiving, error: archiveError, success: archiveSuccess } = useArchiveNC();
+
+  // Hook pour archiver une NC (simplifié)
+  const { archive, loading: archiving, error: archiveError, showToast, setShowToast, popType, popMessage } = useArchiveNC();
   const [archivedId, setArchivedId] = useState(null);
+
   const [selectedProcesses, setSelectedProcesses] = useState([])
   const [selectedTypes, setSelectedTypes] = useState([])
   const [selectedLieu, setSelectedLieu] = useState([])
@@ -74,12 +75,19 @@ const DeclarationsPanel = ({ ncData = [], loading = false, error = null }) => {
   if (archiving) return <div>Archivage en cours...</div>;
   if (archiveError) return <div className="text-danger">Erreur lors de l'archivage : {archiveError}</div>;
 
-  const filteredNC = filterNC();
+  // Masquer l'élément archivé immédiatement
+  const filteredNC = filterNC().filter(nc => nc.id !== archivedId);
   const pageCount = Math.ceil(filteredNC.length / itemsPerPage);
   const paginatedNC = filteredNC.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   return (
     <>
+      <Pop_up
+        show={showToast}
+        type={popType}
+        message={popMessage}
+        onClose={() => setShowToast(false)}
+      />
       <CRow>
         <CCol xs={2}>
           <FilterDropdown
@@ -123,7 +131,7 @@ const DeclarationsPanel = ({ ncData = [], loading = false, error = null }) => {
         </CCol>
         <CCol xs={1}></CCol>
       </CRow>
-      <hr />
+      <hr/>
   {paginatedNC.map((nc) => (
         <CCard
           className="mb-2 card-list-hover"
@@ -148,7 +156,13 @@ const DeclarationsPanel = ({ ncData = [], loading = false, error = null }) => {
               </CCol>
               <CCol xs={1} className="d-flex justify-content-end">
                 <CDropdown variant="btn-group" direction="center" onClick={e => e.stopPropagation()}>
-                  <CIcon icon={cilCommentBubble} className="text-dark mt-1 me-3" size='lg' />
+                  <CIcon 
+                    icon={cilBadge} 
+                    className="text-warning mt-1 me-3" 
+                    size='lg'
+                    title='Qualifier'
+                    onClick={() => navigate(`/nc/qualif/${nc.id}`)}
+                  />              
                   <CDropdownToggle caret={false} className="p-0">
                     <CIcon icon={cilOptions} className="text-dark" />
                   </CDropdownToggle>
@@ -156,17 +170,23 @@ const DeclarationsPanel = ({ ncData = [], loading = false, error = null }) => {
                     <CDropdownItem
                       href="#"
                       onClick={async (e) => {
-                        e.preventDefault();
-                        setArchivedId(nc.id);
-                        await archive(nc.id);
-                        // Optionnel: rafraîchir la liste ou masquer la NC archivée
-                      }}
+                          e.preventDefault();
+                          setArchivedId(nc.id);
+                          await archive(nc.id);
+                        if (typeof onReload === 'function') onReload();
+                        }}
                     >
                       <CIcon icon={cilTrash} className="text-danger me-3" />
                       <span className="text-danger">Archiver</span>
                     </CDropdownItem>
                     <CDropdownDivider />
-                    <CDropdownItem href="#">
+                    <CDropdownItem
+                      href="#"
+                      onClick={e => {
+                        e.preventDefault();
+                        navigate(`/nc/form/${nc.id}`);
+                      }}
+                    >
                       <CIcon icon={cilPen} className="text-warning me-3" />
                       <span className="text-warning">Modifier</span>
                     </CDropdownItem>

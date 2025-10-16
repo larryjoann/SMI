@@ -18,12 +18,34 @@ import BrouillonsPanel from '../components/panel/BrouillonsPanel'
 import TousPanel from '../components/panel/TousPanel'
 import { useGetDeclaration, useGetBrouillon , useGetAll } from '../hooks/useNCData'
 
+// Ajout pour forcer le reload
+import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
+
+
+
 
 const Liste_NC = () => {
-    // Récupérer les données pour compter les NC
-    const { ncData: brouillons, loading: loadingBrouillons, error: errorBrouillon } = useGetBrouillon();
-    const { ncData: declarations, loading: loadingDeclarations, error: errorDeclarations } = useGetDeclaration();
-    const { ncData: all, loading: loadingall , error: errorAll } = useGetAll();
+    const location = useLocation();
+
+    // Un reloadFlag par panel
+    const [reloadFlagBrouillon, setReloadFlagBrouillon] = useState(0);
+    const [reloadFlagDeclaration, setReloadFlagDeclaration] = useState(0);
+    const [reloadFlagTous, setReloadFlagTous] = useState(0);
+
+    // Récupérer les données pour chaque panel
+    const { ncData: brouillons, loading: loadingBrouillons, error: errorBrouillon } = useGetBrouillon(reloadFlagBrouillon);
+    const { ncData: declarations, loading: loadingDeclarations, error: errorDeclarations } = useGetDeclaration(reloadFlagDeclaration);
+    const { ncData: all, loading: loadingall , error: errorAll } = useGetAll(reloadFlagTous);
+
+    // Fonctions pour forcer le reload de chaque panel
+    const handleReloadBrouillon = () => setReloadFlagBrouillon(flag => flag + 1);
+    const handleReloadDeclaration = () => setReloadFlagDeclaration(flag => flag + 1);
+    const handleReloadTous = () => setReloadFlagTous(flag => flag + 1);
+
+    // Déterminer le panel par défaut selon la navigation
+    const defaultPanel = location.state && location.state.defaultPanel ? location.state.defaultPanel : "declaration";
+
     return (
         <>
             <CRow>
@@ -37,7 +59,7 @@ const Liste_NC = () => {
                         key='1'
                         shape=""
                         className="mb-3"
-                        href='#/indicateur/form'
+                        href=''
                     >
                         <CIcon icon={cilTrash} className="me-2" />
                         Corbeille
@@ -45,7 +67,7 @@ const Liste_NC = () => {
                 </CCol>
             </CRow>
             <CCard className='mb-4'>
-                <CTabs defaultActiveItemKey="declaration" className="text-center">
+                <CTabs defaultActiveItemKey={defaultPanel} className="text-center">
                     <CCardHeader style={{ padding: 0, borderBottom: 'none'}}>
                         <CTabList variant="tabs">
                             <CTab itemKey="brouillon" className="d-flex align-items-center">
@@ -61,7 +83,7 @@ const Liste_NC = () => {
                                 </CBadge>
                             </CTab>
                             <CTab itemKey="tous" className="d-flex align-items-center">
-                                <h6 className='m-1'>NC me concernant</h6>
+                                <h6 className='m-1'>Tous</h6>
                                 <CBadge className="custom-badge">
                                     {loadingall ? '...' : all.length}
                                 </CBadge>
@@ -71,13 +93,19 @@ const Liste_NC = () => {
                     <CCardBody>
                         <CTabContent >
                             <CTabPanel className="p-3" itemKey="brouillon">
-                                <BrouillonsPanel ncData={brouillons} loading={loadingBrouillons} error={errorBrouillon} />
+                                <BrouillonsPanel 
+                                    ncData={brouillons} 
+                                    loading={loadingBrouillons} 
+                                    error={errorBrouillon} 
+                                    onReload={handleReloadBrouillon} 
+                                    onDeclareSuccess={() => { handleReloadDeclaration(); handleReloadTous(); }} 
+                                />
                             </CTabPanel>
                             <CTabPanel className="p-3" itemKey="declaration">
-                                <DeclarationsPanel ncData={declarations} loading={loadingDeclarations} error={errorDeclarations} />
+                                <DeclarationsPanel ncData={declarations} loading={loadingDeclarations} error={errorDeclarations} onReload={handleReloadDeclaration} />
                             </CTabPanel>
                             <CTabPanel className="p-3" itemKey="tous">
-                                <TousPanel ncData={all} loading={loadingall} error={errorAll} />
+                                <TousPanel ncData={all} loading={loadingall} error={errorAll} onReload={handleReloadTous} />
                             </CTabPanel>
                         </CTabContent>
                     </CCardBody>

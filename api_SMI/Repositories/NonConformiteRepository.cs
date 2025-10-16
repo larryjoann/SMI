@@ -31,6 +31,7 @@ namespace api_SMI.Repositories
                 .Include(nc => nc.StatusNc)
                 .Include(nc => nc.PrioriteNc)
                 .Where(nc => nc.Status == true)
+                .Where(nc => nc.DateTimeDeclare != null)
                 .ToList();
 
         public NonConformite? GetById(int id)

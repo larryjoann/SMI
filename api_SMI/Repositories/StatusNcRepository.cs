@@ -1,5 +1,6 @@
 using api_SMI.Data;
 using api_SMI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace api_SMI.Repositories
 {
@@ -13,10 +14,15 @@ namespace api_SMI.Repositories
         }
 
         public List<StatusNc> GetAll()
-            => _context.Set<StatusNc>().ToList();
+            => _context.Set<StatusNc>()
+            .Include(s => s.PhaseNc)
+            .OrderBy(s => s.PhaseNc != null ? s.PhaseNc.Id : int.MaxValue)
+            .ToList();
 
         public StatusNc? GetById(int id)
-            => _context.Set<StatusNc>().Find(id);
+            => _context.Set<StatusNc>()
+            .Include(s => s.PhaseNc)
+            .FirstOrDefault(s => s.Id == id);
 
         public void Add(StatusNc entity)
         {

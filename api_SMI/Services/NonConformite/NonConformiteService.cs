@@ -18,13 +18,21 @@ namespace api_SMI.Services
 
         public void Declare(NonConformite nonConformite)
         {
+            nonConformite.DateTimeCreation = DateTime.Now;
+            nonConformite.DateTimeDeclare = DateTime.Now;
             nonConformite.Status = true;
+            nonConformite.IdStatusNc = 1; 
+            nonConformite.IdPrioriteNc = null;
             _repository.Add(nonConformite);
         }
 
         public void Draft(NonConformite nonConformite)
         {
+            nonConformite.DateTimeCreation = DateTime.Now;
+            nonConformite.DateTimeDeclare = null;
             nonConformite.Status = true;
+            nonConformite.IdStatusNc = null;
+            nonConformite.IdPrioriteNc = null;
             _repository.Add(nonConformite);
         }
 

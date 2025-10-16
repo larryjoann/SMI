@@ -13,7 +13,7 @@ const CategorieProcessusSelect = (props) => {
   }, [])
 
   return (
-    <CFormSelect id="categorie" required  {...props}>
+    <CFormSelect id="categorie" {...props}>
       <option value="">Sélectionner une catégorie</option>
       {categories.map(cat => (
         <option key={cat.id} value={cat.id}>{cat.nom}</option>

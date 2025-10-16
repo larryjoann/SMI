@@ -28,6 +28,7 @@ namespace api_SMI.Data
         public DbSet<StatusNc> StatusNcs { get; set; }
         public DbSet<PrioriteNc> PrioriteNcs { get; set; }
         public DbSet<PieceJointeNc> PieceJointeNcs { get; set; }
+        public DbSet<PhaseNc> PhaseNcs { get; set; }
         
     }
 }

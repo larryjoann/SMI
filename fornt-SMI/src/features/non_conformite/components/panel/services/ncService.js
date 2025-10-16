@@ -19,6 +19,7 @@ export async function getDeclaration() {
       colorStatus: nc.statusNc?.color || 'white',
       processes: processusConcerne.map(p => p.processus?.id),
       labelProcesses: processusConcerne.map(p => p.processus?.sigle || p.processus?.nom || ''),
+      status : nc.status,
     }
   }) : []
 }
@@ -41,6 +42,7 @@ export async function getBrouillon() {
       colorStatus: nc.statusNc?.color || 'white',
       processes: processusConcerne.map(p => p.processus?.id),
       labelProcesses: processusConcerne.map(p => p.processus?.sigle || p.processus?.nom || ''),
+      status : nc.status,
     }
   }) : []
 }
@@ -63,6 +65,7 @@ export async function getAll() {
       colorStatus: nc.statusNc?.color || 'white',
       processes: processusConcerne.map(p => p.processus?.id),
       labelProcesses: processusConcerne.map(p => p.processus?.sigle || p.processus?.nom || ''),
+      status : nc.status,
     }
   }) : []
 }

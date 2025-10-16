@@ -6,13 +6,14 @@ import {
   CButton , CFormFeedback ,CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilArrowLeft , cilHistory} from '@coreui/icons'
-import { useParams } from 'react-router-dom'
+import { cilArrowLeft , cilHistory , cilBadge} from '@coreui/icons'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useNCDetails } from '../hooks/useNCDetails'
 
 
 const FicheNC = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { data, loading, error } = useNCDetails(id);
 
   if (loading) return <CAlert color="info" className="text-center rounded-pill">Chargement...</CAlert>;
@@ -26,6 +27,12 @@ const FicheNC = () => {
   const dateStr = dateFait ? dateFait.toLocaleDateString() : '';
   const heureStr = dateFait ? dateFait.toLocaleTimeString() : '';
 
+  // Determine which panel to show on return
+  const getDefaultPanel = () => {
+    if (nc?.dateTimeDeclare) return 'declaration';
+    return 'brouillon';
+  }
+
   return (
     <>
       <CRow className='mb-2'>   
@@ -33,7 +40,7 @@ const FicheNC = () => {
             <CButton
             color='secondary'
             className="mb-3"
-            href='#/nc/list'
+            onClick={() => navigate('/nc/list', { state: { defaultPanel: getDefaultPanel() } })}
             >
             <CIcon icon={cilArrowLeft} className="me-2" />
             Retour
@@ -46,7 +53,7 @@ const FicheNC = () => {
             <CButton
             color='secondary'
             className="mb-3"
-            href=''
+            // href=''
             >
             <CIcon icon={cilHistory} className="me-2" />
             Histo-activité
@@ -114,6 +121,18 @@ const FicheNC = () => {
           </CCardBody>
         </CCard>
       </CForm>
+      {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 1 && (
+        <CCol xs={12} className="d-flex justify-content-center">
+          <CButton
+            color='primary'
+            className="mb-3"
+            onClick={() => navigate(`/nc/qualif/${nc.id}`)}
+          >
+            <CIcon icon={cilBadge} className="me-2" />
+            Qualifier la non-conformité
+          </CButton>
+        </CCol>
+      )}
     </>
   )
 }

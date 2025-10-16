@@ -32,9 +32,6 @@ namespace api_SMI.Controllers
         [HttpPost("declare")]
         public IActionResult Declare(NonConformite nonConformite)
         {
-            nonConformite.DateTimeDeclare = DateTime.Now;
-            nonConformite.DateTimeCreation = DateTime.Now;
-
             if (!TryValidateModel(nonConformite))
             {
                 return ValidationProblem(ModelState);
@@ -46,9 +43,6 @@ namespace api_SMI.Controllers
         [HttpPost("draft")]
         public IActionResult Draft(NonConformite nonConformite)
         {
-            nonConformite.DateTimeDeclare = null;
-            nonConformite.DateTimeCreation = DateTime.Now;
-
             _service.Draft(nonConformite);
             return CreatedAtAction(nameof(GetById), new { id = nonConformite.Id }, nonConformite);
         }

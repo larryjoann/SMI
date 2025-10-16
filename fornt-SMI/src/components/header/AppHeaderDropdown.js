@@ -8,7 +8,7 @@ import {
 } from '@coreui/react'
 import { cilLockLocked } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
-import avatar8 from './../../assets/images/avatars/8.jpg'
+// import avatar8 from './../../assets/images/avatars/8.jpg'
 import axios from 'axios'
 import API_URL from '../../api/API_URL'
 
@@ -39,10 +39,22 @@ const AppHeaderDropdown = () => {
       })
   }
 
+  // Fonction pour obtenir les initiales
+  // Optimisé : retourne les initiales du premier et du deuxième mot
+  const getInitials = (name) => {
+    if (!name) return '';
+    const parts = name.trim().split(' ').filter(Boolean);
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    // Si au moins deux mots, retourne la première lettre du premier et du deuxième mot
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  };
+
   return (
     <CDropdown variant="nav-item">
       <CDropdownToggle placement="bottom-end" className="py-0 pe-0" caret={false}>
-        <CAvatar className="me-3" src={avatar8} size="md" />
+        <CAvatar className="me-3 bg-secondary text-white" size="md">
+          {getInitials(userName)}
+        </CAvatar>
         <span className="d-none d-md-inline">
           {userName}
         </span>

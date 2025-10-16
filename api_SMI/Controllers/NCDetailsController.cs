@@ -80,14 +80,10 @@ namespace api_SMI.Controllers
             if (details == null || details.NC == null)
                 return BadRequest("Invalid NCDetails data.");
 
-            details.NC.DateTimeCreation = DateTime.Now;
-            details.NC.DateTimeDeclare = null;
-
             _service.Draft(details);
             return CreatedAtAction(nameof(GetDetails), new { id = details.NC.Id }, details);
         }
-        
-         // POST: api/NCDetails/declare
+
         [HttpPost("DraftToDeclare/{id}")]
         public IActionResult DraftToDeclare(int id, [FromBody] NCDetails details)
         {
@@ -99,10 +95,45 @@ namespace api_SMI.Controllers
 
             details.NC.DateTimeDeclare = DateTime.Now;
 
+            // Force la validation personnalisée
+            if (!TryValidateModel(details))
+                return BadRequest(ModelState);
+
             _service.DraftToDeclare(details);
 
             return Ok(new { id = details.NC.Id });
         }
 
+        [HttpPost("updateDraft/{id}")]
+        public IActionResult UpdateDraft(int id, [FromBody] NCDetails details)
+        {
+            if (details == null || details.NC == null)
+                return BadRequest("Invalid NCDetails data.");
+
+            if (id != details.NC.Id)
+                return BadRequest("L'ID dans l'URL ne correspond pas à l'ID du corps.");
+
+            _service.Update(details);
+
+            return Ok(new { id = details.NC.Id });
+        }
+
+        [HttpPost("updateDeclare/{id}")]
+        public IActionResult UpdateDeclare(int id, [FromBody] NCDetails details)
+        {
+            if (details == null || details.NC == null)
+                return BadRequest("Invalid NCDetails data.");
+
+            if (id != details.NC.Id)
+                return BadRequest("L'ID dans l'URL ne correspond pas à l'ID du corps.");
+
+            // Force la validation personnalisée
+            if (!TryValidateModel(details))
+                return BadRequest(ModelState);
+            _service.Update(details);
+
+            return Ok(new { id = details.NC.Id });
+        }
+        
     }
 }

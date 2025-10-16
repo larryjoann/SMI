@@ -18,5 +18,12 @@ namespace api_SMI.Models
 
         [Column("color")]
         public string? Color { get; set; }
+
+        [Column("id_phase_nc")]
+        public int? IdPhaseNc { get; set; }
+
+        [ForeignKey("IdPhaseNc")]
+        public PhaseNc? PhaseNc { get; set; }
+    
     }
 }

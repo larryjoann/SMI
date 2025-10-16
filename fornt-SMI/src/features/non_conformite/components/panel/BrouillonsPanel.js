@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react'
+import { useArchiveNC, useDraftToDeclareNC } from '../../hooks/useNCDetails'
+import { Pop_up } from '../../../../components/notification/Pop_up'
 import {
   CRow, CCol, CCard, CCardBody, CBadge,
   CDropdown, CDropdownDivider, CDropdownItem, CDropdownMenu, CDropdownToggle,
   CPagination, CPaginationItem
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilTrash, cilOptions, cilPen, cilSend } from '@coreui/icons'
+import { cilTrash, cilOptions, cilPen, cilSend, cilBadge} from '@coreui/icons'
 
 
 
@@ -14,10 +16,27 @@ import DateFilterDropdown from '../filter/DateFilterDropdown'
 import { useProcessOptions, useTypeOptions, useLieuOptions } from '../filter/hooks/useFilterOptions'
 import { useNavigate } from 'react-router-dom'
 
-
-
-
-const BrouillonsPanel = ({ ncData = [], loading = false, error = null }) => {
+const BrouillonsPanel = ({ ncData = [], loading = false, error = null, onReload, onDeclareSuccess }) => {
+  // Hook pour archiver une NC (même logique que DeclarationsPanel)
+  const {
+    archive,
+    loading: archiving,
+    error: archiveError,
+    showToast: showArchiveToast,
+    setShowToast: setShowArchiveToast,
+    popType: archivePopType,
+    popMessage: archivePopMessage
+  } = useArchiveNC();
+  const {
+    declare,
+    loading: declaring,
+    error: declaringError,
+    showToast: showDeclareToast,
+    setShowToast: setShowDeclareToast,
+    popType: declarePopType,
+    popMessage: declarePopMessage
+  } = useDraftToDeclareNC();
+  const [archivedId, setArchivedId] = useState(null);
   const processOptions = useProcessOptions();
   const typeOptions = useTypeOptions();
   const lieuOptions = useLieuOptions();
@@ -67,6 +86,20 @@ const BrouillonsPanel = ({ ncData = [], loading = false, error = null }) => {
 
   return (
     <>
+      {/* Pop-up pour l'archivage */}
+      <Pop_up
+        show={showArchiveToast}
+        type={archivePopType}
+        message={archivePopMessage}
+        onClose={() => setShowArchiveToast(false)}
+      />
+      {/* Pop-up pour la déclaration */}
+      <Pop_up
+        show={showDeclareToast}
+        type={declarePopType}
+        message={declarePopMessage}
+        onClose={() => setShowDeclareToast(false)}
+      />
       <CRow>
         <CCol xs={2}>
           <FilterDropdown
@@ -107,7 +140,7 @@ const BrouillonsPanel = ({ ncData = [], loading = false, error = null }) => {
         <CCard
           className="mb-2 card-list-hover"
           key={nc.id}
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: 'pointer', opacity: archivedId === nc.id ? 0.5 : 1 }}
           onClick={() => navigate(`/nc/fiche/${nc.id}`)}
         >
           <CCardBody>
@@ -117,18 +150,40 @@ const BrouillonsPanel = ({ ncData = [], loading = false, error = null }) => {
               <CCol xs={2}>{nc.labelLieu}</CCol>
               <CCol xs={2}>{new Date(nc.date).toLocaleString()}</CCol>
               <CCol xs={4} className="d-flex justify-content-end">
-                <CIcon icon={cilSend} className="text-primary mt-1 me-3" size='lg' />
+                <CIcon icon={cilSend} className="text-primary mt-1 me-3" size='lg'
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    await declare(nc.id);
+                    if (typeof onReload === 'function') onReload();
+                    if (typeof onDeclareSuccess === 'function') onDeclareSuccess();
+                  }}
+                />
                 <CDropdown variant="btn-group" direction="center" onClick={e => e.stopPropagation()}>
                   <CDropdownToggle caret={false} className="p-0">
                     <CIcon icon={cilOptions} className="text-dark" />
                   </CDropdownToggle>
                   <CDropdownMenu>
-                    <CDropdownItem href="#">
+                    <CDropdownItem
+                      href="#"
+                      onClick={async (e) => {
+                        e.preventDefault();
+                        setArchivedId(nc.id);
+                        await archive(nc.id);
+                        if (typeof onReload === 'function') onReload();
+                      }}
+                    >
                       <CIcon icon={cilTrash} className="text-danger me-3" />
-                      <span className="text-danger">Supprimer</span>
+                      <span className="text-danger">Archiver</span>
                     </CDropdownItem>
                     <CDropdownDivider />
-                    <CDropdownItem href="#">
+                    <CDropdownItem
+                      href="#"
+                      onClick={e => {
+                        e.preventDefault();
+                        navigate(`/nc/form/${nc.id}`);
+                      }}
+                    >
                       <CIcon icon={cilPen} className="text-warning me-3" />
                       <span className="text-warning">Modifier</span>
                     </CDropdownItem>

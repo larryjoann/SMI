@@ -108,10 +108,10 @@ CREATE TABLE Non_conformite (
     datetime_fait DATETIME DEFAULT GETDATE(),
     descr VARCHAR(MAX),
     action_curative VARCHAR(MAX),
-    id_lieu INT NOT NULL,
-    id_type_nc INT NOT NULL,
-    id_status_nc INT NOT NULL,      -- Foreign key vers Status_nc
-    id_priorite_nc INT NOT NULL,    -- Foreign key vers Priorite_nc
+    id_lieu INT NULL,
+    id_type_nc INT NULL,
+    id_status_nc INT NULL,      -- Foreign key vers Status_nc
+    id_priorite_nc INT NULL,    -- Foreign key vers Priorite_nc
     status boolean DEFAULT true,
     FOREIGN KEY(id_lieu) REFERENCES Lieu(id),
     FOREIGN KEY(id_type_nc) REFERENCES Type_nc(id),
@@ -126,12 +126,43 @@ CREATE TABLE Priorite_nc (
     descr VARCHAR(MAX)
 );
 
+CREATE TABLE Phase_nc (
+    id INT IDENTITY PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    ordre INT NOT NULL
+);
+
 CREATE TABLE Status_nc (
     id INT IDENTITY PRIMARY KEY,
     nom VARCHAR(50),
     color VARCHAR(50),
-    descr VARCHAR(MAX)
+    id_phase_nc INT NOT NULL,
+    descr VARCHAR(MAX),
+    FOREIGN KEY(id_phase_nc) REFERENCES Phase_nc(id)
 );
+
+DBCC CHECKIDENT ('Phase_nc', RESEED, 0);
+
+INSERT INTO Phase_nc (nom, ordre)
+VALUES
+('En qualification', 1),
+('Qualifié comme non recevable',2),
+('Qualifié en attente de traitement',3),
+('Traitement', 4),
+('Clôture', 5);
+
+DBCC CHECKIDENT ('Status_nc', RESEED, 0);
+
+INSERT INTO Status_nc (nom, descr, color , id_phase_nc)
+VALUES
+('En qualification', 'En attente de qualif par QUA', 'dark' ,1 ),
+('A eclarcir', 'Le responsable QUA demande plus d''infrmation', 'info',1),
+('Non Recevable', 'Qualifié comme non-recevable par la QUA', 'danger',2),
+('Reçevable', 'Qualifié comme recevable par la QUA', 'primary',3),
+('En traitement','Les actions correctives sont en cours', 'secondary',4),
+('Suspendue', 'Suspendue', 'light',4),
+('Clôturé', 'Cloturé ', 'success',5);
+
 
 CREATE TABLE Processus_concerne_nc (
     id INT IDENTITY PRIMARY KEY,

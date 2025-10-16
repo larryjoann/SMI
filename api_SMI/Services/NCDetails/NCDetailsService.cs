@@ -99,7 +99,7 @@ namespace api_SMI.Services
         }
 
 
-         public void Archiver(int ncId)
+        public void Archiver(int ncId)
         {
             _ncService.Archiver(ncId);
         }
@@ -192,6 +192,39 @@ namespace api_SMI.Services
             }
 
             // supprimer les processus concernés
+            _processusConcerneService.DeleteByNonConformite(ncId);
+            if (details.ProcessusConcerne != null)
+            {
+                foreach (var proc in details.ProcessusConcerne)
+                {
+                    proc.IdNc = ncId;
+                    _processusConcerneService.Add(proc);
+                }
+            }
+        }
+
+        public void Update(NCDetails details)
+        {
+            if (details == null || details.NC == null)
+                throw new ArgumentException("NCDetails ou NonConformite manquant");
+
+            // 1. Mettre à jour la non-conformité
+            _ncService.Update(details.NC);
+
+            var ncId = details.NC.Id;
+
+            // 2. Mettre à jour les pièces jointes
+            _pjService.DeleteByNonConformite(ncId);
+            if (details.PiecesJointes != null)
+            {
+                foreach (var pj in details.PiecesJointes)
+                {
+                    pj.IdNc = ncId;
+                    _pjService.Add(pj);
+                }
+            }
+
+            // 3. Mettre à jour les processus concernés
             _processusConcerneService.DeleteByNonConformite(ncId);
             if (details.ProcessusConcerne != null)
             {

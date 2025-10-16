@@ -5,7 +5,7 @@ import {
 } from '@coreui/react'
 
 import CIcon from '@coreui/icons-react'
-import { cilCommentBubble  } from '@coreui/icons'
+import { cilBadge  } from '@coreui/icons'
 
 import BadgeFilterDropdown from '../filter/BadgeFilterDropdown'
 import FilterDropdown from '../filter/FilterDropdown'
@@ -138,7 +138,13 @@ const TousPanel = ({ ncData = [], loading = false, error = null }) => {
                 </CBadge>
               </CCol>
               <CCol xs={1} className="d-flex justify-content-end">
-                <CIcon icon={cilCommentBubble} className="text-dark mt-1 me-3" size='lg' />
+                <CIcon 
+                  icon={cilBadge} 
+                  className="text-warning mt-1 me-3" 
+                  size='lg'
+                  title='Qualifier'
+                  onClick={() => navigate(`/nc/qualif/${nc.id}`)}
+                />   
               </CCol>
             </CRow>
           </CCardBody>
