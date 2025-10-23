@@ -43,7 +43,7 @@ const FormProcessus = () => {
         message={popMessage}
       />
       <CRow>
-        <CCol xs={12} className="d-flex justify-content-start">
+        <CCol xs={3} className="d-flex justify-content-start">
           <CButton
             color='secondary'
             className="mb-3"
@@ -53,6 +53,10 @@ const FormProcessus = () => {
             Retour
           </CButton>
         </CCol>
+        <CCol xs={6} className="d-flex justify-content-center">
+          <h3>{id ? "Modifier le processus" : "Ajouter un nouveau processus"}</h3>
+        </CCol>
+        <CCol xs={3} className="d-flex justify-content-end"></CCol>
       </CRow>
       <CCard>
         <CCardHeader className="text-center">

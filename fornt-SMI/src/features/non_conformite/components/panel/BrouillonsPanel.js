@@ -7,9 +7,7 @@ import {
   CPagination, CPaginationItem
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilTrash, cilOptions, cilPen, cilSend, cilBadge} from '@coreui/icons'
-
-
+import { cilTrash, cilOptions, cilPen, cilSend, cilStorage} from '@coreui/icons'
 
 import FilterDropdown from '../filter/FilterDropdown'
 import DateFilterDropdown from '../filter/DateFilterDropdown'
@@ -60,15 +58,19 @@ const BrouillonsPanel = ({ ncData = [], loading = false, error = null, onReload,
   }, [lieuOptions])
 
   const filterNC = () => {
+    const selProc = selectedProcesses.map(String)
+    const selTypes = selectedTypes.map(String)
+    const selLieu = selectedLieu.map(String)
+
     return ncData.filter(item =>
-      selectedProcesses.includes('all') || item.processes?.some(procId => selectedProcesses.includes(procId))
+      selProc.includes('all') || (item.processusConcerne || []).some(pc => selProc.includes(String(pc.processus?.id || pc.idProcessus || pc.id)))
     ).filter(item =>
-      selectedTypes.includes('all') || selectedTypes.includes(item.type)
+      selTypes.includes('all') || selTypes.includes(String(item.nc.typeNc?.id))
     ).filter(item =>
-      selectedLieu.includes('all') || selectedLieu.includes(item.lieu)
+      selLieu.includes('all') || selLieu.includes(String(item.nc.lieu?.id))
     ).filter(item => {
       if (!dateFilter.from && !dateFilter.to) return true
-      const itemDate = new Date(item.date)
+      const itemDate = new Date(item.nc.dateTimeCreation)
       const from = dateFilter.from ? new Date(dateFilter.from) : null
       const to = dateFilter.to ? new Date(dateFilter.to) : null
       if (from && itemDate < from) return false
@@ -139,22 +141,22 @@ const BrouillonsPanel = ({ ncData = [], loading = false, error = null, onReload,
       {paginatedNC.map((nc) => (
         <CCard
           className="mb-2 card-list-hover"
-          key={nc.id}
-          style={{ cursor: 'pointer', opacity: archivedId === nc.id ? 0.5 : 1 }}
-          onClick={() => navigate(`/nc/fiche/${nc.id}`)}
+          key={nc.nc.id}
+          style={{ cursor: 'pointer', opacity: archivedId === nc.nc.id ? 0.5 : 1 }}
+          onClick={() => navigate(`/nc/fiche/${nc.nc.id}`)}
         >
           <CCardBody>
             <CRow>
-              <CCol xs={2}>{nc.labelProcesses?.join(', ')}</CCol>
-              <CCol xs={2}>{nc.labelType}</CCol>
-              <CCol xs={2}>{nc.labelLieu}</CCol>
-              <CCol xs={2}>{new Date(nc.date).toLocaleString()}</CCol>
+                 <CCol xs={2}>{(nc.processusConcerne || []).map(pc => pc.processus.sigle).filter(Boolean).join(', ')}</CCol>
+                <CCol xs={2}>{nc.nc.typeNc.nom || ''}</CCol>
+                <CCol xs={2}>{nc.nc.lieu.nom || ''}</CCol>
+                <CCol xs={2}>{new Date(nc.nc.dateTimeCreation).toLocaleString()}</CCol>
               <CCol xs={4} className="d-flex justify-content-end">
                 <CIcon icon={cilSend} className="text-primary mt-1 me-3" size='lg'
                   onClick={async (e) => {
                     e.stopPropagation();
                     e.preventDefault();
-                    await declare(nc.id);
+                    await declare(nc.nc.id);
                     if (typeof onReload === 'function') onReload();
                     if (typeof onDeclareSuccess === 'function') onDeclareSuccess();
                   }}
@@ -168,12 +170,12 @@ const BrouillonsPanel = ({ ncData = [], loading = false, error = null, onReload,
                       href="#"
                       onClick={async (e) => {
                         e.preventDefault();
-                        setArchivedId(nc.id);
-                        await archive(nc.id);
+                        setArchivedId(nc.nc.id);
+                        await archive(nc.nc.id);
                         if (typeof onReload === 'function') onReload();
                       }}
                     >
-                      <CIcon icon={cilTrash} className="text-danger me-3" />
+                      <CIcon icon={cilStorage} className="text-danger me-3" />
                       <span className="text-danger">Archiver</span>
                     </CDropdownItem>
                     <CDropdownDivider />
@@ -181,7 +183,7 @@ const BrouillonsPanel = ({ ncData = [], loading = false, error = null, onReload,
                       href="#"
                       onClick={e => {
                         e.preventDefault();
-                        navigate(`/nc/form/${nc.id}`);
+                        navigate(`/nc/form/${nc.nc.id}`);
                       }}
                     >
                       <CIcon icon={cilPen} className="text-warning me-3" />

@@ -134,6 +134,19 @@ namespace api_SMI.Controllers
 
             return Ok(new { id = details.NC.Id });
         }
-        
+
+        [HttpPost("qualifier/{id}")]
+        public IActionResult Qualifier(int id, [FromBody] NCDetails details)
+        {
+            if (details == null || details.NC == null)
+                return BadRequest("Invalid NCDetails data.");
+
+            if (id != details.NC.Id)
+                return BadRequest("L'ID dans l'URL ne correspond pas à l'ID du corps.");
+            
+            _service.Qualifier(details , details.NC.IdStatusNc.Value);
+
+            return Ok(new { id = details.NC.Id });
+        }        
     }
 }

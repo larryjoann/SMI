@@ -50,11 +50,6 @@ const _nav = [
     items: [
       {
         component: CNavItem,
-        name: 'Tableau de bord',
-        to: '/#',
-      },
-      {
-        component: CNavItem,
         name: 'Déclarer un NC',
         to: '/nc/form',
       },
@@ -72,11 +67,6 @@ const _nav = [
     to: '/#',
     icon: <CIcon icon={cilTask} customClassName="nav-icon" />,
     items: [
-      {
-        component: CNavItem,
-        name: 'Tableau de bord',
-        to: '/#',
-      },
       {
         component: CNavItem,
         name: 'Inserer une action',

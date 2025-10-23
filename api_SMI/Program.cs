@@ -62,8 +62,14 @@ builder.Services.AddCors(options =>
 });
 
 // Ajoute cette ligne pour configurer le DbContext avec la chaîne de connexion
+// et activer la résilience aux erreurs transitoires (EnableRetryOnFailure)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null)));
 
 builder.Services.AddScoped<CollaborateurRepository>();
 builder.Services.AddScoped<CollaborateurService>();
@@ -104,6 +110,10 @@ builder.Services.AddScoped<PieceJointeNcRepository>();
 builder.Services.AddScoped<INCDetailsService, NCDetailsService>();
 builder.Services.AddScoped<IPhaseNcService, PhaseNcService>();
 builder.Services.AddScoped<PhaseNcRepository>();
+builder.Services.AddScoped<CategorieCauseNcRepository>();
+builder.Services.AddScoped<ICategorieCauseNcService, CategorieCauseNcService>();
+builder.Services.AddScoped<CauseNcRepository>();
+builder.Services.AddScoped<ICauseNcService, CauseNcService>();
 
     
 

@@ -16,8 +16,6 @@ const Form_indicateur = React.lazy(() => import('./features/indicateur/pages/For
 const Liste_NC = React.lazy(() => import('./features/non_conformite/pages/Liste_NC'))
 const Form_NC = React.lazy(() => import('./features/non_conformite/pages/FormNC'))
 const Fiche_NC = React.lazy(() => import('./features/non_conformite/pages/FicheNC'))
-const Qualif_NC = React.lazy(() => import('./features/non_conformite/pages/QualifNC'))
-const AnalyseCauseNC = React.lazy(() => import('./features/non_conformite/pages/AnalyseCauseNC'))
 const routes = [
   { path: '/', exact: true, name: 'Home' },
 
@@ -38,8 +36,6 @@ const routes = [
   { path: '/nc/form', name: 'Form non-conformité', element: Form_NC },
   { path: '/nc/form/:id', name: 'Form non-conformité', element: Form_NC },
   { path: '/nc/fiche/:id', name: 'Fiche non-conformité', element: Fiche_NC },
-  { path: '/nc/qualif/:id', name: 'Qualifier non-conformité', element: Qualif_NC },
-  { path: '/nc/analysecause/:id', name: 'Analyse des causes', element: AnalyseCauseNC },
 ]
 
 export default routes

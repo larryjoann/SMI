@@ -37,8 +37,8 @@ const AppSidebar = () => {
         <CSidebarBrand to="#" className="d-flex align-items-center justify-content-center w-100">
           {/* Mode full: logo + titre */}
           <span className="sidebar-brand-full d-flex align-items-center">
-            <span className="me-4 fw-bold h4 mb-0" style={{ color: '#6b7785' }}>S.M.I</span>
             <img src={myLogo} alt="Logo" height={62} />
+            <span className="me-4 fw-bold h4 mb-0" style={{ color: '#6b7785' }}>S.M.I</span>
           </span>
           {/* Mode narrow: logo seul */}
           <span className="sidebar-brand-narrow">

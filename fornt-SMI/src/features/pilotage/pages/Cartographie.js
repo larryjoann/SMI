@@ -9,7 +9,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 
 import CIcon from '@coreui/icons-react'
-import { cilPlus, cilWarning, cilFilter } from '@coreui/icons'
+import { cilPlus, cilWarning, cilFilter , cilFilterX } from '@coreui/icons'
 import CategorieProcessusSection from '../components/CategorieProcessusSection'
 import API_URL from '../../../api/API_URL'
 import CategorieProcessusSelect from '../../../components/champs/CategorieProcessusSelect'
@@ -50,7 +50,7 @@ const Cartographie = () => {
 
   const categorieColors = {
     2: '#A8D5BA',
-    3: '#7299c1ff',
+    3: '#8aa8c8ff',
     4: '#c7d3e7ff',
     5: '#E0E0E0',
   }
@@ -151,7 +151,11 @@ const Cartographie = () => {
         </CModalFooter>
       </CModal>
       <CRow>
-        <CCol xs={12} className="d-flex justify-content-end">
+        <CCol xs={3} className="d-flex justify-content-start"></CCol>
+        <CCol xs={6} className="d-flex justify-content-center">
+          <h3>Cartographie des processus</h3>
+        </CCol>
+        <CCol xs={3} className="d-flex justify-content-end">
           <CButton
             color='primary'
             key='1'
@@ -196,6 +200,20 @@ const Cartographie = () => {
                 </CCol>
                 <CCol xs={2} className="d-flex justify-content-center align-items-center">
                   <CButton
+                    className='me-1'
+                    color='danger'
+                    key='2'
+                    type='button'
+                    onClick={() => {
+                      setInputNom('')
+                      setInputCategorie('')
+                      setFilterNom('')
+                      setFilterCategorie('')
+                    }}
+                  >
+                   <CIcon icon={cilFilterX} />
+                  </CButton>
+                  <CButton
                     color='primary'
                     key='1'
                     type='submit'
@@ -207,6 +225,16 @@ const Cartographie = () => {
               </CForm>
             </CCardBody>
           </CCard>
+          {/* Legend for category colors */}
+          <div className="mb-3 d-flex align-items-center gap-3">
+            <span className='mb-0 h6'>Légende :</span>
+            {categories.map(cat => (
+              <div key={cat.id} className="d-flex align-items-center" title={cat.nom}>
+                <span style={{ width: 36, height: 18, display: 'inline-block', background: categorieColors[cat.id] || '#eee', borderRadius: 4, marginRight: 8, border: '1px solid rgba(0,0,0,0.08)' }} />
+                <span className="text-muted" style={{ fontSize: 14 }}>{cat.nom}</span>
+              </div>
+            ))}
+          </div>
         </CCol>
       </CRow>
       <CCard className="p-4 mb-4">

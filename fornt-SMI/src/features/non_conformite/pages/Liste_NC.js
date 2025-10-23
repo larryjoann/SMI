@@ -10,7 +10,7 @@ import {
   CButton
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilTrash} from '@coreui/icons'
+import { cilStorage} from '@coreui/icons'
 
 
 import DeclarationsPanel from '../components/panel/DeclarationsPanel'
@@ -59,10 +59,10 @@ const Liste_NC = () => {
                         key='1'
                         shape=""
                         className="mb-3"
-                        href=''
+                        href='#'
                     >
-                        <CIcon icon={cilTrash} className="me-2" />
-                        Corbeille
+                        <CIcon icon={cilStorage} className="me-2" />
+                        Archives
                     </CButton>
                 </CCol>
             </CRow>

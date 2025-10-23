@@ -16,6 +16,8 @@ export const useFormNC = (editId = null) => {
   const [heure, setHeure] = useState('')
   const [actionCurative, setActionCurative] = useState('')
   const [status, setStatus] = useState(1)
+  // backend status id separate from UI `status` object
+  const [idStatusNc, setIdStatusNc] = useState('')
   const [errors, setErrors] = useState({})
   const [showToast, setShowToast] = useState(false)
   const [popType, setPopType] = useState('success')
@@ -150,7 +152,7 @@ export const useFormNC = (editId = null) => {
         idLieu: site || null,
         idTypeNc: typeNC || null,
         dateTimeDeclare,
-        idStatusNc: 1,
+        idStatusNc: idStatusNc,
         idPrioriteNc: 1,
         status: status
       }
@@ -230,8 +232,11 @@ export const useFormNC = (editId = null) => {
           ? data.piecesJointes.map(f => ({ name: f.nomFichier, url: f.cheminFichier }))
           : []
       )
-        setStatus(data.nc.status || 1)
-        setErrors({})
+          setStatus(data.nc.status || 1)
+          // derive backend status id from API response (be tolerant)
+          const derivedId = data.nc.idStatusNc ?? data.nc.idStatus ?? data.nc.status?.id ?? data.nc.statusNc?.id ?? 1
+          setIdStatusNc(derivedId)
+          setErrors({})
     } catch (e) {
       setErrors({ global: "Erreur lors du chargement de la non-conformité." })
     }
@@ -249,7 +254,8 @@ export const useFormNC = (editId = null) => {
     date, setDate,
     heure, setHeure,
     actionCurative, setActionCurative,
-    status, setStatus,
+  status, setStatus,
+  idStatusNc, setIdStatusNc,
     errors, setErrors,
     formRef,
     handleSubmit,

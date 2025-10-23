@@ -46,7 +46,6 @@ namespace api_SMI.Services
 
         public void Update(NonConformite nonConformite) => _repository.Update(nonConformite);
 
-
         public void Delete(int id) => _repository.Delete(id);
 
         public void DeleteAll() => _repository.DeleteAll();
@@ -54,12 +53,17 @@ namespace api_SMI.Services
         public List<NonConformite> GetDrafts() => _repository.GetDrafts();
 
         public List<NonConformite> GetDeclare() => _repository.GetDeclare();
-        
+
         public void Archiver(int id)
         {
             _repository.Archiver(id);
         }
         
-
+        public void Qualifier(NonConformite nonConformite , int idStatusNc)
+        {
+            nonConformite.IdStatusNc = idStatusNc;
+            _repository.Update(nonConformite);
+        }
+        
     }
 }

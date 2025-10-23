@@ -8,6 +8,7 @@ namespace api_SMI.Models
         public NonConformite NC { get; set; }
         public List<PieceJointeNc> PiecesJointes { get; set; } = new();
         public List<ProcessusConcerneNc> ProcessusConcerne { get; set; } = new();
+        public List<CauseNc> Causes { get; set; } = new();
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

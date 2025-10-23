@@ -20,6 +20,8 @@ namespace api_SMI.Services
 
         IEnumerable<NCDetails> GetDeclare();
 
+        void Qualifier(NCDetails details, int idStatusNc);
+
         
 
     }

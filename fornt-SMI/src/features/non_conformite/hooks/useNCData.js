@@ -19,6 +19,7 @@ export function useGetDeclaration(reloadFlag = 0) {
         setLoading(false)
       })
   }, [reloadFlag])
+  //console.log('useGetDeclaration ncData:', ncData);
   return { ncData, loading, error }
 }
 

@@ -8,15 +8,19 @@ namespace api_SMI.Services
         private readonly INonConformiteService _ncService;
         private readonly IPieceJointeNcService _pjService;
         private readonly IProcessusConcerneNcService _processusConcerneService;
+        private readonly ICauseNcService _causeNcService;
 
         public NCDetailsService(
             INonConformiteService ncService,
             IPieceJointeNcService pjService,
+            ICauseNcService causeNcService,
             IProcessusConcerneNcService processusConcerneService)
         {
             _ncService = ncService;
             _pjService = pjService;
+            _causeNcService = causeNcService;
             _processusConcerneService = processusConcerneService;
+
         }
 
         public NCDetails? GetDetails(int ncId)
@@ -26,12 +30,14 @@ namespace api_SMI.Services
 
             var pieces = _pjService.GetByNonConformite(ncId).ToList();
             var processusConcerne = _processusConcerneService.GetByNonConformite(ncId).ToList();
+            var causes = _causeNcService.GetByNc(ncId).ToList();
 
             return new NCDetails
             {
                 NC = nc,
                 PiecesJointes = pieces,
-                ProcessusConcerne = processusConcerne
+                ProcessusConcerne = processusConcerne,
+                Causes = causes
             };
         }
 
@@ -234,6 +240,32 @@ namespace api_SMI.Services
                     _processusConcerneService.Add(proc);
                 }
             }
+        }
+
+        public void Qualifier(NCDetails details, int idStatusNc)
+        {
+            if (details == null || details.NC == null)
+                throw new ArgumentException("NCDetails ou NonConformite manquant");
+
+            NonConformite nc = _ncService.GetById(details.NC.Id);
+
+            _ncService.Qualifier(nc, idStatusNc);
+
+            // 3. Mettre à jour les processus concernés
+            _processusConcerneService.DeleteByNonConformite(details.NC.Id);
+            if (details.ProcessusConcerne != null)
+            {
+                foreach (var proc in details.ProcessusConcerne)
+                {
+                    proc.IdNc = details.NC.Id;
+                    _processusConcerneService.Add(proc);
+                }
+            }
+        }
+
+        public void UpdateCausesNc(NCDetails details, List<CauseNc> causes)
+        {
+            //_causeNcService.UpdateByNc(ncId, causes);
         }
     }
 }

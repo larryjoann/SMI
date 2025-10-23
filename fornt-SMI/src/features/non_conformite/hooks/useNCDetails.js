@@ -7,22 +7,28 @@ export function useNCDetails(id) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
+  const fetchData = useCallback(() => {
     if (!id) return
     setLoading(true)
     setError(null)
-    getNC(id)
+    return getNC(id)
       .then(res => {
         setData(res)
         setLoading(false)
+        return res
       })
       .catch(err => {
         setError(err?.response?.data?.message || 'Erreur lors du chargement')
         setLoading(false)
+        throw err
       })
   }, [id])
 
-  return { data, loading, error }
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  return { data, loading, error, refetch: fetchData }
 }
 
 // Hook pour archiver une NC

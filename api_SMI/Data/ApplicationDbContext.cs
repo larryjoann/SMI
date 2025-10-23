@@ -18,7 +18,6 @@ namespace api_SMI.Data
         public DbSet<Role> Role { get; set; }
         public DbSet<RolePermission> RolePermission { get; set; }
         public DbSet<RoleCollaborateur> RoleCollaborateur { get; set; }
-        // Ajoute d'autres DbSet si besoin
         public DbSet<Pilote> Pilotes { get; set; }
         public DbSet<Copilote> Copilotes { get; set; }
         public DbSet<Lieu> Lieux { get; set; }
@@ -28,7 +27,8 @@ namespace api_SMI.Data
         public DbSet<StatusNc> StatusNcs { get; set; }
         public DbSet<PrioriteNc> PrioriteNcs { get; set; }
         public DbSet<PieceJointeNc> PieceJointeNcs { get; set; }
-        public DbSet<PhaseNc> PhaseNcs { get; set; }
-        
+        public DbSet<PhaseNc> PhaseNcs { get; set; } 
+        public DbSet<CategorieCauseNc> CategorieCauseNcs { get; set; }
+        public DbSet<CauseNc> CauseNcs { get; set; } 
     }
 }

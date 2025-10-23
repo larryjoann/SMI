@@ -15,7 +15,7 @@ const FicheProcessus = () => {
   return (
     <>
       <CRow>
-        <CCol xs={12} className="d-flex justify-content-start">
+        <CCol xs={3} className="d-flex justify-content-start">
           <CButton
             color='secondary'
             className="mb-3"
@@ -25,6 +25,10 @@ const FicheProcessus = () => {
             Retour
           </CButton>
         </CCol>
+        <CCol xs={6} className="d-flex justify-content-center">
+          <h3>Fiche du processus</h3>
+        </CCol>
+        <CCol xs={3} className="d-flex justify-content-end"></CCol>
       </CRow>
       <CCard>
         <CCardHeader className="text-center">

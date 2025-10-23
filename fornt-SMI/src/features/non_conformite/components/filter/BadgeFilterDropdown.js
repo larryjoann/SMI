@@ -94,7 +94,7 @@ const BadgeFilterDropdown = ({ options, selected, onChange, label }) => {
                     style={{ marginRight: 8 }}
                   />
                   <CBadge
-                    color={opt.color || 'secondary'}
+                    color={opt.color || 'light'}
                     shape="rounded-pill"
                     className="status_badge"
                     style={{ fontSize: 14, cursor: 'pointer' }}

@@ -1,26 +1,40 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   CRow, CCol,
   CCard, CCardBody, CCardHeader, 
-  CForm, CFormInput, CFormLabel, CFormTextarea,
-  CButton , CFormFeedback ,CAlert
+  CForm, CFormInput,
+  CButton , CFormFeedback ,CAlert,
+  CInputGroup
 } from '@coreui/react'
+import { CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle, CLink, CPopover, CTooltip } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilArrowLeft , cilHistory , cilBadge} from '@coreui/icons'
+import { cilArrowLeft , 
+  cilHistory, 
+  cilStar, 
+  cilSend,
+  cilMagnifyingGlass
+} from '@coreui/icons'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useNCDetails } from '../hooks/useNCDetails'
+import QualificationModal from '../components/QualificationModal'
+import AnalyseCausesModal from '../components/AnalyseCausesModal'
 
 
 const FicheNC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data, loading, error } = useNCDetails(id);
+  const [showQualifModal, setShowQualifModal] = useState(false)
+  const [showAnalyseModal, setShowAnalyseModal] = useState(false)
+  const [selectedProcessus, setSelectedProcessus] = useState([])
+  const [selectedCategorieCause, setSelectedCategorieCause] = useState([])
+  const { data, loading, error, refetch } = useNCDetails(id);
 
   if (loading) return <CAlert color="info" className="text-center rounded-pill">Chargement...</CAlert>;
   if (error) return <CAlert color="danger" className="text-center rounded-pill">{error}</CAlert>;
   if (!data) return null;
 
-  const { nc, piecesJointes, processusConcerne } = data;
+  const { nc, piecesJointes, processusConcerne , causes } = data;
+  // Causes may come from top-level `data.causes` or inside `nc.causes` depending on API
 
   // Format date/heure
   const dateFait = nc?.dateTimeFait ? new Date(nc.dateTimeFait) : null;
@@ -61,7 +75,7 @@ const FicheNC = () => {
         </CCol>    
       </CRow>
       {nc.statusNc?.id && (
-        <CAlert color={nc.statusNc.color} className="text-center rounded-pill">{nc.statusNc.nom}</CAlert>
+        <CAlert  color={nc.statusNc.color} variant='solid' className="text-center fw-bold rounded-pill">{nc.statusNc.nom}</CAlert>
       )}
       <CForm >
         <CCard className='mb-4'>
@@ -105,7 +119,6 @@ const FicheNC = () => {
               <CCol xs={12} sm={12} md={12} className='mb-3'>
                 <span className='h6'>Description du fait :</span>
                 <div
-                //   style={{ border: '1px solid #eee', borderRadius: 6, padding: 8, minHeight: 40, background: '#fafbfc' }}
                   dangerouslySetInnerHTML={{ __html: nc.descr || '' }}
                 />
               </CCol>
@@ -120,19 +133,96 @@ const FicheNC = () => {
             </CRow>
           </CCardBody>
         </CCard>
+
+        <CCard className='mb-4'>
+          <CCardHeader className="text-center">
+            <span className="h6">ANALYSE DES CAUSES</span>
+          </CCardHeader>
+          <CCardBody>
+              <CRow>
+                <CCol xs={12} sm={12} md={12} className='mb-3'>
+                  {Array.isArray(causes) && causes.length > 0 ? (
+                    <div>
+                      {causes.map((c) => (
+                        <div key={c.id} className="mb-2">     
+                            <span className='h6'>{c.categorieCauseNc.nom} </span>                      
+                          <div>{c.descr}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="mt-3 text-muted">Aucune analyse des causes</div>
+                  )}
+                </CCol>
+              </CRow>
+            </CCardBody>
+        </CCard>
+
       </CForm>
-      {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 1 && (
+      {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 1 && (nc.statusNc.id === 1 || nc.statusNc.id === 2) &&(
         <CCol xs={12} className="d-flex justify-content-center">
           <CButton
             color='primary'
             className="mb-3"
-            onClick={() => navigate(`/nc/qualif/${nc.id}`)}
+            onClick={() => {
+              const init = (processusConcerne || []).map(p => ({ value: p.processus?.id, label: p.processus?.nom }))
+              setSelectedProcessus(init)
+              setShowQualifModal(true)
+            }}
           >
-            <CIcon icon={cilBadge} className="me-2" />
+            <CIcon icon={cilStar} className="me-2" />
             Qualifier la non-conformité
           </CButton>
         </CCol>
       )}
+      {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 1 && nc.statusNc.id === 3 &&(
+        <CCol xs={12} className="d-flex justify-content-center">
+          <CButton
+            color='primary'
+            className="mb-3"
+            onClick={() => {
+              const init = (causes || []).map(c => ({ value: c.categorieCauseNc.id, label: c.categorieCauseNc?.nom }))
+              setSelectedCategorieCause(init)
+              setShowAnalyseModal(true)
+            }}
+          >
+            <CIcon icon={cilMagnifyingGlass} className="me-2" />
+            Analyser les causes
+          </CButton>
+        </CCol>
+      )}
+      <QualificationModal
+        visible={showQualifModal}
+        onClose={() => setShowQualifModal(false)}
+        nc={nc}
+        processusConcerne={processusConcerne}
+        onSuccess={() => {
+          // refresh data without reloading the whole page
+          if (typeof refetch === 'function') refetch()
+          setShowQualifModal(false)
+        }}
+      />
+      <AnalyseCausesModal
+        visible={showAnalyseModal}
+        onClose={() => setShowAnalyseModal(false)}
+        nc={nc}
+        causes={causes}
+        onSuccess={() => {
+          if (typeof refetch === 'function') refetch()
+          setShowAnalyseModal(false)
+        }}
+      />
+      <CInputGroup className="mb-3 rounded-pill overflow-hidden" style={{ border: '1px solid #c7c5c5ff' }}>
+        <CFormInput
+          placeholder="Ajouter un commentaire..."
+          aria-label="Recipient's username"
+          className="border-0"
+          style={{ boxShadow: 'none' }}
+        />
+        <CButton type="button" className="rounded-pill" color='primary'>
+          <CIcon icon={cilSend}  />
+        </CButton>
+      </CInputGroup>
     </>
   )
 }

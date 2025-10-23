@@ -25,8 +25,6 @@ CREATE TABLE Processus (
     id_categorie_processus INT NOT NULL,
     contexte VARCHAR(MAX),
     finalite VARCHAR(MAX),
-    FOREIGN KEY(matricule_pilote) REFERENCES Collaborateur(matricule),
-    FOREIGN KEY(matricule_copilote) REFERENCES Collaborateur(matricule),
     FOREIGN KEY(id_categorie_processus) REFERENCES Categorie_processus(id)
 );
 
@@ -101,23 +99,6 @@ CREATE TABLE Type_nc (
     nom VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE Non_conformite (
-    id INT IDENTITY PRIMARY KEY,
-    datetime_creation DATE DEFAULT CAST(GETDATE() AS DATE),
-    datetime_declare DATETIME NULL;
-    datetime_fait DATETIME DEFAULT GETDATE(),
-    descr VARCHAR(MAX),
-    action_curative VARCHAR(MAX),
-    id_lieu INT NULL,
-    id_type_nc INT NULL,
-    id_status_nc INT NULL,      -- Foreign key vers Status_nc
-    id_priorite_nc INT NULL,    -- Foreign key vers Priorite_nc
-    status boolean DEFAULT true,
-    FOREIGN KEY(id_lieu) REFERENCES Lieu(id),
-    FOREIGN KEY(id_type_nc) REFERENCES Type_nc(id),
-    FOREIGN KEY(id_status_nc) REFERENCES Status_nc(id),
-    FOREIGN KEY(id_priorite_nc) REFERENCES Priorite_nc(id)
-);
 
 CREATE TABLE Priorite_nc (
     id INT IDENTITY PRIMARY KEY,
@@ -145,24 +126,43 @@ DBCC CHECKIDENT ('Phase_nc', RESEED, 0);
 
 INSERT INTO Phase_nc (nom, ordre)
 VALUES
-('En qualification', 1),
-('Qualifié comme non recevable',2),
-('Qualifié en attente de traitement',3),
-('Traitement', 4),
-('Clôture', 5);
+('Déclaration', 1),
+('Traitement',2),
+('Cloture',3);
 
 DBCC CHECKIDENT ('Status_nc', RESEED, 0);
 
 INSERT INTO Status_nc (nom, descr, color , id_phase_nc)
 VALUES
-('En qualification', 'En attente de qualif par QUA', 'dark' ,1 ),
-('A eclarcir', 'Le responsable QUA demande plus d''infrmation', 'info',1),
-('Non Recevable', 'Qualifié comme non-recevable par la QUA', 'danger',2),
-('Reçevable', 'Qualifié comme recevable par la QUA', 'primary',3),
-('En traitement','Les actions correctives sont en cours', 'secondary',4),
-('Suspendue', 'Suspendue', 'light',4),
-('Clôturé', 'Cloturé ', 'success',5);
+--('Ouverte', 'Non-conformité ouverte ', 'ouverte',1),
+('En qualification', 'En attente de qualification par la QUA', 'en_qualification' ,1 ),
+('A clarifier', 'Le responsable QUA demande plus d''information', 'a_clarifier',1),
+('Reçevable', 'Qualifié comme recevable par la QUA', 'recevable',1),
+('Non Recevable', 'Qualifié comme non-recevable par la QUA', 'non_recevable',1),
+('Analysé','Causes analysés', 'analysé',2),
+('Assigné','Les actions sont en cours', 'assigné',2),
+('Suspendue', 'Suspendue', 'suspendue',2),
+('Vérifié', 'Efficacité vérifié','vérifié', 3),
+('Clôturé', 'Cloturé ', 'cloturé',3);
 
+
+CREATE TABLE Non_conformite (
+    id INT IDENTITY PRIMARY KEY,
+    datetime_creation DATE DEFAULT CAST(GETDATE() AS DATE),
+    datetime_declare DATETIME NULL,
+    datetime_fait DATETIME DEFAULT GETDATE(),
+    descr VARCHAR(MAX),
+    action_curative VARCHAR(MAX),
+    id_lieu INT NULL,
+    id_type_nc INT NULL,
+    id_status_nc INT NULL,      -- Foreign key vers Status_nc
+    id_priorite_nc INT NULL,    -- Foreign key vers Priorite_nc
+    status BIT NOT NULL DEFAULT 1,
+    FOREIGN KEY(id_lieu) REFERENCES Lieu(id),
+    FOREIGN KEY(id_type_nc) REFERENCES Type_nc(id),
+    FOREIGN KEY(id_status_nc) REFERENCES Status_nc(id),
+    FOREIGN KEY(id_priorite_nc) REFERENCES Priorite_nc(id)
+);
 
 CREATE TABLE Processus_concerne_nc (
     id INT IDENTITY PRIMARY KEY,
@@ -178,4 +178,18 @@ CREATE TABLE Piece_jointe_nc (
     nom_fichier VARCHAR(200) NOT NULL,
     chemin_fichier VARCHAR(500) NOT NULL,
     FOREIGN KEY(id_nc) REFERENCES Non_conformite(id)
+);
+
+CREATE TABLE Categorie_cause_nc (
+    id INT IDENTITY PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE Cause_nc (
+    id INT IDENTITY PRIMARY KEY,
+    id_categorie_cause_nc INT NOT NULL,
+    descr VARCHAR(MAX),
+    id_nc INT NOT NULL,
+    FOREIGN KEY(id_nc) REFERENCES Non_conformite(id),
+    FOREIGN KEY(id_categorie_cause_nc) REFERENCES Categorie_cause_nc(id)
 );

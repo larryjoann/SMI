@@ -27,8 +27,8 @@ export async function fetchStatusOptions() {
   const data = await res.json()
   return Array.isArray(data)
     ? [
-        { id: 'all', label: 'Tous' },
-        ...data.map(status => ({ id: status.id, label: status.nom, color: status.color }))
+        // { id: 'all', label: 'Tous' },
+        ...data.map(status => ({ id: status.id, label: status.nom, color: status.color, id_phase: status.phaseNc.id, phaseNc: status.phaseNc.nom }))
       ]
     : [{ id: 'all', label: 'Tous' }]
 }

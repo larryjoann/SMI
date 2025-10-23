@@ -1,8 +1,33 @@
 @use "sass:map";
 
-@use "@coreui/coreui/scss/coreui" with (
-  $primary: #78C043
+// custom.scss (au début, avant d'importer coreui)
+$custom-colors: (
+  "primary" : #78C043,
+  "secondary": #6b7785,
+  "success"  : #1b9e3e,
+  "info"     : #3399ff,
+  "warning"  : #f9b115,
+  "danger"   : #e55353,
+  "light"    : #f3f4f7,
+  "dark"     : #212631,
+
+  "ouverte":        #37547d,
+  "en_qualification": #638ECB,
+  "a_clarifier":    #8AAEE0,
+  "recevable":      #99d6ff,
+  "non_recevable":  #ffA5A3,
+  "analysé":     #DFAC13,
+  "assigné":  #F0D876,
+  "suspendue":      #d5d2cd,
+  "vérifié":     #90B77F,
+  "cloturé":        #6CBA42
 );
+
+@use "@coreui/coreui/scss/coreui" with (
+  $primary: #78C043,
+  $theme-colors: $custom-colors
+);
+
 
 // Exemple pour forcer la couleur du texte des boutons
 .btn {
