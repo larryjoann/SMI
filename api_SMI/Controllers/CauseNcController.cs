@@ -51,6 +51,14 @@ namespace api_SMI.Controllers
             return NoContent();
         }
 
+        [HttpPost("updateByNc/{idNc}")]
+
+        public IActionResult UpdateByNc(int idNc, List<CauseNc> entities)
+        {
+            _service.UpdateByNc(idNc, entities);
+            return NoContent();
+        }
+
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {

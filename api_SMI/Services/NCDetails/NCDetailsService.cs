@@ -263,9 +263,9 @@ namespace api_SMI.Services
             }
         }
 
-        public void UpdateCausesNc(NCDetails details, List<CauseNc> causes)
+        public void UpdateCausesNc(int idNc , List<CauseNc> causes)
         {
-            //_causeNcService.UpdateByNc(ncId, causes);
+            _causeNcService.UpdateByNc(idNc, causes);
         }
     }
 }

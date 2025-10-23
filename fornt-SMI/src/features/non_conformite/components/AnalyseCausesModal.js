@@ -95,17 +95,29 @@ export default function AnalyseCausesModal({ visible, onClose, nc, causes = [], 
     if (!nc || !nc.id) return
     setLoading(true)
     try {
-      const body = buildBody()
-      const url = `NCDetails/analyser/${nc.id}`
-      const res = await axiosInstance.post(url, body)
-      setLoading(false)
-      if (res && res.data) {
+      // prepare payload following controller UpdateByNc: List<CauseNc>
+      const causesPayload = (causesState || [])
+        .map(c => ({ idCategorieCauseNc: c.idCategorieCauseNc, descr: c.descr, idNc: nc.id }))
+      // include newly selected categories that were not in causesState
+      const selectedValues = (selectedCauses || []).map(s => s.value)
+      const existingCatIds = new Set((causesState || []).map(c => c.idCategorieCauseNc))
+      const newOnes = selectedValues
+        .filter(v => !existingCatIds.has(v))
+        .map(v => ({ idCategorieCauseNc: v, descr: '', idNc: nc.id }))
+
+      const payload = [...causesPayload, ...newOnes]
+
+      const url = `CauseNc/updateByNc/${nc.id}`
+      const res = await axiosInstance.post(url, payload)
+      // treat any 2xx response as success (covers 200, 201, 204 NoContent)
+      if (res && res.status >= 200 && res.status < 300) {
         onSuccess && onSuccess(res.data)
         onClose && onClose()
       }
     } catch (err) {
-      setLoading(false)
       console.error('Erreur analyse des causes', err)
+    } finally {
+      setLoading(false)
     }
   }
 

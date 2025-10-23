@@ -10,5 +10,7 @@ namespace api_SMI.Services
         void Add(CauseNc entity);
         void Update(CauseNc entity);
         void Delete(int id);
+
+        void UpdateByNc(int id_nc, List<CauseNc> entities);
     }
 }

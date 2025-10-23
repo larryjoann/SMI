@@ -22,7 +22,7 @@ namespace api_SMI.Services
 
         void Qualifier(NCDetails details, int idStatusNc);
 
-        
+        void UpdateCausesNc(int idNc, List<CauseNc> causes);
 
     }
 }
