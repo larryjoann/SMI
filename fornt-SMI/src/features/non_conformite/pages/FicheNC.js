@@ -12,6 +12,7 @@ import { cilArrowLeft ,
   cilHistory, 
   cilStar, 
   cilSend,
+  cilPen,
   cilMagnifyingGlass
 } from '@coreui/icons'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -133,11 +134,23 @@ const FicheNC = () => {
             </CRow>
           </CCardBody>
         </CCard>
-
+        {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 2&&(
         <CCard className='mb-4'>
-          <CCardHeader className="text-center">
-            <span className="h6">ANALYSE DES CAUSES</span>
-          </CCardHeader>
+          <CCardHeader className="position-relative text-center">
+                <span className="h6 mb-0 d-block">ANALYSE DES CAUSES</span>
+                <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
+                  <CButton
+                    size="sm"
+                    onClick={() => {
+                      const init = (causes || []).map(c => ({ value: c.idCategorieCauseNc, label: c.categorieCauseNc?.nom }))
+                      setSelectedCategorieCause(init)
+                      setShowAnalyseModal(true)
+                    }}
+                  >
+                    <CIcon icon={cilPen} className="text-dark" />
+                  </CButton>
+                </div>
+              </CCardHeader>
           <CCardBody>
               <CRow>
                 <CCol xs={12} sm={12} md={12} className='mb-3'>
@@ -157,7 +170,7 @@ const FicheNC = () => {
               </CRow>
             </CCardBody>
         </CCard>
-
+      )}
       </CForm>
       {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 1 && (nc.statusNc.id === 1 || nc.statusNc.id === 2) &&(
         <CCol xs={12} className="d-flex justify-content-center">
