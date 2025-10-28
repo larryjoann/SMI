@@ -16,14 +16,24 @@ namespace api_SMI.Repositories
         public List<ProcessusConcerneNc> GetAll()
             => _context.Set<ProcessusConcerneNc>()
                 // .Include(p => p.NonConformite)
-                .Include(p => p.Processus)
+                .Include(p => p.Processus!)
+                    .ThenInclude(pr => pr.Pilotes!)
+                        .ThenInclude(pl => pl.Collaborateur)
+                .Include(p => p.Processus!)
+                    .ThenInclude(pr => pr.Copilotes!)
+                        .ThenInclude(cp => cp.Collaborateur)
                 .ToList();
 
         public ProcessusConcerneNc? GetById(int id)
         {
             return _context.Set<ProcessusConcerneNc>()
                 // .Include(p => p.NonConformite)
-                .Include(p => p.Processus)
+                .Include(p => p.Processus!)
+                    .ThenInclude(pr => pr.Pilotes!)
+                        .ThenInclude(pl => pl.Collaborateur)
+                .Include(p => p.Processus!)
+                    .ThenInclude(pr => pr.Copilotes!)
+                        .ThenInclude(cp => cp.Collaborateur)
                 .FirstOrDefault(p => p.Id == id);
         }
 
@@ -66,7 +76,30 @@ namespace api_SMI.Repositories
             return _context.Set<ProcessusConcerneNc>()
                 .Where(p => p.IdNc == idNc)
                 // .Include(p => p.NonConformite)
-                .Include(p => p.Processus)
+                .Include(p => p.Processus!)
+                    .ThenInclude(pr => pr.Pilotes!)
+                        .ThenInclude(pl => pl.Collaborateur)
+                .Include(p => p.Processus!)
+                    .ThenInclude(pr => pr.Copilotes!)
+                        .ThenInclude(cp => cp.Collaborateur)
+                .ToList();
+        }
+
+        public List<ProcessusConcerneNc> GetByMatricule(string matricule)
+        {
+            return _context.Set<ProcessusConcerneNc>()
+                // include processus and their pilots/coplots/collaborateurs
+                .Include(p => p.Processus!)
+                    .ThenInclude(pr => pr.Pilotes!)
+                        .ThenInclude(pl => pl.Collaborateur)
+                .Include(p => p.Processus!)
+                    .ThenInclude(pr => pr.Copilotes!)
+                        .ThenInclude(cp => cp.Collaborateur)
+                // filter where the given matricule is a pilote or a copilote of the processus
+                .Where(p => p.Processus != null && (
+                    (p.Processus.Pilotes != null && p.Processus.Pilotes.Any(pl => pl.MatriculeCollaborateur == matricule))
+                    || (p.Processus.Copilotes != null && p.Processus.Copilotes.Any(cp => cp.MatriculeCollaborateur == matricule))
+                ))
                 .ToList();
         }
 

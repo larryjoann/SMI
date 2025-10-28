@@ -52,10 +52,14 @@ namespace api_SMI.Controllers
         }
 
         [HttpPost("updateByNc/{idNc}")]
-
         public IActionResult UpdateByNc(int idNc, List<CauseNc> entities)
         {
-            _service.UpdateByNc(idNc, entities);
+             var matricule = HttpContext.Session.GetString("matricule");
+            if (string.IsNullOrEmpty(matricule))
+            {
+                return Unauthorized(new { message = "Aucune session active ou matricule absent." });
+            }
+            _service.UpdateByNc(idNc, entities , matricule);
             return NoContent();
         }
 

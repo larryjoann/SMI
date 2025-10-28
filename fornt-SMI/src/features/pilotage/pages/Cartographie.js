@@ -21,8 +21,11 @@ const Cartographie = () => {
   // Etats pour le filtre
   const [inputNom, setInputNom] = useState('')
   const [inputCategorie, setInputCategorie] = useState('')
+  const [inputYear, setInputYear] = useState('')
   const [filterNom, setFilterNom] = useState('')
   const [filterCategorie, setFilterCategorie] = useState('')
+  const [filterYear, setFilterYear] = useState('')
+  const [availableYears, setAvailableYears] = useState([])
   // Pour le modal de suppression
   const [modalVisible, setModalVisible] = useState(false)
   const [processusToDelete, setProcessusToDelete] = useState(null)
@@ -48,11 +51,28 @@ const Cartographie = () => {
       .catch(() => setCategories([]))
   }, [])
 
+  // Build available years list from processus.validites; fall back to sensible defaults
+  useEffect(() => {
+    const years = new Set()
+    processus.forEach(p => {
+      if (Array.isArray(p.validites)) {
+        p.validites.forEach(v => { if (v && v.annee) years.add(v.annee) })
+      }
+    })
+    const sorted = Array.from(years).sort((a, b) => a - b)
+    if (sorted.length === 0) {
+      const now = new Date().getFullYear()
+      setAvailableYears([now, now + 1, now + 2])
+    } else {
+      setAvailableYears(sorted)
+    }
+  }, [processus])
+
   const categorieColors = {
-    2: '#A8D5BA',
-    3: '#8aa8c8ff',
-    4: '#c7d3e7ff',
-    5: '#E0E0E0',
+    1: '#A8D5BA',
+    2: '#8aa8c8ff',
+    3: '#c7d3e7ff',
+    4: '#E0E0E0',
   }
 
   // Demande la confirmation avant suppression
@@ -93,7 +113,9 @@ const Cartographie = () => {
     const nomMatch = filterNom.trim() === '' || p.nom.toLowerCase().includes(filterNom.trim().toLowerCase());
     // Filtre par catégorie
     const catMatch = filterCategorie === '' || p.idCategorieProcessus === Number(filterCategorie);
-    return nomMatch && catMatch;
+    // Filtre par année de validité : si aucun filtre, ok; sinon garder si l'une des validites contient l'année
+    const yearMatch = filterYear === '' || (Array.isArray(p.validites) && p.validites.some(v => Number(v.annee) === Number(filterYear)));
+    return nomMatch && catMatch && yearMatch;
   });
 
   const processusParCategorie = categories.map(cat => ({
@@ -176,8 +198,9 @@ const Cartographie = () => {
                 e.preventDefault();
                 setFilterNom(inputNom);
                 setFilterCategorie(inputCategorie);
+                setFilterYear(inputYear);
               }}>
-                <CCol xs={5}>
+                <CCol xs={4}>
                   <CFormInput
                     type="text"
                     id="floatingInput"
@@ -188,7 +211,7 @@ const Cartographie = () => {
                     onChange={e => setInputNom(e.target.value)}
                   />
                 </CCol>
-                <CCol xs={5}>
+                <CCol xs={4}>
                   <CategorieProcessusSelect 
                     id="floatingInput"
                     floatingClassName="mb-0"
@@ -197,6 +220,20 @@ const Cartographie = () => {
                     onChange={e => setInputCategorie(e.target.value)}
                     allowEmpty={true}
                   />
+                </CCol>
+                <CCol xs={2}>
+                  <CFormSelect
+                    aria-label="Année de validité"
+                    floatingLabel="Année"
+                    value={inputYear}
+                    onChange={e => setInputYear(e.target.value)}
+                    className="mb-0"
+                  >
+                    <option value="">Toutes les années</option>
+                    {availableYears.map(y => (
+                      <option key={y} value={String(y)}>{y}</option>
+                    ))}
+                  </CFormSelect>
                 </CCol>
                 <CCol xs={2} className="d-flex justify-content-center align-items-center">
                   <CButton
@@ -207,8 +244,10 @@ const Cartographie = () => {
                     onClick={() => {
                       setInputNom('')
                       setInputCategorie('')
+                      setInputYear('')
                       setFilterNom('')
                       setFilterCategorie('')
+                      setFilterYear('')
                     }}
                   >
                    <CIcon icon={cilFilterX} />

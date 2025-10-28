@@ -8,6 +8,8 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilTrash, cilOptions, cilPen, cilStorage } from '@coreui/icons'
+import axios from 'axios'
+import API_URL from '../../../../api/API_URL'
 
 import FilterDropdown from '../filter/FilterDropdown'
 import DateFilterDropdown from '../filter/DateFilterDropdown'
@@ -23,6 +25,23 @@ const TousPanel = ({ ncData = [], loading = false, error = null, onReload }) => 
   const lieuOptions = useLieuOptions();
   const statusOptions = useStatusOptions();
   const navigate = useNavigate();
+  const [currentUserMatricule, setCurrentUserMatricule] = useState(null);
+
+  useEffect(() => {
+    let mounted = true
+    axios.get(`${API_URL}/Collaborateur/collaborateur_connecte`, { withCredentials: true })
+      .then(res => {
+        if (!mounted) return
+        // try common field names for matricule
+        const m = res?.data?.matricule || res?.data?.Matricule || res?.data?.matriculeCollaborateur || null
+        setCurrentUserMatricule(m)
+      })
+      .catch(() => {
+        if (!mounted) return
+        setCurrentUserMatricule(null)
+      })
+    return () => { mounted = false }
+  }, [])
 
   // Hook pour archiver une NC (simplifié)
   const { archive, loading: archiving, error: archiveError, showToast, setShowToast, popType, popMessage } = useArchiveNC();
@@ -155,36 +174,50 @@ const TousPanel = ({ ncData = [], loading = false, error = null, onReload }) => 
                 </CBadge>
               </CCol>
               <CCol xs={1} className="d-flex justify-content-end">
-                <CDropdown variant="btn-group" direction="center" onClick={e => e.stopPropagation()}>           
-                  <CDropdownToggle caret={false} className="p-0">
-                    <CIcon icon={cilOptions} className="text-dark" />
-                  </CDropdownToggle>
-                  <CDropdownMenu>
-                    <CDropdownItem
-                      href="#"
-                      onClick={async (e) => {
-                          e.preventDefault();
-                          setArchivedId(nc.nc.id);
-                          await archive(nc.nc.id);
-                        if (typeof onReload === 'function') onReload();
-                        }}
-                    >
-                      <CIcon icon={cilStorage} className="text-danger me-3" />
-                      <span className="text-danger">Archiver</span>
-                    </CDropdownItem>
-                    <CDropdownDivider />
-                    <CDropdownItem
-                      href="#"
-                      onClick={e => {
-                        e.preventDefault();
-                        navigate(`/nc/form/${nc.nc.id}`);
-                      }}
-                    >
-                      <CIcon icon={cilPen} className="text-warning me-3" />
-                      <span className="text-warning">Modifier</span>
-                    </CDropdownItem>
-                  </CDropdownMenu>
-                </CDropdown>
+                {
+                  (() => {
+                    // determine emitter matricule whether emetteur is an object or a string
+                    const emetteurMatricule = nc?.nc?.emetteur
+                      ? (typeof nc.nc.emetteur === 'string' ? nc.nc.emetteur : nc.nc.emetteur.matricule)
+                      : null
+                    // show dropdown only if current user is the emitter
+                    if (currentUserMatricule && emetteurMatricule && String(currentUserMatricule) === String(emetteurMatricule)) {
+                      return (
+                        <CDropdown variant="btn-group" direction="center" onClick={e => e.stopPropagation()}>
+                          <CDropdownToggle caret={false} className="p-0">
+                            <CIcon icon={cilOptions} className="text-dark" />
+                          </CDropdownToggle>
+                          <CDropdownMenu>
+                            <CDropdownItem
+                              href="#"
+                              onClick={async (e) => {
+                                  e.preventDefault();
+                                  setArchivedId(nc.nc.id);
+                                  await archive(nc.nc.id);
+                                if (typeof onReload === 'function') onReload();
+                                }}
+                            >
+                              <CIcon icon={cilStorage} className="text-danger me-3" />
+                              <span className="text-danger">Archiver</span>
+                            </CDropdownItem>
+                            <CDropdownDivider />
+                            <CDropdownItem
+                              href="#"
+                              onClick={e => {
+                                e.preventDefault();
+                                navigate(`/nc/form/${nc.nc.id}`);
+                              }}
+                            >
+                              <CIcon icon={cilPen} className="text-warning me-3" />
+                              <span className="text-warning">Modifier</span>
+                            </CDropdownItem>
+                          </CDropdownMenu>
+                        </CDropdown>
+                      )
+                    }
+                    return null
+                  })()
+                }
               </CCol>
             </CRow>
           </CCardBody>

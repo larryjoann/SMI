@@ -106,7 +106,7 @@ const FormNC = () => {
                 </CCol>
               )} */}
               <CCol xs={12} sm={6} md={6} className='mb-3'>
-                <CFormLabel htmlFor="type">Type :</CFormLabel>
+                <CFormLabel htmlFor="type">Type <span className="text-danger">*</span> :</CFormLabel>
                 <TypeNCSelect
                   value={typeNC}
                   onChange={e => setTypeNC(e.target.value)}
@@ -117,7 +117,7 @@ const FormNC = () => {
                 )}
               </CCol>
               <CCol xs={12} sm={6} md={6} className='mb-3'>
-                <CFormLabel htmlFor="site">Site :</CFormLabel>
+                <CFormLabel htmlFor="site">Site <span className="text-danger">*</span> :</CFormLabel>
                 <SiteSelect
                   value={site}
                   onChange={e => setSite(e.target.value)}
@@ -130,7 +130,7 @@ const FormNC = () => {
             </CRow>
             <CRow>
               <CCol xs={12} sm={12} md={12} className='mb-3'>
-                <CFormLabel htmlFor="type">Processus concerné(s) :</CFormLabel>
+                <CFormLabel htmlFor="type">Processus concerné(s) <span className="text-danger">*</span> :</CFormLabel>
                 <ProcessusMultiSelect
                   value={processus}
                   onChange={setProcessus}
@@ -152,18 +152,18 @@ const FormNC = () => {
             {/* ...existing code... */}
             <CRow>
               <CCol xs={12} sm={6} md={4} className='mb-3'>
-                <CFormLabel htmlFor="date">Date :</CFormLabel>
+                <CFormLabel htmlFor="date">Date <span className="text-danger">*</span> :</CFormLabel>
                 <CFormInput type='date' id="date" value={date} onChange={e => setDate(e.target.value)} invalid={!!errors['NC.DateTimeFait']}/>
                   {errors['NC.DateTimeFait'] && (
                   <CFormFeedback invalid>{errors['NC.DateTimeFait'][0]}</CFormFeedback>
                 )}
               </CCol>
               <CCol xs={12} sm={6} md={4} className='mb-3'>
-                <CFormLabel htmlFor="heure">Heure :</CFormLabel>
+                <CFormLabel htmlFor="heure">Heure <span className="text-danger">*</span> :</CFormLabel>
                 <CFormInput type='time' id="heure" value={heure} onChange={e => setHeure(e.target.value)} invalid={!!errors['NC.DateTimeFait']}/>
               </CCol>
               <CCol xs={12} sm={12} md={12} className='mb-3'>
-                <CFormLabel htmlFor="description">Description du fait :</CFormLabel>
+                <CFormLabel htmlFor="description">Description du fait <span className="text-danger">*</span> :</CFormLabel>
                 <WysiwygEditor
                   value={description}
                   onChange={setDescription}

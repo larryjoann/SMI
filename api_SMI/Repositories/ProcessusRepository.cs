@@ -20,6 +20,7 @@ namespace api_SMI.Repositories
                     .ThenInclude(pilote => pilote.Collaborateur)
                 .Include(p => p.Copilotes)
                     .ThenInclude(copilote => copilote.Collaborateur)
+                .Include(p => p.Validites)
                 .ToList();
 
         public Processus? GetById(int id)
@@ -30,6 +31,7 @@ namespace api_SMI.Repositories
                     .ThenInclude(pilote => pilote.Collaborateur)
                 .Include(p => p.Copilotes)
                     .ThenInclude(copilote => copilote.Collaborateur)
+                .Include(p => p.Validites)
                 .FirstOrDefault(p => p.Id == id);
         }
 

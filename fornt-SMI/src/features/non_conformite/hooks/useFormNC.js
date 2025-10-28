@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { declareNC, draftNC, getNC, updateDraftNC, updateDeclareNC } from '../services/nonConformiteService'
 
 export const useFormNC = (editId = null) => {
-
+  const [emetteur, setEmetteur] = useState('')
   const [description, setDescription] = useState('')
   const [dateTimeDeclare, setDateTimeDeclare] = useState('')
   const [dateTimeCreation, setDateTimeCreation] = useState('')
@@ -31,6 +31,7 @@ export const useFormNC = (editId = null) => {
     setErrors({})
     const dateTimeFait = date && heure ? `${date}T${heure}` : null
       const nc = {
+        //emetteur : 'ST151',
         dateTimeFait,
         descr: description,
         actionCurative,
@@ -42,7 +43,7 @@ export const useFormNC = (editId = null) => {
       }
     const piecesJointes = files.map(f => ({
       nomFichier: f.name,
-      cheminFichier: f.url || f.path || '',
+      cheminFichier: f.name,
       idNc: 0
     }))
     const processusConcerne = processus.map(p => ({
@@ -51,8 +52,9 @@ export const useFormNC = (editId = null) => {
     }))
     const payload = { nc, piecesJointes, processusConcerne }
     try {
-      await declareNC(payload)
+      const created = await declareNC(payload)
       if (formRef.current) formRef.current.reset()
+      //setEmetteur('')
       setDateTimeDeclare('')
       setDescription('')
       setFiles([])
@@ -66,6 +68,14 @@ export const useFormNC = (editId = null) => {
       setPopType('success')
       setPopMessage('Déclaration enregistrée avec succès !')
       setShowToast(true)
+      // Try to navigate to the fiche for the created NC
+      const newId = created?.nc?.id || created?.id || created?.idNc || created?.nc?.idNc
+      if (newId) {
+        navigate(`/nc/fiche/${newId}`)
+      } else {
+        // fallback to list (declaration panel)
+        navigate('/nc/list', { state: { defaultPanel: 'declaration' } })
+      }
     } catch (error) {
       if (error.response && error.response.data) {
         setErrors(error.response.data)
@@ -88,6 +98,7 @@ export const useFormNC = (editId = null) => {
     setErrors({})
     const dateTimeFait = date && heure ? `${date}T${heure}` : null
       const nc = {
+        //emetteur : 'ST151',
         dateTimeFait,
         descr: description,
         actionCurative,
@@ -99,7 +110,7 @@ export const useFormNC = (editId = null) => {
       }
     const piecesJointes = files.map(f => ({
       nomFichier: f.name,
-      cheminFichier: f.url || f.path || '',
+      cheminFichier: f.name,
       idNc: 0
     }))
     const processusConcerne = processus.map(p => ({
@@ -108,8 +119,9 @@ export const useFormNC = (editId = null) => {
     }))
     const payload = { nc, piecesJointes, processusConcerne }
     try {
-      await draftNC(payload)
+      const created = await draftNC(payload)
       if (formRef.current) formRef.current.reset()
+      setEmetteur('')
       setDateTimeDeclare('')
       setDescription('')
       setFiles([])
@@ -123,6 +135,12 @@ export const useFormNC = (editId = null) => {
       setPopType('success')
       setPopMessage('Brouillon enregistré avec succès !')
       setShowToast(true)
+      const newId = created?.nc?.id || created?.id || created?.idNc || created?.nc?.idNc
+      if (newId) {
+        navigate(`/nc/fiche/${newId}`)
+      } else {
+        navigate('/nc/list', { state: { defaultPanel: 'brouillon' } })
+      }
     } catch (error) {
       if (error.response && error.response.data) {
         setErrors(error.response.data)
@@ -145,6 +163,7 @@ export const useFormNC = (editId = null) => {
     const dateTimeFait = date && heure ? `${date}T${heure}` : null
       const nc = {
         id: editId,
+        emetteur,
         dateTimeCreation,
         dateTimeFait,
         descr: description,
@@ -158,7 +177,7 @@ export const useFormNC = (editId = null) => {
       }
     const piecesJointes = files.map(f => ({
       nomFichier: f.name,
-      cheminFichier: f.url || f.path || '',
+      cheminFichier: f.name,
       idNc: 0
     }))
     const processusConcerne = processus.map(p => ({
@@ -175,7 +194,7 @@ export const useFormNC = (editId = null) => {
         await updateDeclareNC(editId, payload)
       }
       if (formRef.current) formRef.current.reset()
-      setDateTimeDeclare('')
+      //setDateTimeDeclare('')
       setDescription('')
       setFiles([])
       setTypeNC('')
@@ -188,6 +207,8 @@ export const useFormNC = (editId = null) => {
       setPopType('success')
       setPopMessage('Modification enregistrée avec succès !')
       setShowToast(true)
+      // After update, navigate to the fiche for this NC
+      if (editId) navigate(`/nc/fiche/${editId}`)
     } catch (error) {
       if (error.response && error.response.data) {
         setErrors(error.response.data)
@@ -208,6 +229,7 @@ export const useFormNC = (editId = null) => {
       const data = await getNC(id)
       console.log(data)
       // Adapt to your API response structure
+      setEmetteur(data.nc.emetteur)
       setDateTimeCreation(data.nc.dateTimeCreation)
       setDateTimeDeclare(data.nc.dateTimeDeclare)
       setDescription(data.nc.descr || '')
@@ -244,6 +266,7 @@ export const useFormNC = (editId = null) => {
 
 
   return {
+    emetteur, setEmetteur,
     dateTimeCreation, setDateTimeCreation,
     dateTimeDeclare, setDateTimeDeclare,
     description, setDescription,

@@ -59,13 +59,23 @@ export function useProcessusForm(id, reset, setError, navigate) {
         await updateProcessus(id, payload)
         setPopType('success')
         setPopMessage('Valeur modifiée avec succès')
-        navigate('/pilotage/cartographie')
+        // After updating, go to the fiche (detail) page for this processus
+        navigate(`/pilotage/ficheprocessus/${id}`)
         setShowToast(true)
       } else {
-        await createProcessus(payload)
+        // Create and navigate to the created processus fiche when possible
+        const created = await createProcessus(payload)
         setPopType('success')
         setPopMessage('Valeur insérée avec succès')
         setShowToast(true)
+        // Try to extract the new id from common response shapes
+        const newId = created?.id || created?.idProcessus || created?.processus?.id
+        if (newId) {
+          navigate(`/pilotage/ficheprocessus/${newId}`)
+        } else {
+          // Fallback: go back to cartographie if we can't determine the id
+          navigate('/pilotage/cartographie')
+        }
         reset()
       }
     } catch (error) {

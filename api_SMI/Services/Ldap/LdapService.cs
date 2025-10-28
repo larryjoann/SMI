@@ -17,7 +17,7 @@ namespace api_SMI.Ldap
             List<Collaborateur> collaborateurs = new();
             try
             {
-                using var entry = new DirectoryEntry(domainPath, "ST151", "LewisHamilton77!?");
+                using var entry = new DirectoryEntry(domainPath, "ST151", "LewisHamilton77haha!?");
                 using var searcher = new DirectorySearcher(entry);
                 searcher.Filter = "(objectClass=user)";
                 searcher.PageSize = 2000;

@@ -23,18 +23,52 @@ namespace api_SMI.Controllers
             return Ok(details);
         }
 
+        [HttpGet("by-matricule")]
+        public IActionResult GetAllByMatricule()
+        {
+            var matricule = HttpContext.Session.GetString("matricule");
+            if (string.IsNullOrEmpty(matricule))
+            {
+                return Unauthorized(new { message = "Aucune session active ou matricule absent." });
+            }
+            var list = _service.GetAllByMatricule(matricule);
+            return Ok(list);
+        }
+
         // GET: api/NCDetails/drafts
         [HttpGet("drafts")]
         public IActionResult GetDrafts()
         {
-            var drafts = _service.GetDrafts();
+            var matricule = HttpContext.Session.GetString("matricule");
+            if (string.IsNullOrEmpty(matricule))
+            {
+                return Unauthorized(new { message = "Aucune session active ou matricule absent." });
+            }
+            var drafts = _service.GetDrafts(matricule);
             return Ok(drafts);
         }
 
         [HttpGet("declare")]
         public IActionResult GetDeclare()
         {
-            var drafts = _service.GetDeclare();
+            var matricule = HttpContext.Session.GetString("matricule");
+            if (string.IsNullOrEmpty(matricule))
+            {
+                return Unauthorized(new { message = "Aucune session active ou matricule absent." });
+            }
+            var drafts = _service.GetDeclare(matricule);
+            return Ok(drafts);
+        }
+
+        [HttpGet("archived")]
+        public IActionResult GetArchived()
+        {
+            var matricule = HttpContext.Session.GetString("matricule");
+            if (string.IsNullOrEmpty(matricule))
+            {
+                return Unauthorized(new { message = "Aucune session active ou matricule absent." });
+            }
+            var drafts = _service.GetArchived(matricule);
             return Ok(drafts);
         }
 
@@ -51,7 +85,24 @@ namespace api_SMI.Controllers
         [HttpPut("archiver/{id}")]
         public IActionResult Archive(int id)
         {
-            _service.Archiver(id);
+             var matricule = HttpContext.Session.GetString("matricule");
+            if (string.IsNullOrEmpty(matricule))
+            {
+                return Unauthorized(new { message = "Aucune session active ou matricule absent." });
+            }
+            _service.Archiver(id, matricule);
+            return NoContent();
+        }
+
+        [HttpPut("restorer/{id}")]
+        public IActionResult Restorer(int id)
+        {
+            var matricule = HttpContext.Session.GetString("matricule");
+            if (string.IsNullOrEmpty(matricule))
+            {
+                return Unauthorized(new { message = "Aucune session active ou matricule absent." });
+            }
+            _service.Restorer(id , matricule);
             return NoContent();
         }
 
@@ -61,7 +112,14 @@ namespace api_SMI.Controllers
         {
             if (details == null || details.NC == null)
                 return BadRequest("Invalid NCDetails data.");
+            
+            var matricule = HttpContext.Session.GetString("matricule");
+            if (string.IsNullOrEmpty(matricule))
+            {
+                return Unauthorized(new { message = "Aucune session active ou matricule absent." });
+            }
 
+            details.NC.MatriculeEmetteur = matricule;
             details.NC.DateTimeDeclare = DateTime.Now;
             details.NC.DateTimeCreation = DateTime.Now;
 
@@ -69,7 +127,7 @@ namespace api_SMI.Controllers
             if (!TryValidateModel(details))
                 return BadRequest(ModelState);
 
-            _service.Declare(details);
+            _service.Declare(details, matricule);
             return CreatedAtAction(nameof(GetDetails), new { id = details.NC.Id }, details);
         }
 
@@ -80,7 +138,14 @@ namespace api_SMI.Controllers
             if (details == null || details.NC == null)
                 return BadRequest("Invalid NCDetails data.");
 
-            _service.Draft(details);
+            var matricule = HttpContext.Session.GetString("matricule");
+            if (string.IsNullOrEmpty(matricule))
+            {
+                return Unauthorized(new { message = "Aucune session active ou matricule absent." });
+            }
+            details.NC.MatriculeEmetteur = matricule;
+
+            _service.Draft(details,matricule);
             return CreatedAtAction(nameof(GetDetails), new { id = details.NC.Id }, details);
         }
 
@@ -99,7 +164,13 @@ namespace api_SMI.Controllers
             if (!TryValidateModel(details))
                 return BadRequest(ModelState);
 
-            _service.DraftToDeclare(details);
+             var matricule = HttpContext.Session.GetString("matricule");
+            if (string.IsNullOrEmpty(matricule))
+            {
+                return Unauthorized(new { message = "Aucune session active ou matricule absent." });
+            }
+
+            _service.DraftToDeclare(details, matricule);
 
             return Ok(new { id = details.NC.Id });
         }
@@ -113,7 +184,13 @@ namespace api_SMI.Controllers
             if (id != details.NC.Id)
                 return BadRequest("L'ID dans l'URL ne correspond pas à l'ID du corps.");
 
-            _service.Update(details);
+             var matricule = HttpContext.Session.GetString("matricule");
+            if (string.IsNullOrEmpty(matricule))
+            {
+                return Unauthorized(new { message = "Aucune session active ou matricule absent." });
+            }
+
+            _service.Update(details,matricule);
 
             return Ok(new { id = details.NC.Id });
         }
@@ -130,7 +207,14 @@ namespace api_SMI.Controllers
             // Force la validation personnalisée
             if (!TryValidateModel(details))
                 return BadRequest(ModelState);
-            _service.Update(details);
+
+             var matricule = HttpContext.Session.GetString("matricule");
+            if (string.IsNullOrEmpty(matricule))
+            {
+                return Unauthorized(new { message = "Aucune session active ou matricule absent." });
+            }
+
+            _service.Update(details,matricule);
 
             return Ok(new { id = details.NC.Id });
         }
@@ -143,8 +227,13 @@ namespace api_SMI.Controllers
 
             if (id != details.NC.Id)
                 return BadRequest("L'ID dans l'URL ne correspond pas à l'ID du corps.");
-            
-            _service.Qualifier(details , details.NC.IdStatusNc.Value);
+
+             var matricule = HttpContext.Session.GetString("matricule");
+            if (string.IsNullOrEmpty(matricule))
+            {
+                return Unauthorized(new { message = "Aucune session active ou matricule absent." });
+            }
+            _service.Qualifier(details , details.NC.IdStatusNc.Value, matricule);
 
             return Ok(new { id = details.NC.Id });
         }        

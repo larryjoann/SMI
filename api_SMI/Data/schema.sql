@@ -7,6 +7,11 @@ CREATE TABLE Categorie_processus (
     nom VARCHAR(100) NOT NULL
 );
 
+INSERT INTO Categorie_processus (nom) VALUES ('Management');
+INSERT INTO Categorie_processus (nom) VALUES ('Système et amélioration');
+INSERT INTO Categorie_processus (nom) VALUES ('Réalisation');
+INSERT  INTO Categorie_processus (nom) VALUES ('Support');
+
 CREATE TABLE Collaborateur (
     matricule VARCHAR(50) PRIMARY KEY,
     nom_complet VARCHAR(150),
@@ -18,6 +23,11 @@ CREATE TABLE Collaborateur (
     etat INT
 );
 
+INSERT INTO Collaborateur (matricule, nom_complet, nom_affichage, departement, poste, courriel, telephone, etat)
+VALUES
+('A001', 'Dupont Jean', 'J. Dupont (DQRSE)', 'Qualité', 'Responsable Qualité', 'joannrandrianirina@gmail.com', '0123456789', 1),
+('A002', 'Martin Claire', 'C. Martin (Prod)', 'Production', 'Opératrice de production', 'randrianirina@gmail.com', '0987654321', 1);   
+
 CREATE TABLE Processus (
     id INT IDENTITY PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
@@ -26,6 +36,14 @@ CREATE TABLE Processus (
     contexte VARCHAR(MAX),
     finalite VARCHAR(MAX),
     FOREIGN KEY(id_categorie_processus) REFERENCES Categorie_processus(id)
+);
+
+CREATE TABLE Validite_processus (
+    id INT IDENTITY PRIMARY KEY,
+    id_processus INT NOT NULL,
+    annee INT NOT NULL CHECK (annee BETWEEN 1900 AND 9999),
+    FOREIGN KEY (id_processus) REFERENCES Processus(id),
+    CONSTRAINT UQ_annee_dispoProcessus_Processus_Annee UNIQUE (id_processus, annee)
 );
 
 CREATE TABLE Pilote (
@@ -94,11 +112,19 @@ CREATE TABLE Lieu (
     abr VARCHAR(10) NOT NULL    
 );
 
+INSERT INTO Lieu (nom, abr) VALUES ('Tananarive', 'TNR');
+INSERT INTO Lieu (nom, abr) VALUES ('Nosy Be', 'NOS');
+
 CREATE TABLE Type_nc (
     id INT IDENTITY PRIMARY KEY,
     nom VARCHAR(50) NOT NULL
 );
 
+INSERT INTO Type_nc (nom) VALUES ('Environnement');
+INSERT INTO Type_nc (nom) VALUES ('Annomalie');
+INSERT INTO Type_nc (nom) VALUES ('Dysfonctionnement');
+INSERT INTO Type_nc (nom) VALUES ('Audit interne');
+INSERT INTO Type_nc (nom) VALUES ('Audit externe');
 
 CREATE TABLE Priorite_nc (
     id INT IDENTITY PRIMARY KEY,
@@ -106,6 +132,8 @@ CREATE TABLE Priorite_nc (
     nom VARCHAR(50),
     descr VARCHAR(MAX)
 );
+
+INSERT INTO Priorite_nc (degre,nom,descr) VALUES (1,'Haute','tres haute');
 
 CREATE TABLE Phase_nc (
     id INT IDENTITY PRIMARY KEY,
@@ -122,6 +150,7 @@ CREATE TABLE Status_nc (
     FOREIGN KEY(id_phase_nc) REFERENCES Phase_nc(id)
 );
 
+DELETE FROM Phase_nc; 
 DBCC CHECKIDENT ('Phase_nc', RESEED, 0);
 
 INSERT INTO Phase_nc (nom, ordre)
@@ -130,6 +159,8 @@ VALUES
 ('Traitement',2),
 ('Cloture',3);
 
+
+DELETE FROM Status_nc;
 DBCC CHECKIDENT ('Status_nc', RESEED, 0);
 
 INSERT INTO Status_nc (nom, descr, color , id_phase_nc)
@@ -145,10 +176,10 @@ VALUES
 ('Vérifié', 'Efficacité vérifié','vérifié', 3),
 ('Clôturé', 'Cloturé ', 'cloturé',3);
 
-
 CREATE TABLE Non_conformite (
     id INT IDENTITY PRIMARY KEY,
-    datetime_creation DATE DEFAULT CAST(GETDATE() AS DATE),
+    matricule_emetteur VARCHAR(50) NOT NULL,
+    datetime_creation DATETIME DEFAULT GETDATE(),
     datetime_declare DATETIME NULL,
     datetime_fait DATETIME DEFAULT GETDATE(),
     descr VARCHAR(MAX),
@@ -161,7 +192,8 @@ CREATE TABLE Non_conformite (
     FOREIGN KEY(id_lieu) REFERENCES Lieu(id),
     FOREIGN KEY(id_type_nc) REFERENCES Type_nc(id),
     FOREIGN KEY(id_status_nc) REFERENCES Status_nc(id),
-    FOREIGN KEY(id_priorite_nc) REFERENCES Priorite_nc(id)
+    FOREIGN KEY(id_priorite_nc) REFERENCES Priorite_nc(id),
+    FOREIGN KEY(matricule_emetteur) REFERENCES Collaborateur(matricule)
 );
 
 CREATE TABLE Processus_concerne_nc (
@@ -185,6 +217,13 @@ CREATE TABLE Categorie_cause_nc (
     nom VARCHAR(100) NOT NULL
 );
 
+INSERT INTO Categorie_cause_nc (nom) VALUES ('Milieu');
+INSERT INTO Categorie_cause_nc (nom) VALUES ('Méthode');
+INSERT INTO Categorie_cause_nc (nom) VALUES ('Matériel');
+INSERT INTO Categorie_cause_nc (nom) VALUES ('Matière');
+INSERT INTO Categorie_cause_nc (nom) VALUES ('Main d''oeuvre');
+
+
 CREATE TABLE Cause_nc (
     id INT IDENTITY PRIMARY KEY,
     id_categorie_cause_nc INT NOT NULL,
@@ -193,3 +232,51 @@ CREATE TABLE Cause_nc (
     FOREIGN KEY(id_nc) REFERENCES Non_conformite(id),
     FOREIGN KEY(id_categorie_cause_nc) REFERENCES Categorie_cause_nc(id)
 );
+
+CREATE TABLE Commentaire_nc (
+    id INT IDENTITY PRIMARY KEY,
+    id_nc INT NOT NULL,
+    matricule_collaborateur VARCHAR(50) NOT NULL,
+    datetime_commentaire DATETIME DEFAULT GETDATE(),
+    contenu VARCHAR(MAX) NOT NULL,
+    FOREIGN KEY(id_nc) REFERENCES Non_conformite(id),
+    FOREIGN KEY(matricule_collaborateur) REFERENCES Collaborateur(matricule)
+);
+
+-- =========================
+-- 6. Historique activite
+-- =========================
+
+CREATE TABLE Operation (
+    id INT IDENTITY PRIMARY KEY,
+    nom VARCHAR(50)
+);
+
+INSERT INTO operation (nom) VALUES ('Création');
+INSERT INTO operation (nom) VALUES ('Modification');
+INSERT INTO operation (nom) VALUES ('Suppression');
+
+
+CREATE TABLE Entite (
+    id INT IDENTITY PRIMARY KEY,
+    nom VARCHAR(50)
+);
+
+INSERT INTO entite (nom) VALUES ('Processus');
+INSERT INTO entite (nom) VALUES ('Non-conformité');
+
+CREATE TABLE Historique (
+    id INT IDENTITY PRIMARY KEY,
+    datetime DATETIME DEFAULT GETDATE(),
+    matricule_collaborateur VARCHAR(50) NOT NULL,
+    id_operation INT NOT NULL,
+    id_entite INT NOT NULL,
+    id_object INT,
+    descr VARCHAR(MAX),
+    usefull_data VARCHAR(MAX),
+    FOREIGN KEY(id_entite) REFERENCES Entite(id),
+    FOREIGN KEY(id_operation) REFERENCES Operation(id),
+    FOREIGN KEY(matricule_collaborateur) REFERENCES Collaborateur(matricule)
+);
+
+

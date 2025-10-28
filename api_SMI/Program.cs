@@ -43,8 +43,12 @@ builder.Services.AddSession(options =>
 {
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-    options.Cookie.SameSite = SameSiteMode.Lax; // Lax autorise le cookie sur HTTP cross-origin
-    options.Cookie.SecurePolicy = CookieSecurePolicy.None; // Autorise le cookie sur HTTP
+    // Pour que la session fonctionne depuis un front sur une autre origine (ex: http://localhost:3000)
+    // il faut autoriser les cookies cross-site et permettre les credentials côté CORS.
+    // SameSite=None permet l'envoi du cookie pour les requêtes cross-site (POST via fetch/axios).
+    options.Cookie.SameSite = SameSiteMode.None;
+    // En dev sur HTTP, utilisez SameAsRequest. En production, utilisez Always et servez via HTTPS.
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
 
 // Ajoutez cette ligne pour configurer CORS
@@ -114,8 +118,15 @@ builder.Services.AddScoped<CategorieCauseNcRepository>();
 builder.Services.AddScoped<ICategorieCauseNcService, CategorieCauseNcService>();
 builder.Services.AddScoped<CauseNcRepository>();
 builder.Services.AddScoped<ICauseNcService, CauseNcService>();
+builder.Services.AddScoped<CommentaireNcRepository>();
+builder.Services.AddScoped<ICommentaireNcService, CommentaireNcService>();
+builder.Services.AddScoped<INCDetailsService, NCDetailsService>();
+builder.Services.AddScoped<IHistoriqueService, HistoriqueService>();
+builder.Services.AddScoped<HistoriqueRepository>();
+builder.Services.AddScoped<ValiditeProcessusRepository>();
+builder.Services.AddScoped<IValiditeProcessusService, ValiditeProcessusService>();
+builder.Services.AddScoped<ValiditeProcessusService>();
 
-    
 
 var app = builder.Build();
 

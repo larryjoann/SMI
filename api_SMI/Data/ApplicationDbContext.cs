@@ -30,5 +30,12 @@ namespace api_SMI.Data
         public DbSet<PhaseNc> PhaseNcs { get; set; } 
         public DbSet<CategorieCauseNc> CategorieCauseNcs { get; set; }
         public DbSet<CauseNc> CauseNcs { get; set; } 
+        public DbSet<CommentaireNc> CommentaireNcs { get; set; }
+        public DbSet<Entite> Entites { get; set; }
+        public DbSet<Operation> Operations { get; set; }
+        public DbSet<Historique> Historiques { get; set; }
+
+        public DbSet<ValiditeProcessus> ValiditeProcessus { get; set; }
+        
     }
 }

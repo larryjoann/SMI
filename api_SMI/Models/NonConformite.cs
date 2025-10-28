@@ -12,6 +12,11 @@ namespace api_SMI.Models
         [Column("id")]
         public int Id { get; set; }
 
+        [Column("matricule_emetteur")]
+        public string? MatriculeEmetteur { get; set; }
+        [ForeignKey("MatriculeEmetteur")]
+        public Collaborateur? Emetteur { get; set; }
+
         [Column("datetime_creation")]
         public DateTime? DateTimeCreation { get; set; }
 
@@ -54,7 +59,6 @@ namespace api_SMI.Models
         [Column("status")]
         public bool? Status { get; set; }
 
-
         // Validation personnalisée
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -72,11 +76,11 @@ namespace api_SMI.Models
                 if (IdStatusNc == null)
                     yield return new ValidationResult("Le status NC est obligatoire.", new[] { nameof(IdStatusNc) });
 
-                if (IdPrioriteNc == null)
-                    yield return new ValidationResult("La priorité NC est obligatoire.", new[] { nameof(IdPrioriteNc) });
+                // if (IdPrioriteNc == null)
+                //     yield return new ValidationResult("La priorité NC est obligatoire.", new[] { nameof(IdPrioriteNc) });
 
                 if (DateTimeFait == null)
-                    yield return new ValidationResult("La date de réalisation est obligatoire.", new[] { nameof(DateTimeFait) });
+                    yield return new ValidationResult("La date et heure du fait est obligatoire.", new[] { nameof(DateTimeFait) });
             }
         }
     }

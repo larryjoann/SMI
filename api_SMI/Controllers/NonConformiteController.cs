@@ -29,6 +29,13 @@ namespace api_SMI.Controllers
             return Ok(nc);
         }
 
+        [HttpGet("by-matricule/{matricule}")]
+        public IActionResult GetAllByMatricule(string matricule)
+        {
+            var list = _service.GetAllByMatricule(matricule);
+            return Ok(list);
+        }
+
         [HttpPost("declare")]
         public IActionResult Declare(NonConformite nonConformite)
         {
@@ -36,6 +43,14 @@ namespace api_SMI.Controllers
             {
                 return ValidationProblem(ModelState);
             }
+
+            var matricule = HttpContext.Session.GetString("matricule");
+            if (string.IsNullOrEmpty(matricule))
+            {
+                return Unauthorized(new { message = "Aucune session active ou matricule absent." });
+            }
+
+            nonConformite.MatriculeEmetteur = matricule;
             _service.Declare(nonConformite);
             return CreatedAtAction(nameof(GetById), new { id = nonConformite.Id }, nonConformite);
         }
@@ -43,6 +58,13 @@ namespace api_SMI.Controllers
         [HttpPost("draft")]
         public IActionResult Draft(NonConformite nonConformite)
         {
+            var matricule = HttpContext.Session.GetString("matricule");
+            if (string.IsNullOrEmpty(matricule))
+            {
+                return Unauthorized(new { message = "Aucune session active ou matricule absent." });
+            }
+
+            nonConformite.MatriculeEmetteur = matricule;
             _service.Draft(nonConformite);
             return CreatedAtAction(nameof(GetById), new { id = nonConformite.Id }, nonConformite);
         }

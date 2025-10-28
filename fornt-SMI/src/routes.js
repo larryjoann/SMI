@@ -16,6 +16,9 @@ const Form_indicateur = React.lazy(() => import('./features/indicateur/pages/For
 const Liste_NC = React.lazy(() => import('./features/non_conformite/pages/Liste_NC'))
 const Form_NC = React.lazy(() => import('./features/non_conformite/pages/FormNC'))
 const Fiche_NC = React.lazy(() => import('./features/non_conformite/pages/FicheNC'))
+const Arcive_NC = React.lazy(() => import('./features/non_conformite/pages/ArchiveNC'))
+const HistoActiviteNC = React.lazy(() => import('./features/non_conformite/pages/HistoActiviteNC'))
+
 const routes = [
   { path: '/', exact: true, name: 'Home' },
 
@@ -28,14 +31,17 @@ const routes = [
   { path: '/pilotage/ficheprocessus/:id', name: 'Fiche processus', element: FicheProcessus },
 
   { path: '/indicateur', name: 'Indicateur', element: Liste_indicateur, exact: true },
-  { path: '/indicateur/tableau', name: 'Tableau indicateur', element: Liste_indicateur },
+  { path: '/indicateur/tableau', name: 'Saisie des indicateurs', element: Liste_indicateur },
   { path: '/indicateur/form', name: 'Form indicateur', element: Form_indicateur },
 
   { path: '/nc', name: 'Non conformité', element: Liste_NC, exact: true },
-  { path: '/nc/list', name: 'Mes non-conformité', element: Liste_NC },
-  { path: '/nc/form', name: 'Form non-conformité', element: Form_NC },
-  { path: '/nc/form/:id', name: 'Form non-conformité', element: Form_NC },
+  { path: '/nc/list', name: 'Liste des Non-conformité', element: Liste_NC },
+  { path: '/nc/archive', name: 'Archive des Non-conformité', element: Arcive_NC },
+  { path: '/nc/form', name: 'Déclaration de Non-conformité', element: Form_NC },
+  { path: '/nc/form/:id', name: 'Modification de Non-conformité', element: Form_NC },
   { path: '/nc/fiche/:id', name: 'Fiche non-conformité', element: Fiche_NC },
+  { path: '/nc/histoactivite/:id', name: 'Historique des activités NC', element: HistoActiviteNC },
+  
 ]
 
 export default routes

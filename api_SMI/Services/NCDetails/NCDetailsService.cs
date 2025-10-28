@@ -9,16 +9,22 @@ namespace api_SMI.Services
         private readonly IPieceJointeNcService _pjService;
         private readonly IProcessusConcerneNcService _processusConcerneService;
         private readonly ICauseNcService _causeNcService;
+        private readonly ICommentaireNcService _commentaireNcService;
+        private readonly IHistoriqueService _historiqueService;
 
         public NCDetailsService(
             INonConformiteService ncService,
             IPieceJointeNcService pjService,
             ICauseNcService causeNcService,
+            ICommentaireNcService commentaireNcService,
+            IHistoriqueService historiqueService,
             IProcessusConcerneNcService processusConcerneService)
         {
             _ncService = ncService;
             _pjService = pjService;
             _causeNcService = causeNcService;
+            _commentaireNcService = commentaireNcService;
+            _historiqueService = historiqueService;
             _processusConcerneService = processusConcerneService;
 
         }
@@ -31,13 +37,15 @@ namespace api_SMI.Services
             var pieces = _pjService.GetByNonConformite(ncId).ToList();
             var processusConcerne = _processusConcerneService.GetByNonConformite(ncId).ToList();
             var causes = _causeNcService.GetByNc(ncId).ToList();
+            var commentaires = _commentaireNcService.GetByNc(ncId).ToList();
 
             return new NCDetails
             {
                 NC = nc,
                 PiecesJointes = pieces,
                 ProcessusConcerne = processusConcerne,
-                Causes = causes
+                Causes = causes,
+                Commentaires = commentaires
             };
         }
 
@@ -62,9 +70,9 @@ namespace api_SMI.Services
             return result;
         }
 
-        public IEnumerable<NCDetails> GetDrafts()
+        public IEnumerable<NCDetails> GetAllByMatricule(string matricule_emetteur)
         {
-            var allNc = _ncService.GetDrafts();
+            var allNc = _ncService.GetAllByMatricule(matricule_emetteur);
             var result = new List<NCDetails>();
 
             foreach (var nc in allNc)
@@ -83,9 +91,51 @@ namespace api_SMI.Services
             return result;
         }
 
-        public IEnumerable<NCDetails> GetDeclare()
+        public IEnumerable<NCDetails> GetDrafts(string matricule_emetteur)
         {
-            var allNc = _ncService.GetDeclare();
+            var allNc = _ncService.GetDrafts(matricule_emetteur);
+            var result = new List<NCDetails>();
+
+            foreach (var nc in allNc)
+            {
+                var pieces = _pjService.GetByNonConformite(nc.Id).ToList();
+                var processusConcerne = _processusConcerneService.GetByNonConformite(nc.Id).ToList();
+
+                result.Add(new NCDetails
+                {
+                    NC = nc,
+                    PiecesJointes = pieces,
+                    ProcessusConcerne = processusConcerne
+                });
+            }
+
+            return result;
+        }
+
+        public IEnumerable<NCDetails> GetDeclare(string matricule_emetteur)
+        {
+            var allNc = _ncService.GetDeclare(matricule_emetteur);
+            var result = new List<NCDetails>();
+
+            foreach (var nc in allNc)
+            {
+                var pieces = _pjService.GetByNonConformite(nc.Id).ToList();
+                var processusConcerne = _processusConcerneService.GetByNonConformite(nc.Id).ToList();
+
+                result.Add(new NCDetails
+                {
+                    NC = nc,
+                    PiecesJointes = pieces,
+                    ProcessusConcerne = processusConcerne
+                });
+            }
+
+            return result;
+        }
+
+        public IEnumerable<NCDetails> GetArchived(string matricule_emetteur)
+        {
+            var allNc = _ncService.GetArchived(matricule_emetteur);
             var result = new List<NCDetails>();
 
             foreach (var nc in allNc)
@@ -105,13 +155,37 @@ namespace api_SMI.Services
         }
 
 
-        public void Archiver(int ncId)
+        public void Archiver(int ncId, string matricule)
         {
             _ncService.Archiver(ncId);
+            _historiqueService.Add(new Historique
+            {
+                MatriculeCollaborateur = matricule,
+                IdOperation = 3, 
+                Datetime = DateTime.Now,
+                IdEntite = 2, 
+                IdObject = ncId,
+                Descr = "Archivage de la non-conformité",
+            });
+        }
+
+        public void Restorer(int ncId, string matricule)
+        {
+            _ncService.Restorer(ncId);
+            _historiqueService.Add(new Historique
+            {
+                MatriculeCollaborateur = matricule,
+                IdOperation = 2, 
+                Datetime = DateTime.Now,
+                IdEntite = 2, 
+                IdObject = ncId,
+                Descr = "Restauration de la non-conformité",
+            });
+
         }
 
 
-        public void Declare(NCDetails details)
+        public void Declare(NCDetails details, string matricule)
         {
             if (details == null || details.NC == null)
                 throw new ArgumentException("NCDetails ou NonConformite manquant");
@@ -141,9 +215,19 @@ namespace api_SMI.Services
                     _processusConcerneService.Add(proc);
                 }
             }
+
+            _historiqueService.Add(new Historique
+            {
+                MatriculeCollaborateur = matricule,
+                IdOperation = 1, // Archiver
+                Datetime = DateTime.Now,
+                IdEntite = 2, // NonConformite
+                IdObject = ncId,
+                Descr = "Déclaration de la non-conformité",
+            });
         }
 
-        public void Draft(NCDetails details)
+        public void Draft(NCDetails details, string matricule)
         {
             if (details == null || details.NC == null)
                 throw new ArgumentException("NCDetails ou NonConformite manquant");
@@ -173,9 +257,19 @@ namespace api_SMI.Services
                     _processusConcerneService.Add(proc);
                 }
             }
+
+            _historiqueService.Add(new Historique
+            {
+                MatriculeCollaborateur = matricule,
+                IdOperation = 1, 
+                Datetime = DateTime.Now,
+                IdEntite = 2, // NonConformite
+                IdObject = ncId,
+                Descr = "Déclaration de la non-conformité en brouillon",
+            });
         }
 
-        public void DraftToDeclare(NCDetails details)
+        public void DraftToDeclare(NCDetails details , string matricule)
         {
             if (details == null || details.NC == null)
                 throw new ArgumentException("NCDetails ou NonConformite manquant");
@@ -207,9 +301,19 @@ namespace api_SMI.Services
                     _processusConcerneService.Add(proc);
                 }
             }
+
+            _historiqueService.Add(new Historique
+            {
+                MatriculeCollaborateur = matricule,
+                IdOperation = 2, // Archiver
+                Datetime = DateTime.Now,
+                IdEntite = 2, // NonConformite
+                IdObject = ncId,
+                Descr = "Passage de brouillon à déclaré de la non-conformité",
+            });
         }
 
-        public void Update(NCDetails details)
+        public void Update(NCDetails details , string matricule)
         {
             if (details == null || details.NC == null)
                 throw new ArgumentException("NCDetails ou NonConformite manquant");
@@ -240,9 +344,19 @@ namespace api_SMI.Services
                     _processusConcerneService.Add(proc);
                 }
             }
+
+            _historiqueService.Add(new Historique
+            {
+                MatriculeCollaborateur = matricule,
+                IdOperation = 2, // Archiver
+                Datetime = DateTime.Now,
+                IdEntite = 2, // NonConformite
+                IdObject = ncId,
+                Descr = "Mise à jour de la non-conformité",
+            });
         }
 
-        public void Qualifier(NCDetails details, int idStatusNc)
+        public void Qualifier(NCDetails details, int idStatusNc , string matricule)
         {
             if (details == null || details.NC == null)
                 throw new ArgumentException("NCDetails ou NonConformite manquant");
@@ -261,11 +375,31 @@ namespace api_SMI.Services
                     _processusConcerneService.Add(proc);
                 }
             }
+
+            _historiqueService.Add(new Historique
+            {
+                MatriculeCollaborateur = matricule,
+                IdOperation = 1, // Archiver
+                Datetime = DateTime.Now,
+                IdEntite = 2, // NonConformite
+                IdObject = details.NC.Id,
+                Descr = "Qualification de la non-conformité",
+            });
         }
 
-        public void UpdateCausesNc(int idNc , List<CauseNc> causes)
+        public void UpdateCausesNc(int idNc , List<CauseNc> causes , string matricule)
         {
-            _causeNcService.UpdateByNc(idNc, causes);
+            _causeNcService.UpdateByNc(idNc, causes,matricule);
+
+            _historiqueService.Add(new Historique
+            {
+                MatriculeCollaborateur = matricule,
+                IdOperation = 2, // Archiver
+                Datetime = DateTime.Now,
+                IdEntite = 2, // NonConformite
+                IdObject = idNc,
+                Descr = "Mise à jour des causes de la non-conformité",
+            });
         }
     }
 }

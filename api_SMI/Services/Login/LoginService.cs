@@ -32,6 +32,7 @@ namespace api_SMI.Services
             {
                 Console.WriteLine($"Échec de la connexion LDAP pour l'utilisateur : {login.matricule} - Erreur : {ex.Message}");
                 return false;
+                //return true;
             }
         }
         public string GenerateJwt(string matricule)

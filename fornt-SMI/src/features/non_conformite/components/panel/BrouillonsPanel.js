@@ -148,8 +148,8 @@ const BrouillonsPanel = ({ ncData = [], loading = false, error = null, onReload,
           <CCardBody>
             <CRow>
                  <CCol xs={2}>{(nc.processusConcerne || []).map(pc => pc.processus.sigle).filter(Boolean).join(', ')}</CCol>
-                <CCol xs={2}>{nc.nc.typeNc.nom || ''}</CCol>
-                <CCol xs={2}>{nc.nc.lieu.nom || ''}</CCol>
+                <CCol xs={2}>{nc.nc?.typeNc?.nom || ''}</CCol>
+                <CCol xs={2}>{nc.nc?.lieu?.nom || ''}</CCol>
                 <CCol xs={2}>{new Date(nc.nc.dateTimeCreation).toLocaleString()}</CCol>
               <CCol xs={4} className="d-flex justify-content-end">
                 <CIcon icon={cilSend} className="text-primary mt-1 me-3" size='lg'

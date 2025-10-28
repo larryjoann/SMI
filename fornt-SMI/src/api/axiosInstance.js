@@ -15,6 +15,8 @@ export function getMatriculeFromJwt() {
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
+  // Allow sending cookies (credentials) with cross-site requests when needed
+  withCredentials: true,
 })
 
 axiosInstance.interceptors.request.use(

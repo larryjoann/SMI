@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { CFormSelect } from '@coreui/react'
 import API_URL from '../../api/API_URL'
 
-const CategorieProcessusSelect = (props) => {
+const CategorieProcessusSelect = ({ allowEmpty = true, ...props }) => {
   const [categories, setCategories] = useState([])
 
   useEffect(() => {
@@ -14,7 +14,7 @@ const CategorieProcessusSelect = (props) => {
 
   return (
     <CFormSelect id="categorie" {...props}>
-      <option value="">Sélectionner une catégorie</option>
+      {allowEmpty && <option value="">Sélectionner une catégorie</option>}
       {categories.map(cat => (
         <option key={cat.id} value={cat.id}>{cat.nom}</option>
       ))}

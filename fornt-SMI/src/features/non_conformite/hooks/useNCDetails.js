@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useCallback } from 'react'
-import { getNC, archiverNC, draftToDeclareNC } from '../services/nonConformiteService'
+import { getNC, archiverNC, draftToDeclareNC, restorerNC } from '../services/nonConformiteService'
 
 export function useNCDetails(id) {
   const [data, setData] = useState(null)
@@ -69,6 +69,46 @@ export function useArchiveNC() {
   return { archive, loading, error, success, showToast, setShowToast, popType, popMessage }
 }
 
+
+// Hook pour restaurer une NC
+export function useRestoreNC() {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(false)
+  const [showToast, setShowToast] = useState(false)
+  const [popType, setPopType] = useState('success')
+  const [popMessage, setPopMessage] = useState('')
+
+  const restaure = useCallback(async (id) => {
+    setLoading(true)
+    setError(null)
+    setSuccess(false)
+    setShowToast(false)
+    try {
+      await restorerNC(id)
+      setSuccess(true)
+      setPopType('success')
+      setPopMessage('Non-conformité restauré avec succès !')
+      setShowToast(true)
+    } catch (err) {
+      let msg = "Erreur lors de la restauration"
+      if (err?.response?.data?.message) {
+        msg = err.response.data.message
+      } else if (err instanceof TypeError) {
+        msg = "Erreur réseau : impossible de contacter le serveur."
+      }
+      setError(msg)
+      setPopType('danger')
+      setPopMessage(msg)
+      setShowToast(true)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+  return { restaure, loading, error, success, showToast, setShowToast, popType, popMessage }
+}
+
+
 // Hook pour draft to declare une NC
 export function useDraftToDeclareNC() {
   const [loading, setLoading] = useState(false)
@@ -89,6 +129,7 @@ export function useDraftToDeclareNC() {
       const payload = {
         nc: {
           id: ncData.nc.id,
+          emetteur: ncData.nc.emetteur,
           dateTimeCreation: ncData.nc.dateTimeCreation,
           dateTimeDeclare: ncData.nc.dateTimeDeclare || null,
           dateTimeFait: ncData.nc.dateTimeFait,
@@ -96,7 +137,7 @@ export function useDraftToDeclareNC() {
           actionCurative: ncData.nc.actionCurative || '',
           idLieu: ncData.nc.idLieu,
           idTypeNc: ncData.nc.idTypeNc,
-          idStatusNc: ncData.nc.idStatusNc,
+          idStatusNc: 1,
           idPrioriteNc: ncData.nc.idPrioriteNc,
           status: ncData.nc.status
         },
@@ -110,24 +151,37 @@ export function useDraftToDeclareNC() {
           idNc: proc.idNc || 0
         })) : []
       };
-      //console.log('Payload for draftToDeclareNC:', payload);
+      console.log('Payload for draftToDeclareNC:', payload);
       await draftToDeclareNC(id, payload);
       setSuccess(true);
       setPopType('success');
       setPopMessage('Non-conformité déclarée avec succès !');
       setShowToast(true);
     } catch (err) {
-      let msg = "Erreur lors de la déclaration";
-      if (err?.response?.data?.message) {
-        msg = err.response.data.message;
-      } else if (err instanceof TypeError) {
-        msg = "Erreur réseau : impossible de contacter le serveur.";
+      // Normalize different error shapes to a readable message
+      let msg = 'Erreur lors de la déclaration';
+      try {
+        if (err?.response?.data) {
+          const d = err.response.data
+          if (typeof d === 'string') msg = d
+          else if (d.message) msg = d.message
+          else msg = JSON.stringify(d)
+        } else if (err?.message) {
+          msg = err.message
+        } else if (err instanceof TypeError) {
+          msg = 'Erreur réseau : impossible de contacter le serveur.'
+        } else {
+          msg = String(err)
+        }
+      } catch (e) {
+        // fallback to generic message
+        msg = 'Erreur lors de la déclaration'
       }
-      //console.log('Error in draftToDeclareNC:', err);
-      setError(msg);
-      setPopType('danger');
-      setPopMessage(msg);
-      setShowToast(true);
+      console.error('Error in draftToDeclareNC:', err)
+      setError(msg)
+      setPopType('danger')
+      setPopMessage(msg)
+      setShowToast(true)
     } finally {
       setLoading(false);
     }

@@ -21,6 +21,13 @@ namespace api_SMI.Controllers
             return Ok(_service.GetAll());
         }
 
+        [HttpGet("by-matricule/{matricule}")]
+        public IActionResult GetByMatricule(string matricule)
+        {
+            var list = _service.GetByMatricule(matricule);
+            return Ok(list);
+        }
+
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {

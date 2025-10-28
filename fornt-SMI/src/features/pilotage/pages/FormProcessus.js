@@ -66,7 +66,7 @@ const FormProcessus = () => {
           <CForm onSubmit={handleSubmit(onSubmit)}>
             <CRow>
               <CCol xs={12} sm={6} md={4} className='mb-3'>
-                <CFormLabel htmlFor="nom">Nom</CFormLabel>
+                <CFormLabel htmlFor="nom">Nom <span className="text-danger">*</span> :</CFormLabel>
                 <CFormInput
                   {...register('nom', { required: 'Le nom est requis' })}
                   invalid={!!errors.nom}
@@ -76,7 +76,7 @@ const FormProcessus = () => {
                 </CFormFeedback>
               </CCol>
               <CCol xs={12} sm={6} md={4} className='mb-3'>
-                <CFormLabel htmlFor="sigle">Sigle</CFormLabel>
+                <CFormLabel htmlFor="sigle">Sigle <span className="text-danger">*</span></CFormLabel>
                 <CFormInput
                   {...register('sigle', { required: 'Le sigle est requis' })}
                   invalid={!!errors.sigle}
@@ -86,7 +86,7 @@ const FormProcessus = () => {
                 </CFormFeedback>
               </CCol>
               <CCol xs={12} sm={6} md={4} className='mb-3'>
-                <CFormLabel htmlFor="categorie">Categorie</CFormLabel>
+                <CFormLabel htmlFor="categorie">Categorie <span className="text-danger">*</span></CFormLabel>
                 <Controller
                   control={control}
                   name="idCategorieProcessus"
@@ -105,7 +105,7 @@ const FormProcessus = () => {
             </CRow>
             <CRow>
               <CCol xs={12} sm={6} md={6} className='mb-3'>
-                <CFormLabel>Pilotes</CFormLabel>
+                <CFormLabel>Pilotes <span className="text-danger">*</span></CFormLabel>
                 <Controller
                   control={control}
                   name="matriculePilote"
@@ -130,7 +130,7 @@ const FormProcessus = () => {
                 )}
               </CCol>
               <CCol xs={12} sm={6} md={6} className='mb-3'>
-                <CFormLabel>Copilotes</CFormLabel>
+                <CFormLabel>Copilotes <span className="text-danger">*</span></CFormLabel>
                 <Controller
                   control={control}
                   name="matriculeCopilote"

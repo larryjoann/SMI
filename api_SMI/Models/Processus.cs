@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Collections.Generic;
 
 namespace api_SMI.Models
 {
@@ -33,10 +34,13 @@ namespace api_SMI.Models
         [Column("finalite")]
         public string? Finalite { get; set; }
 
-        // Navigation vers plusieurs pilotes
-        public ICollection<Pilote>? Pilotes { get; set; }
+    // Navigation vers plusieurs pilotes
+    public ICollection<Pilote> Pilotes { get; set; } = new List<Pilote>();
 
-        // Navigation vers plusieurs copilotes
-        public ICollection<Copilote>? Copilotes { get; set; }
+    // Navigation vers plusieurs copilotes
+    public ICollection<Copilote> Copilotes { get; set; } = new List<Copilote>();
+
+    // Navigation vers les années de validité
+    public ICollection<ValiditeProcessus> Validites { get; set; } = new List<ValiditeProcessus>();
     }
 }

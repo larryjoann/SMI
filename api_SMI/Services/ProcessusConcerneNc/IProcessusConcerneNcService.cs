@@ -14,5 +14,6 @@ namespace api_SMI.Services
         void DeleteAll();
 
         void DeleteByNonConformite(int idNc);
+        List<ProcessusConcerneNc> GetByMatricule(string matricule);
     }
 }

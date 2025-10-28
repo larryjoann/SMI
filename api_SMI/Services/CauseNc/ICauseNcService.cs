@@ -11,6 +11,6 @@ namespace api_SMI.Services
         void Update(CauseNc entity);
         void Delete(int id);
 
-        void UpdateByNc(int id_nc, List<CauseNc> entities);
+        void UpdateByNc(int id_nc, List<CauseNc> entities , string matricule);
     }
 }

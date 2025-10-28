@@ -5,8 +5,9 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Http;
 
-namespace api_SMI.Controllers.Auth
+namespace api_SMI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -30,7 +31,21 @@ namespace api_SMI.Controllers.Auth
                     // creation session avec le matricule
                     HttpContext.Session.SetString("matricule", loginModel.matricule ?? "");
                     var matriculeSession = HttpContext.Session.GetString("matricule");
-                    Console.WriteLine($"Matricule enregistré en session : {matriculeSession}");
+
+                    Console.WriteLine($"Matricule enregistré en session login: {matriculeSession}");
+                    // Diagnostic: log session id and request cookies to help debug missing session on subsequent requests
+                    try
+                    {
+                        Console.WriteLine($"Session.Id after login: {HttpContext.Session.Id}");
+                        foreach (var c in HttpContext.Request.Cookies)
+                        {
+                            Console.WriteLine($"Request cookie after login: {c.Key} = {c.Value}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Erreur lors du logging des cookies/session après login: " + ex.Message);
+                    }
 
                     // génération du JWT
                     var jwt = _loginService.GenerateJwt(loginModel.matricule ?? "");

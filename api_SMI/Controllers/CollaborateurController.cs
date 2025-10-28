@@ -1,6 +1,5 @@
 using api_SMI.Models;
 using api_SMI.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api_SMI.Controllers
@@ -27,8 +26,22 @@ namespace api_SMI.Controllers
         public IActionResult ImportFromAD()
         {
             Console.WriteLine("POST /api/Collaborateur/import appelé");
-            _service.ImportAllADCollaborateurs();
-            return Ok(new { message = "Importation terminée." });
+            try
+            {
+                _service.ImportAllADCollaborateurs();
+                return Ok(new { message = "Importation terminée." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                // LDAP-specific error (bad creds, connectivity)
+                Console.WriteLine($"ImportFromAD failed: {ex.Message}");
+                return StatusCode(500, new { error = "Echec de l'accès à Active Directory. Vérifiez les identifiants et la connectivité.", detail = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ImportFromAD unexpected error: {ex.Message}");
+                return StatusCode(500, new { error = "Erreur interne lors de l'importation depuis Active Directory.", detail = ex.Message });
+            }
         }
         
         [HttpGet("{matricule}")]
@@ -42,9 +55,7 @@ namespace api_SMI.Controllers
         [HttpGet("collaborateur_connecte")]
         public IActionResult GetCollaborateurConnecte()
         {
-            //var sessionId = HttpContext.Session.Id;
             var matricule = HttpContext.Session.GetString("matricule");
-            //Console.WriteLine($"SessionId: {sessionId}, Matricule récupéré depuis la session lors de recup : {matricule}");
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });

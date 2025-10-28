@@ -23,7 +23,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    await login(matricule, password, () => navigate('/notifications'))
+    await login(matricule, password, () => navigate('/pilotage/cartographie'))
   }
 
   return (

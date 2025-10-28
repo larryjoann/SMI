@@ -29,5 +29,7 @@ namespace api_SMI.Services
         public void DeleteAll() => _repository.DeleteAll();
 
         public void DeleteByNonConformite(int idNc) => _repository.DeleteByNonConformite(idNc);
+
+        public List<ProcessusConcerneNc> GetByMatricule(string matricule) => _repository.GetByMatricule(matricule);
     }
 }

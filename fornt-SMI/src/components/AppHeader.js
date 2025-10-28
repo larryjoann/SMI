@@ -51,6 +51,10 @@ const AppHeader = () => {
         >
           <CIcon icon={cilMenu} size="lg" />
         </CHeaderToggler>
+        {/* Breadcrumbs beside toggler (visible on md and up) */}
+        <div className="ms-3 d-none d-md-block">
+          <AppBreadcrumb />
+        </div>
 
         <CHeaderNav className="ms-auto">
           <CDropdown variant="nav-item" placement="bottom-end">
