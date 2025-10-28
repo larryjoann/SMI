@@ -54,15 +54,28 @@ namespace api_SMI.Controllers
 
         [HttpGet("collaborateur_connecte")]
         public IActionResult GetCollaborateurConnecte()
-        {
+        {            
             var matricule = HttpContext.Session.GetString("matricule");
+            Console.WriteLine($"Matricule enregistré en session get collab connecté: {matricule}");
+            try
+            {
+                Console.WriteLine($"Session.Id en get session collab connecte: {HttpContext.Session.Id}");
+                foreach (var c in HttpContext.Request.Cookies)
+                {
+                    Console.WriteLine($"Request cookie after login: {c.Key} = {c.Value}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erreur lors du logging des cookies/session après get collab: " + ex.Message);
+            }
+
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
             }
             return GetByMatricule(matricule);
         }
-
 
         [HttpPost]
         public IActionResult Create(Collaborateur collaborateur)

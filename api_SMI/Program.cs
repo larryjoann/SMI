@@ -46,9 +46,22 @@ builder.Services.AddSession(options =>
     // Pour que la session fonctionne depuis un front sur une autre origine (ex: http://localhost:3000)
     // il faut autoriser les cookies cross-site et permettre les credentials côté CORS.
     // SameSite=None permet l'envoi du cookie pour les requêtes cross-site (POST via fetch/axios).
-    options.Cookie.SameSite = SameSiteMode.None;
-    // En dev sur HTTP, utilisez SameAsRequest. En production, utilisez Always et servez via HTTPS.
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    // Configure cookie options depending on environment to avoid modern browsers rejecting cookies
+    // that set SameSite=None without Secure=true. In development (HTTP) we use Lax to ensure
+    // the cookie is accepted by browsers when running on localhost. In production, allow
+    // cross-site cookies but require Secure so SameSite=None is valid.
+    if (builder.Environment.IsDevelopment())
+    {
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        // On HTTP local dev, do not force Secure; leave as None so cookie can be used by the dev server.
+        options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+    }
+    else
+    {
+        // In production require secure cookies and allow cross-site usage when needed
+        options.Cookie.SameSite = SameSiteMode.None;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    }
 });
 
 // Ajoutez cette ligne pour configurer CORS
