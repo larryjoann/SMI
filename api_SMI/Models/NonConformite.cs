@@ -81,7 +81,14 @@ namespace api_SMI.Models
 
                 if (DateTimeFait == null)
                     yield return new ValidationResult("La date et heure du fait est obligatoire.", new[] { nameof(DateTimeFait) });
+
+                if (DateTimeFait > DateTime.Now)
+                {
+                    yield return new ValidationResult("La date et heure du fait ne peut pas être dans le futur.", new[] { nameof(DateTimeFait) });
+                }
+                
             }
+            
         }
     }
 }
