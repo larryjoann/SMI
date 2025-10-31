@@ -84,7 +84,7 @@ const _nav = [
   {
     component: CNavGroup,
     name: 'Administration',
-    to: '/#',
+    to: '#',
     icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
     items: [
       {
@@ -95,7 +95,7 @@ const _nav = [
       {
         component: CNavItem,
         name: 'Logs',
-        to: '/#',
+        to: '/administration/logs',
       },
       
     ],

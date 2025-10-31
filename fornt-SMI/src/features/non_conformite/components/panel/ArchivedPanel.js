@@ -149,7 +149,7 @@ const ArchivedPanel = ({ ncData = [], loading = false, error = null, onReload })
           className="mb-2 card-list-hover"
           key={nc.nc.id}
           style={{ cursor: 'pointer', opacity: archivedId === nc.nc.id ? 0.5 : 1 }}
-          onClick={() => navigate(`/nc/fiche/${nc.nc.id}`)}
+          onClick={() => navigate(`/nc/list/fiche/${nc.nc.id}`)}
         >
           <CCardBody>
             <CRow>

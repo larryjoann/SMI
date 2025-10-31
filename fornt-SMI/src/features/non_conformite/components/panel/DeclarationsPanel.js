@@ -139,7 +139,7 @@ const DeclarationsPanel = ({ ncData = [], loading = false, error = null, onReloa
           className="mb-2 card-list-hover"
           key={nc.nc?.id || nc.id}
           style={{ cursor: 'pointer', opacity: archivedId === (nc.nc?.id || nc.id) ? 0.5 : 1 }}
-          onClick={() => navigate(`/nc/fiche/${nc.nc.id}`)}
+          onClick={() => navigate(`/nc/list/fiche/${nc.nc.id}`)}
         >
           <CCardBody>
             <CRow>
@@ -179,7 +179,7 @@ const DeclarationsPanel = ({ ncData = [], loading = false, error = null, onReloa
                       href="#"
                       onClick={e => {
                         e.preventDefault();
-                        navigate(`/nc/form/${nc.nc.id}`);
+                        navigate(`/nc/list/form/${nc.nc.id}`);
                       }}
                     >
                       <CIcon icon={cilPen} className="text-warning me-3" />

@@ -24,7 +24,8 @@ const AppSidebar = () => {
   return (
     <CSidebar
       className="border-end"
-      style={{ backgroundColor: "#2E2F2F" }}
+      style={{backgroundColor: "#035668ff"}}
+      // style={{ backgroundColor: "#2E2F2F" }}
       colorScheme="dark"
       position="fixed"
       unfoldable={unfoldable}
@@ -47,11 +48,11 @@ const AppSidebar = () => {
         </CSidebarBrand>
       </CSidebarHeader>
       <AppSidebarNav items={navigation} />
-      <CSidebarFooter className="border-top d-none d-lg-flex">
+      {/* <CSidebarFooter className="border-top d-none d-lg-flex">
         <CSidebarToggler
           onClick={() => dispatch({ type: 'set', sidebarUnfoldable: !unfoldable })}
         />
-      </CSidebarFooter>
+      </CSidebarFooter> */}
     </CSidebar>
   )
 }

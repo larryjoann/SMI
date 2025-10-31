@@ -134,8 +134,8 @@ const Cartographie = () => {
           ? p.copilotes.map(co => co.collaborateur?.poste).filter(Boolean).join(', ')
           : "-",
         onDelete: () => askDeleteProcessus(p.id),
-        onEdit: () => navigate(`/pilotage/formprocessus/${p.id}`),
-        onClick: () => navigate(`/pilotage/ficheprocessus/${p.id}`),
+        onEdit: () => navigate(`/pilotage/cartographie/formprocessus/${p.id}`),
+        onClick: () => navigate(`/pilotage/cartographie/ficheprocessus/${p.id}`),
       })),
   }));
 
@@ -182,7 +182,7 @@ const Cartographie = () => {
             color='primary'
             key='1'
             className="mb-3"
-            href='#/pilotage/formprocessus'
+            href='#/pilotage/cartographie/formprocessus'
           >
             <CIcon icon={cilPlus} className="me-2" />
             Nouvelle processus
@@ -219,6 +219,7 @@ const Cartographie = () => {
                     value={inputCategorie}
                     onChange={e => setInputCategorie(e.target.value)}
                     allowEmpty={true}
+                    emptyLabel="Tous"
                   />
                 </CCol>
                 <CCol xs={2}>

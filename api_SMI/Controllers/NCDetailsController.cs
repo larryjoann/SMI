@@ -1,6 +1,10 @@
 using api_SMI.Models;
 using api_SMI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using System.Text.Json;
+using System.IO;
+using System;
 
 namespace api_SMI.Controllers
 {
@@ -107,35 +111,67 @@ namespace api_SMI.Controllers
         }
 
         // POST: api/NCDetails/declare
+        // Accepts multipart/form-data with a JSON part named "details" (string) and file parts named "fichiers".
         [HttpPost("declare")]
-        public IActionResult Declare([FromBody] NCDetails details)
+        public async Task<IActionResult> Declare([FromForm] string details, [FromForm] List<IFormFile>? fichiers)
         {
-            if (details == null || details.NC == null)
+            if (string.IsNullOrEmpty(details))
                 return BadRequest("Invalid NCDetails data.");
-            
+
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var detailsObj = JsonSerializer.Deserialize<NCDetails>(details, options);
+            if (detailsObj == null || detailsObj.NC == null)
+                return BadRequest("Invalid NCDetails data.");
+
             var matricule = HttpContext.Session.GetString("matricule");
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
             }
 
-            details.NC.MatriculeEmetteur = matricule;
-            details.NC.DateTimeDeclare = DateTime.Now;
-            details.NC.DateTimeCreation = DateTime.Now;
+            detailsObj.NC.MatriculeEmetteur = matricule;
 
+            detailsObj.PiecesJointes = new List<PieceJointeNc>();
+            // Save uploaded files (if any) and add to detailsObj.PiecesJointes
+            if (fichiers != null && fichiers.Count > 0)
+            {
+                var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+                var fileStorage = new FileStorageService(uploadFolder);
+                var chemins = await fileStorage.SaveFilesAsync(fichiers);
+
+                for (int i = 0; i < fichiers.Count; i++)
+                {
+                    var piece = new PieceJointeNc
+                    {
+                        // IdNc will be set when NC is persisted by the service if EF is configured for relationships
+                        NomFichier = fichiers[i].FileName,
+                        CheminFichier = chemins[i]
+                    };
+                    Console.WriteLine("File saved: " + chemins[i]);
+                    detailsObj.PiecesJointes.Add(piece);
+                }
+            }
+
+            detailsObj.NC.DateTimeDeclare = DateTime.Now;
             // Force la validation personnalisée
-            if (!TryValidateModel(details))
+            if (!TryValidateModel(detailsObj))
                 return BadRequest(ModelState);
 
-            _service.Declare(details, matricule);
-            return CreatedAtAction(nameof(GetDetails), new { id = details.NC.Id }, details);
+            _service.Declare(detailsObj, matricule);
+            return CreatedAtAction(nameof(GetDetails), new { id = detailsObj.NC.Id }, detailsObj);
         }
 
-        // POST: api/NCDetails/declare
+        // POST: api/NCDetails/draft
+        // Accepts multipart/form-data with a JSON part named "details" (string) and file parts named "fichiers".
         [HttpPost("draft")]
-        public IActionResult Draft([FromBody] NCDetails details)
+        public async Task<IActionResult> Draft([FromForm] string details, [FromForm] List<IFormFile>? fichiers)
         {
-            if (details == null || details.NC == null)
+            if (string.IsNullOrEmpty(details))
+                return BadRequest("Invalid NCDetails data.");
+
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var detailsObj = JsonSerializer.Deserialize<NCDetails>(details, options);
+            if (detailsObj == null || detailsObj.NC == null)
                 return BadRequest("Invalid NCDetails data.");
 
             var matricule = HttpContext.Session.GetString("matricule");
@@ -143,25 +179,65 @@ namespace api_SMI.Controllers
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
             }
-            details.NC.MatriculeEmetteur = matricule;
+            detailsObj.NC.MatriculeEmetteur = matricule;
 
-            _service.Draft(details,matricule);
-            return CreatedAtAction(nameof(GetDetails), new { id = details.NC.Id }, details);
+            detailsObj.PiecesJointes = new List<PieceJointeNc>();
+            if (fichiers != null && fichiers.Count > 0)
+            {
+                var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+                var fileStorage = new FileStorageService(uploadFolder);
+                var chemins = await fileStorage.SaveFilesAsync(fichiers);
+
+                for (int i = 0; i < fichiers.Count; i++)
+                {
+                    var piece = new PieceJointeNc
+                    {
+                        NomFichier = fichiers[i].FileName,
+                        CheminFichier = chemins[i]
+                    };
+                    detailsObj.PiecesJointes.Add(piece);
+                }
+            }
+            Console.WriteLine("nombre de fichiers draft: " + fichiers.Count);
+            _service.Draft(detailsObj, matricule);
+            return CreatedAtAction(nameof(GetDetails), new { id = detailsObj.NC.Id }, detailsObj);
         }
 
         [HttpPost("DraftToDeclare/{id}")]
-        public IActionResult DraftToDeclare(int id, [FromBody] NCDetails details)
+        public async Task<IActionResult> DraftToDeclare(int id, [FromForm] string details, [FromForm] List<IFormFile>? fichiers)
         {
-            if (details == null || details.NC == null)
+            if (string.IsNullOrEmpty(details))
                 return BadRequest("Invalid NCDetails data.");
 
-            if (id != details.NC.Id)
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var detailsObj = JsonSerializer.Deserialize<NCDetails>(details, options);
+            if (detailsObj == null || detailsObj.NC == null)
+                return BadRequest("Invalid NCDetails data.");
+
+            if (id != detailsObj.NC.Id)
                 return BadRequest("L'ID dans l'URL ne correspond pas à l'ID du corps.");
 
-            details.NC.DateTimeDeclare = DateTime.Now;
+            detailsObj.NC.DateTimeDeclare = DateTime.Now;
 
-            // Force la validation personnalisée
-            if (!TryValidateModel(details))
+            //detailsObj.PiecesJointes = new List<PieceJointeNc>();
+            if (fichiers != null && fichiers.Count > 0)
+            {
+                var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+                var fileStorage = new FileStorageService(uploadFolder);
+                var chemins = await fileStorage.SaveFilesAsync(fichiers);
+
+                for (int i = 0; i < fichiers.Count; i++)
+                {
+                    var piece = new PieceJointeNc
+                    {
+                        NomFichier = fichiers[i].FileName,
+                        CheminFichier = chemins[i]
+                    };
+                    detailsObj.PiecesJointes.Add(piece);
+                }
+            }
+
+            if (!TryValidateModel(detailsObj))
                 return BadRequest(ModelState);
 
              var matricule = HttpContext.Session.GetString("matricule");
@@ -170,42 +246,98 @@ namespace api_SMI.Controllers
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
             }
 
-            _service.DraftToDeclare(details, matricule);
+            _service.DraftToDeclare(detailsObj, matricule);
 
-            return Ok(new { id = details.NC.Id });
+            return Ok(new { id = detailsObj.NC.Id });
         }
 
         [HttpPost("updateDraft/{id}")]
-        public IActionResult UpdateDraft(int id, [FromBody] NCDetails details)
+        // Accepts multipart/form-data with a JSON part named "details" and optional file parts named "fichiers".
+        public async Task<IActionResult> UpdateDraft(int id, [FromForm] string details, [FromForm] List<IFormFile>? fichiers)
         {
-            if (details == null || details.NC == null)
+            if (string.IsNullOrEmpty(details))
                 return BadRequest("Invalid NCDetails data.");
 
-            if (id != details.NC.Id)
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var detailsObj = JsonSerializer.Deserialize<NCDetails>(details, options);
+            if (detailsObj == null || detailsObj.NC == null)
+                return BadRequest("Invalid NCDetails data.");
+
+            if (id != detailsObj.NC.Id)
                 return BadRequest("L'ID dans l'URL ne correspond pas à l'ID du corps.");
 
-             var matricule = HttpContext.Session.GetString("matricule");
+            var matricule = HttpContext.Session.GetString("matricule");
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
             }
 
-            _service.Update(details,matricule);
+            // Ensure PiecesJointes list exists
+            if (detailsObj.PiecesJointes == null)
+                detailsObj.PiecesJointes = new List<PieceJointeNc>();
 
-            return Ok(new { id = details.NC.Id });
+            detailsObj.PiecesJointes = new List<PieceJointeNc>();
+            if (fichiers != null && fichiers.Count > 0)
+            {
+                var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+                var fileStorage = new FileStorageService(uploadFolder);
+                var chemins = await fileStorage.SaveFilesAsync(fichiers);
+
+                for (int i = 0; i < fichiers.Count; i++)
+                {
+                    var piece = new PieceJointeNc
+                    {
+                        NomFichier = fichiers[i].FileName,
+                        CheminFichier = chemins[i]
+                    };
+                    detailsObj.PiecesJointes.Add(piece);
+                }
+            }
+
+            _service.Update(detailsObj, matricule);
+
+            return Ok(new { id = detailsObj.NC.Id });
         }
 
         [HttpPost("updateDeclare/{id}")]
-        public IActionResult UpdateDeclare(int id, [FromBody] NCDetails details)
+        // Accepts multipart/form-data with a JSON part named "details" and optional file parts named "fichiers".
+        public async Task<IActionResult> UpdateDeclare(int id, [FromForm] string details, [FromForm] List<IFormFile>? fichiers)
         {
-            if (details == null || details.NC == null)
+            if (string.IsNullOrEmpty(details))
                 return BadRequest("Invalid NCDetails data.");
 
-            if (id != details.NC.Id)
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var detailsObj = JsonSerializer.Deserialize<NCDetails>(details, options);
+            if (detailsObj == null || detailsObj.NC == null)
+                return BadRequest("Invalid NCDetails data.");
+
+            if (id != detailsObj.NC.Id)
                 return BadRequest("L'ID dans l'URL ne correspond pas à l'ID du corps.");
 
+            // Save uploaded files (if any) and add to detailsObj.PiecesJointes
+            if (detailsObj.PiecesJointes == null)
+                detailsObj.PiecesJointes = new List<PieceJointeNc>();
+
+            detailsObj.PiecesJointes = new List<PieceJointeNc>();
+            if (fichiers != null && fichiers.Count > 0)
+            {
+                var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+                var fileStorage = new FileStorageService(uploadFolder);
+                var chemins = await fileStorage.SaveFilesAsync(fichiers);
+
+                for (int i = 0; i < fichiers.Count; i++)
+                {
+                    var piece = new PieceJointeNc
+                    {
+                        NomFichier = fichiers[i].FileName,
+                        CheminFichier = chemins[i]
+                    };
+                    detailsObj.PiecesJointes.Add(piece);
+                }
+            }
+
             // Force la validation personnalisée
-            if (!TryValidateModel(details))
+            if (!TryValidateModel(detailsObj))
                 return BadRequest(ModelState);
 
              var matricule = HttpContext.Session.GetString("matricule");
@@ -214,9 +346,9 @@ namespace api_SMI.Controllers
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
             }
 
-            _service.Update(details,matricule);
+            _service.Update(detailsObj,matricule);
 
-            return Ok(new { id = details.NC.Id });
+            return Ok(new { id = detailsObj.NC.Id });
         }
 
         [HttpPost("qualifier/{id}")]

@@ -25,6 +25,7 @@ namespace api_SMI.Services
 
         public void Add(Processus processus)
         {
+            processus.Status = true;
             _repository.Add(processus);
         }
 
@@ -46,7 +47,9 @@ namespace api_SMI.Services
             foreach (var copilote in copilotes)
                 _copiloteRepository.Delete(copilote.Id);
 
-            _repository.Delete(id);
+            var processus = _repository.GetById(id);
+            processus.Status = false;
+            _repository.Update(processus);
         }
     }
 }

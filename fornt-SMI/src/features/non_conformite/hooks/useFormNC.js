@@ -52,7 +52,8 @@ export const useFormNC = (editId = null) => {
     }))
     const payload = { nc, piecesJointes, processusConcerne }
     try {
-      const created = await declareNC(payload)
+      // include actual File objects as `_files` so backend receives multipart files
+      const created = await declareNC({ ...payload, _files: files })
       if (formRef.current) formRef.current.reset()
       //setEmetteur('')
       setDateTimeDeclare('')
@@ -71,7 +72,7 @@ export const useFormNC = (editId = null) => {
       // Try to navigate to the fiche for the created NC
       const newId = created?.nc?.id || created?.id || created?.idNc || created?.nc?.idNc
       if (newId) {
-        navigate(`/nc/fiche/${newId}`)
+        navigate(`/nc/list/fiche/${newId}`)
       } else {
         // fallback to list (declaration panel)
         navigate('/nc/list', { state: { defaultPanel: 'declaration' } })
@@ -119,7 +120,7 @@ export const useFormNC = (editId = null) => {
     }))
     const payload = { nc, piecesJointes, processusConcerne }
     try {
-      const created = await draftNC(payload)
+      const created = await draftNC({ ...payload, _files: files })
       if (formRef.current) formRef.current.reset()
       setEmetteur('')
       setDateTimeDeclare('')
@@ -137,7 +138,7 @@ export const useFormNC = (editId = null) => {
       setShowToast(true)
       const newId = created?.nc?.id || created?.id || created?.idNc || created?.nc?.idNc
       if (newId) {
-        navigate(`/nc/fiche/${newId}`)
+        navigate(`/nc/list/fiche/${newId}`)
       } else {
         navigate('/nc/list', { state: { defaultPanel: 'brouillon' } })
       }
@@ -186,12 +187,12 @@ export const useFormNC = (editId = null) => {
     }))
     const payload = { nc, piecesJointes, processusConcerne }
     try {
-      // if datetimedeclare null updateDraftNC
-      // else updateDeclareNC
+      // include files on update by passing _files so backend receives multipart files
+      const updatePayload = { ...payload, _files: files }
       if (!dateTimeDeclare) {
-        await updateDraftNC(editId, payload)
+        await updateDraftNC(editId, updatePayload)
       } else {
-        await updateDeclareNC(editId, payload)
+        await updateDeclareNC(editId, updatePayload)
       }
       if (formRef.current) formRef.current.reset()
       //setDateTimeDeclare('')
@@ -208,7 +209,7 @@ export const useFormNC = (editId = null) => {
       setPopMessage('Modification enregistrée avec succès !')
       setShowToast(true)
       // After update, navigate to the fiche for this NC
-      if (editId) navigate(`/nc/fiche/${editId}`)
+      if (editId) navigate(`/nc/list/fiche/${editId}`)
     } catch (error) {
       if (error.response && error.response.data) {
         setErrors(error.response.data)

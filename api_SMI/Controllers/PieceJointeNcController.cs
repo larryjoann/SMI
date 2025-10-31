@@ -1,6 +1,8 @@
 using api_SMI.Models;
 using api_SMI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
+using System.IO;
 
 namespace api_SMI.Controllers
 {
@@ -21,11 +23,13 @@ namespace api_SMI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] IFormFile fichier, [FromForm] int idNc)
         {
+            if (fichier == null || fichier.Length == 0)
+                return BadRequest("Aucun fichier envoyé.");
+
             var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
             var fileStorage = new FileStorageService(uploadFolder);
 
             var cheminRelatif = await fileStorage.SaveFileAsync(fichier);
-
             var piece = new PieceJointeNc
             {
                 IdNc = idNc,
@@ -47,8 +51,8 @@ namespace api_SMI.Controllers
             var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
             var fileStorage = new FileStorageService(uploadFolder);
 
-            var pieces = new List<PieceJointeNc>();
             var chemins = await fileStorage.SaveFilesAsync(fichiers);
+            var pieces = new List<PieceJointeNc>();
 
             for (int i = 0; i < fichiers.Count; i++)
             {
@@ -61,6 +65,7 @@ namespace api_SMI.Controllers
                 pieces.Add(piece);
             }
 
+            Console.WriteLine($"Nombre de fichiers uploadés: {pieces.Count}");
             _service.AddRange(pieces);
 
             return Ok(pieces);
@@ -90,6 +95,36 @@ namespace api_SMI.Controllers
         {
             var pieces = _service.GetByNonConformite(idNc);
             return Ok(pieces);
+        }
+
+        // Télécharger une pièce jointe par son id
+        [HttpGet("download/{id}")]
+        public IActionResult Download(int id)
+        {
+            var piece = _service.GetById(id);
+            // Console.WriteLine("Téléchargement de la pièce jointe ID: " + id);
+            // Console.WriteLine("Détails de la pièce jointe: " + (piece != null ? piece.NomFichier : "Non trouvée"));
+            // Console.WriteLine("Cheminde la pièce jointe: " + (piece != null ? piece.CheminFichier : "Non trouvée"));
+            if (piece == null)
+                return NotFound();
+
+            var relativePath = (piece.CheminFichier ?? string.Empty).Replace('/', Path.DirectorySeparatorChar).TrimStart(Path.DirectorySeparatorChar);
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), relativePath);
+
+            if (!System.IO.File.Exists(filePath))
+                return NotFound();
+
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(piece.NomFichier ?? filePath, out var contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+
+            var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+
+            Response.Headers["Content-Disposition"] = $"attachment; filename=\"{piece.NomFichier}\"";
+
+            return File(stream, contentType, piece.NomFichier);
         }
 
         // Supprimer une pièce jointe

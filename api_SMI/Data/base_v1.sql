@@ -156,7 +156,7 @@ CREATE TABLE Non_conformite (
     FOREIGN KEY(id_lieu) REFERENCES Lieu(id),
     FOREIGN KEY(id_type_nc) REFERENCES Type_nc(id)
 );
-
+--ok
 CREATE TABLE piece_jointe_nc (
     id INT IDENTITY PRIMARY KEY,
     id_nc INT NOT NULL,
@@ -166,7 +166,7 @@ CREATE TABLE piece_jointe_nc (
     FOREIGN KEY(id_nc) REFERENCES non_conformite(id)
 );
 
-
+--ok
 CREATE TABLE emetteur_nc (
     id INT IDENTITY PRIMARY KEY,
     id_personnel INT NULL,
@@ -183,14 +183,14 @@ CREATE TABLE Processus_concerne_nc (
     FOREIGN KEY(id_nc) REFERENCES Non_conformite(id),
     FOREIGN KEY(id_processus) REFERENCES Processus(id)
 );
-
+--ok
 CREATE TABLE nc_brouillon (
     id INT IDENTITY PRIMARY KEY,
     id_nc INT NOT NULL,
     date DATE DEFAULT CAST(GETDATE() AS DATE),
     FOREIGN KEY(id_nc) REFERENCES non_conformite(id)
 );
-
+--ok
 CREATE TABLE nc_actif (
     id INT IDENTITY PRIMARY KEY,
     id_nc INT NOT NULL,
@@ -202,7 +202,7 @@ CREATE TABLE Status_nc (
     nom VARCHAR(50),
     descr VARCHAR(MAX)
 );
-
+--ok
 CREATE TABLE status_nc_nc (
     id INT IDENTITY PRIMARY KEY,
     date DATE DEFAULT CAST(GETDATE() AS DATE),
@@ -218,7 +218,7 @@ CREATE TABLE Priorite_nc (
     nom VARCHAR(50),
     descr VARCHAR(MAX)
 );
-
+--ok
 CREATE TABLE priorite_nc_nc (
     id INT IDENTITY PRIMARY KEY,
     date DATE DEFAULT CAST(GETDATE() AS DATE),
@@ -227,7 +227,7 @@ CREATE TABLE priorite_nc_nc (
     FOREIGN KEY(id_nc) REFERENCES non_conformite(id),
     FOREIGN KEY(id_priorite_nc) REFERENCES priorite_nc(id)
 );
-
+--ok
 CREATE TABLE commentaire_nc (
     id INT IDENTITY PRIMARY KEY,
     datetime DATETIME DEFAULT GETDATE(),
@@ -237,7 +237,7 @@ CREATE TABLE commentaire_nc (
     FOREIGN KEY(id_nc) REFERENCES non_conformite(id),
     FOREIGN KEY(id_personnel) REFERENCES personnel(id)
 );
-
+--ok
 CREATE TABLE analyse_nc (
     id INT IDENTITY PRIMARY KEY,
     id_nc INT NOT NULL,
@@ -261,29 +261,35 @@ CREATE TABLE piece_jointe_nc_cloture (
 -- =========================
 -- 5. Plan d'action
 -- =========================
-
-CREATE TABLE source_action (
+CREATE TABLE PA_SMI (
     id INT IDENTITY PRIMARY KEY,
+    id_nc INT NOT NULL,
+    date_creation DATE DEFAULT CAST(GETDATE() AS DATE),
+    date_cloture_prevue DATE,
+    date_cloture_reelle DATE,
     descr VARCHAR(MAX),
-    id_entite INT NOT NULL,
-    id_objet INT,
-    FOREIGN KEY(id_entite) REFERENCES entite(id)
+    FOREIGN KEY(id_nc) REFERENCES Non_conformite(id)
 );
 
 CREATE TABLE action (
     id INT IDENTITY PRIMARY KEY,
-    date DATE DEFAULT CAST(GETDATE() AS DATE),
-    date_constat DATE DEFAULT CAST(GETDATE() AS DATE),
-    constat VARCHAR(MAX),
+    date_debut DATE DEFAULT CAST(GETDATE() AS DATE),
     descr VARCHAR(MAX),
-    ressources VARCHAR(MAX),
-    moyen_de_verif VARCHAR(MAX),
-    efficacite VARCHAR(MAX),
-    id_lieu INT NOT NULL,
-    id_source_action INT NOT NULL,
-    FOREIGN KEY(id_lieu) REFERENCES lieu(id),
-    FOREIGN KEY(id_source_action) REFERENCES source_action(id)
+    date_fin_prevue DATE,
+    date_fin_reelle DATE,
+    avacement INT,
+    id_pa_smi INT NOT NULL,
 );
+
+CREATE TABLE source_action (
+    id INT IDENTITY PRIMARY KEY,
+    id_action INT NOT NULL,
+    id_entite INT NOT NULL,
+    id_objet INT NOT NULL,
+    FOREIGN KEY(id_entite) REFERENCES entite(id),
+    FOREIGN KEY(id_action) REFERENCES action(id),
+);
+
 
 CREATE TABLE processus_concerne_action (
     id INT IDENTITY PRIMARY KEY,

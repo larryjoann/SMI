@@ -35,6 +35,7 @@ CREATE TABLE Processus (
     id_categorie_processus INT NOT NULL,
     contexte VARCHAR(MAX),
     finalite VARCHAR(MAX),
+    status BIT NOT NULL DEFAULT 1,
     FOREIGN KEY(id_categorie_processus) REFERENCES Categorie_processus(id)
 );
 

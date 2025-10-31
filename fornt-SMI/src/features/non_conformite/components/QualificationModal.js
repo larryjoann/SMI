@@ -14,8 +14,11 @@ export default function QualificationModal({ visible, onClose, nc, processusConc
   const [loading, setLoading] = useState(false)
   const [confirmVisible, setConfirmVisible] = useState(false)
   const [pendingStatus, setPendingStatus] = useState(null)
+  const [internalVisible, setInternalVisible] = useState(visible)
 
   useEffect(() => {
+    // sync prop visible to internalVisible and initialize selectedProcessus
+    setInternalVisible(visible)
     if (visible) {
       const init = (processusConcerne || []).map(p => ({ value: p.processus?.id, label: p.processus?.nom }))
       setSelectedProcessus(init)
@@ -47,17 +50,24 @@ export default function QualificationModal({ visible, onClose, nc, processusConc
       setLoading(false)
       if (res && res.data) {
         onSuccess && onSuccess(res.data)
+        // close both modals: notify parent and hide internal
+        setInternalVisible(false)
         onClose && onClose()
       }
     } catch (err) {
       setLoading(false)
       console.error('Erreur qualification', err)
+      // Re-open the qualification modal so user can retry
+      setConfirmVisible(false)
+      setInternalVisible(true)
       // TODO: afficher erreur utilisateur
     }
   }
 
   const openConfirm = (idStatus) => {
     setPendingStatus(idStatus)
+    // hide the qualification modal and open the confirmation modal (successive modals behaviour)
+    setInternalVisible(false)
     setConfirmVisible(true)
   }
 
@@ -71,8 +81,8 @@ export default function QualificationModal({ visible, onClose, nc, processusConc
   }
 
   return (
-    <>
-    <CModal alignment="center" visible={visible} onClose={onClose}>
+  <>
+  <CModal alignment="center" visible={internalVisible} onClose={() => { setInternalVisible(false); onClose && onClose(); }}>
       <CModalHeader>
         <CModalTitle>
           <CIcon icon={cilStar} className="me-2" size='lg' />
@@ -90,19 +100,19 @@ export default function QualificationModal({ visible, onClose, nc, processusConc
       <CModalFooter className='px-0'>
         <CRow className="w-100 g-2">
           <CCol xs={12} sm={4}>
-            <CButton className="w-100" color="non_recevable" disabled={loading} onClick={() => openConfirm(4)}>
+      <CButton className="w-100" color="non_recevable" disabled={loading} onClick={() => openConfirm(4)}>
               <CIcon icon={cilX} className="me-2" />
               Non-reçevable
             </CButton>
           </CCol>
           <CCol xs={12} sm={4}>
-            <CButton className="w-100" color="a_clarifier" disabled={loading} onClick={() => openConfirm(2)}>
+      <CButton className="w-100" color="a_clarifier" disabled={loading} onClick={() => openConfirm(2)}>
               <CIcon icon={cilInfo} className="me-2" />
               A clarifier
             </CButton>
           </CCol>
           <CCol xs={12} sm={4}>
-            <CButton className="w-100" color="recevable" disabled={loading} onClick={() => openConfirm(3)}>
+      <CButton className="w-100" color="recevable" disabled={loading} onClick={() => openConfirm(3)}>
               <CIcon icon={cilCheck} className="me-2" />
               Recevable
             </CButton>
@@ -112,7 +122,7 @@ export default function QualificationModal({ visible, onClose, nc, processusConc
     </CModal>
 
     {/* Confirmation modal before sending the qualification */}
-    <CModal alignment="center" visible={confirmVisible} onClose={() => setConfirmVisible(false)}>
+  <CModal alignment="center" visible={confirmVisible} onClose={() => { setConfirmVisible(false); setInternalVisible(true); }}>
       <CModalHeader>
         <CModalTitle>Confirmer l'attribution</CModalTitle>
       </CModalHeader>
@@ -130,7 +140,7 @@ export default function QualificationModal({ visible, onClose, nc, processusConc
         )}
       </CModalBody>
       <CModalFooter>
-        <CButton color="secondary" onClick={() => setConfirmVisible(false)} disabled={loading}>Annuler</CButton>
+  <CButton color="secondary" onClick={() => { setConfirmVisible(false); setInternalVisible(true); }} disabled={loading}>Annuler</CButton>
         <CButton color="primary" onClick={handleConfirm} disabled={loading}>Confirmer</CButton>
       </CModalFooter>
     </CModal>

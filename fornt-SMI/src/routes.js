@@ -1,3 +1,4 @@
+import { exact } from 'prop-types'
 import React from 'react'
 
 // Notifications
@@ -19,6 +20,10 @@ const Fiche_NC = React.lazy(() => import('./features/non_conformite/pages/FicheN
 const Arcive_NC = React.lazy(() => import('./features/non_conformite/pages/ArchiveNC'))
 const HistoActiviteNC = React.lazy(() => import('./features/non_conformite/pages/HistoActiviteNC'))
 
+//Administration
+// const Roles = React.lazy(() => import('./features/administration/pages/Roles'))
+const Logs = React.lazy(() => import('./features/admin/pages/Logs'))
+
 const routes = [
   { path: '/', exact: true, name: 'Home' },
 
@@ -26,21 +31,24 @@ const routes = [
 
   { path: '/pilotage', name: 'Pilotage', element: Cartographie, exact: true },
   { path: '/pilotage/cartographie', name: 'Cartographie des processus', element: Cartographie },
-  { path: '/pilotage/formprocessus', name: 'Form processus', element: FormProcessus },
-  { path: '/pilotage/formprocessus/:id', name: 'Form processus', element: FormProcessus },
-  { path: '/pilotage/ficheprocessus/:id', name: 'Fiche processus', element: FicheProcessus },
+  { path: '/pilotage/cartographie/formprocessus', name: 'Insertion', element: FormProcessus , exact: true},
+  { path: '/pilotage/cartographie/formprocessus/:id', name: 'Modification', element: FormProcessus},
+  { path: '/pilotage/cartographie/ficheprocessus/:id', name: 'Fiche processus', element: FicheProcessus },
 
   { path: '/indicateur', name: 'Indicateur', element: Liste_indicateur, exact: true },
   { path: '/indicateur/tableau', name: 'Saisie des indicateurs', element: Liste_indicateur },
   { path: '/indicateur/form', name: 'Form indicateur', element: Form_indicateur },
 
   { path: '/nc', name: 'Non conformité', element: Liste_NC, exact: true },
-  { path: '/nc/list', name: 'Liste des Non-conformité', element: Liste_NC },
-  { path: '/nc/archive', name: 'Archive des Non-conformité', element: Arcive_NC },
-  { path: '/nc/form', name: 'Déclaration de Non-conformité', element: Form_NC },
-  { path: '/nc/form/:id', name: 'Modification de Non-conformité', element: Form_NC },
-  { path: '/nc/fiche/:id', name: 'Fiche non-conformité', element: Fiche_NC },
-  { path: '/nc/histoactivite/:id', name: 'Historique des activités NC', element: HistoActiviteNC },
+    { path: '/nc/form', name: 'Déclaration', element: Form_NC },
+  { path: '/nc/list', name: 'Liste', element: Liste_NC },
+  { path: '/nc/list/archive', name: 'Archive', element: Arcive_NC },
+  { path: '/nc/list/fiche/:id', name: 'Fiche', element: Fiche_NC },
+  { path: '/nc/list/fiche/histoactivite/:id', name: 'Historique des activités', element: HistoActiviteNC },
+  { path: '/nc/list/form/:id', name: 'Modification', element: Form_NC },
+
+  { path: '/administration', name: 'Administration', element: Logs, exact: true },
+  { path: '/administration/logs', name: 'Logs', element: Logs },
   
 ]
 

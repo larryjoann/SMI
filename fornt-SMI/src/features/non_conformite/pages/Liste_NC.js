@@ -59,7 +59,7 @@ const Liste_NC = () => {
                         key='1'
                         shape=""
                         className="mb-3"
-                        href='#/nc/archive'
+                        href='#/nc/list/archive'
                     >
                         <CIcon icon={cilStorage} className="me-2" />
                         Archives

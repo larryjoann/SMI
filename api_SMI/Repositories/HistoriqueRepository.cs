@@ -1,6 +1,7 @@
 using api_SMI.Data;
 using api_SMI.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace api_SMI.Repositories
 {
@@ -18,6 +19,7 @@ namespace api_SMI.Repositories
                 .Include(h => h.Collaborateur)
                 .Include(h => h.Operation)
                 .Include(h => h.Entite)
+                .OrderByDescending(h => h.Datetime)
                 .ToList();
 
         public Historique? GetById(int id)

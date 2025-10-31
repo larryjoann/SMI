@@ -156,7 +156,7 @@ const TousPanel = ({ ncData = [], loading = false, error = null, onReload }) => 
           className="mb-2 card-list-hover"
           key={nc.nc.id}
           style={{ cursor: 'pointer', opacity: archivedId === nc.nc.id ? 0.5 : 1 }}
-          onClick={() => navigate(`/nc/fiche/${nc.nc.id}`)}
+          onClick={() => navigate(`/nc/list/fiche/${nc.nc.id}`)}
         >
           <CCardBody>
             <CRow>
@@ -205,7 +205,7 @@ const TousPanel = ({ ncData = [], loading = false, error = null, onReload }) => 
                               href="#"
                               onClick={e => {
                                 e.preventDefault();
-                                navigate(`/nc/form/${nc.nc.id}`);
+                                navigate(`/nc/list/form/${nc.nc.id}`);
                               }}
                             >
                               <CIcon icon={cilPen} className="text-warning me-3" />

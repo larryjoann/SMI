@@ -57,7 +57,7 @@ const AppHeader = () => {
         </div>
 
         <CHeaderNav className="ms-auto">
-          <CDropdown variant="nav-item" placement="bottom-end">
+          {/* <CDropdown variant="nav-item" placement="bottom-end">
             <CDropdownToggle caret={false}>
               {colorMode === 'dark' ? (
                 <CIcon icon={cilMoon} size="lg" />
@@ -96,7 +96,7 @@ const AppHeader = () => {
                 <CIcon className="me-2" icon={cilContrast} size="lg" /> Auto
               </CDropdownItem>
             </CDropdownMenu>
-          </CDropdown>
+          </CDropdown> */}
           <CNavItem>
             <CNavLink href="#/notifications">
               <div className="position-relative">

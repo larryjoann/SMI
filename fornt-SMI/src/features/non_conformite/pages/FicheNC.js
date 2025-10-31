@@ -4,6 +4,7 @@ import {
   CCard, CCardBody, CCardHeader, 
   CForm, CFormInput,
   CButton , CFormFeedback ,CAlert, CBadge,
+  CAvatar,
   CInputGroup
 } from '@coreui/react'
 import { CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle, CLink, CPopover, CTooltip } from '@coreui/react'
@@ -42,14 +43,23 @@ const FicheNC = () => {
   const downloadAttachment = async (pj, idx) => {
     setDownloadingIndex(idx)
     try {
-      let fileUrl = pj.cheminFichier || pj.chemin || pj.url || ''
-      if (!fileUrl) return
-      // convert relative paths to absolute using API_URL
-      if (!/^https?:\/\//i.test(fileUrl) && !fileUrl.startsWith('//')) {
-        const base = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL
-        fileUrl = fileUrl.startsWith('/') ? `${base}${fileUrl}` : `${base}/${fileUrl}`
+      // Prefer calling backend download endpoint when an id is available
+      const apiBase = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL
+      // Possible id fields: id, idPieceJointe, idPJ
+      const pjId = pj.id || pj.idPieceJointe || pj.idPJ || pj.idPiece
+      let res
+      if (pjId) {
+        const downloadUrl = `${apiBase}/PieceJointeNc/download/${pjId}`
+        res = await fetch(downloadUrl, { credentials: 'include' })
+      } else {
+        let fileUrl = pj.cheminFichier || pj.chemin || pj.url || ''
+        if (!fileUrl) return
+        // convert relative paths to absolute using API_URL
+        if (!/^https?:\/\//i.test(fileUrl) && !fileUrl.startsWith('//')) {
+          fileUrl = fileUrl.startsWith('/') ? `${apiBase}${fileUrl}` : `${apiBase}/${fileUrl}`
+        }
+        res = await fetch(fileUrl, { credentials: 'include' })
       }
-      const res = await fetch(fileUrl, { credentials: 'include' })
       if (!res.ok) throw new Error(`Erreur téléchargement (${res.status})`)
       const blob = await res.blob()
       // try to derive filename from content-disposition header
@@ -74,32 +84,11 @@ const FicheNC = () => {
       setShowDownloadToast(true)
     } catch (err) {
       console.error('Download failed', err)
-      // Fallback: create and download an empty file with the expected filename
-      const filename = pj.nomFichier || (() => {
-        try {
-          const parts = (pj.cheminFichier || pj.chemin || pj.url || '').split('/')
-          return parts[parts.length - 1] || 'download'
-        } catch { return 'download' }
-      })()
-      try {
-        const emptyBlob = new Blob([''], { type: 'application/octet-stream' })
-        const tempUrl = window.URL.createObjectURL(emptyBlob)
-        const a = document.createElement('a')
-        a.href = tempUrl
-        a.download = filename
-        document.body.appendChild(a)
-        a.click()
-        a.remove()
-        window.URL.revokeObjectURL(tempUrl)
-        // setDownloadPopType('warning')
-        // setDownloadPopMessage(`Fichier introuvable : téléchargement d'un fichier vide nommé "${filename}"`)
-        // setShowDownloadToast(true)
-      } catch (e) {
-        console.error('Fallback empty-file download failed', e)
-        // setDownloadPopType('danger')
-        // setDownloadPopMessage(err?.message || 'Erreur lors du téléchargement')
-        // setShowDownloadToast(true)
-      }
+      // Show an error popup instead of creating/downloading an empty file
+      const msg = err?.message || 'Erreur lors du téléchargement'
+      setDownloadPopType('danger')
+      setDownloadPopMessage(msg)
+      setShowDownloadToast(true)
     }
     finally {
       setDownloadingIndex(null)
@@ -184,7 +173,7 @@ const FicheNC = () => {
             <CButton
             color='secondary'
             className="mb-3"
-            onClick={() => navigate(`/nc/histoactivite/${nc?.id || id}`)}
+            onClick={() => navigate(`/nc/list/fiche/histoactivite/${nc?.id || id}`)}
             >
             <CIcon icon={cilHistory} className="me-2" />
             Histo-activité
@@ -199,111 +188,99 @@ const FicheNC = () => {
       />
       {/* Status moved into identification card below */}
       <CForm >
-        <CCard className='mb-4'>
-          <CCardHeader className="text-center">
-            <span className="h6">IDENTIFICATION DE LA NON-CONFORMITE</span>
-          </CCardHeader>
-          <CCardBody>
-            <CRow>
-              <CCol xs={12} sm={6} md={6} className='mb-3'>
-                <span className='h6' >Type :</span>
-                <a> {nc.typeNc?.nom || ''}</a>
-              </CCol>
-              <CCol xs={12} sm={6} md={6} className='mb-3'>
-                <span className='h6' >Site :</span>
-                <a> {nc.lieu?.nom || ''}</a>
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol xs={12} sm={12} md={12} className='mb-3'>
-                <span className='h6'>Processus concerné(s) :</span>
-                <a> {processusConcerne?.map(p => p.processus?.nom).filter(Boolean).join(' , ')}</a>
-              </CCol>
-            </CRow>
-            <CRow>
-              <CCol xs={12} sm={6} md={6} className='mb-3'>
-                <span className='h6'>Statut :</span>
-                {' '}
-                {nc?.statusNc ? (
-                  <CBadge color={nc.statusNc.color || 'secondary'} className="ms-2">{nc.statusNc.nom}</CBadge>
-                ) : (
-                  <a className='ms-2'>-</a>
-                )}
-              </CCol>
-            </CRow>
-          </CCardBody>
-        </CCard>
-
-        {/* Emetteur card (improved layout) */}
-        <CCard className='mb-4'>
-          <CCardHeader className="text-center">
-            <span className="h6">EMETTEUR</span>
-          </CCardHeader>
-          <CCardBody>
-            {nc?.emetteur ? (
-              <CRow className="align-items-center">
-                <CCol xs={12} md={3} className="d-flex align-items-center mb-3 mb-md-0">
-                  <div
-                    style={{
-                      width: 64,
-                      height: 64,
-                      borderRadius: '50%',
-                      background: '#6b7785',
-                      color: '#fff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontWeight: 700,
-                      marginRight: 12,
-                      flexShrink: 0,
-                      fontSize: 18,
-                    }}
-                    aria-hidden
-                  >
-                    {(() => {
-                      const name = nc.emetteur.nomAffichage || nc.emetteur.nomComplet || nc.emetteur.matricule || ''
-                      return name.split(' ').map(n => n?.[0]).filter(Boolean).slice(0,2).join('').toUpperCase()
-                    })()}
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 16 }}>{nc.emetteur.nomAffichage || nc.emetteur.nomComplet}</div>
-                    <span className='text-muted'> {nc.emetteur.poste} </span>
-                  </div>
-                </CCol>
-                <CCol xs={12} md={9}>
-                  <CRow>
-                    <CCol xs={12} md={6} className="mb-2">
-                      <span className='h6'>Matricule : </span>
-                      <a > {nc.emetteur.matricule || '-'}</a>
+        <CRow>
+          <CCol xs={12} sm={12} md={6}>
+            <CCard className='mb-4'>
+              <CCardHeader className="text-center">
+                <span className="h6">IDENTIFICATION DE LA NON-CONFORMITE</span>
+              </CCardHeader>
+              <CCardBody>
+                <CRow>
+                  <CCol xs={12} sm={12} md={12} className='mb-3'>
+                    <span className='h6' >Type :</span>
+                    <a> {nc.typeNc?.nom || ''}</a>
+                  </CCol>
+                  <CCol xs={12} sm={12} md={12} className='mb-3'>
+                    <span className='h6' >Site :</span>
+                    <a> {nc.lieu?.nom || ''}</a>
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol xs={12} sm={12} md={12} className='mb-3'>
+                    <span className='h6'>Processus concerné(s) :</span>
+                    <a> {processusConcerne?.map(p => p.processus?.nom).filter(Boolean).join(' , ')}</a>
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol xs={12} sm={6} md={6} className='mb-3'>
+                    <span className='h6'>Statut :</span>
+                    {' '}
+                    {nc?.statusNc ? (
+                      <CBadge color={nc.statusNc.color || 'secondary'} className="ms-2">{nc.statusNc.nom}</CBadge>
+                    ) : (
+                      <a className='ms-2'>-</a>
+                    )}
+                  </CCol>
+                </CRow>
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol xs={12} sm={12} md={6}>
+            <CCard className='mb-4'>
+              <CCardHeader className="text-center">
+                <span className="h6">EMETTEUR</span>
+              </CCardHeader>
+              <CCardBody>
+                {nc?.emetteur ? (
+                  <CRow className="align-items-center">
+                    <CCol xs={12} sm={6} md={12} className="d-flex align-items-center mb-3">
+                      <CAvatar className="me-3 bg-secondary text-white" size="md">
+                        {(() => {
+                          const name = nc.emetteur.nomAffichage || nc.emetteur.nomComplet || nc.emetteur.matricule || ''
+                          return name.split(' ').map(n => n?.[0]).filter(Boolean).slice(0,2).join('').toUpperCase()
+                        })()}
+                      </CAvatar>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 16 }}>{nc.emetteur.nomAffichage || nc.emetteur.nomComplet}</div>
+                        <span className='text-muted'> {nc.emetteur.poste} </span>
+                      </div>
                     </CCol>
-                    <CCol xs={12} md={6} className="mb-2">
-                      <span className='h6'>Département : </span>
-                      <a>{nc.emetteur.departement || '-'}</a>
-                    </CCol>
-                    <CCol xs={12} md={6} className="mb-2">
-                      <span className='h6'>Email : </span>
-                      {nc.emetteur.courriel ? (
-                        <a href={`mailto:${nc.emetteur.courriel}`} style={{ fontWeight: 600 }}>{nc.emetteur.courriel}</a>
-                      ) : (
-                        <a>-</a>
-                      )}
-                    </CCol>
-                    <CCol xs={12} md={6} className="mb-2">
-                      <span className='h6'>Téléphone : </span>
-                      {nc.emetteur.telephone ? (
-                        <a href={`tel:${nc.emetteur.telephone}`} style={{ fontWeight: 600 }}>{nc.emetteur.telephone}</a>
-                      ) : (
-                        <a>-</a>
-                      )}
+                    <CCol xs={12} sm={6} md={12} className='mb-3'>
+                      <CRow>
+                        {/* <CCol xs={12} sm={12} md={12} className="mb-2">
+                          <span className='h6'>Matricule : </span>
+                          <a > {nc.emetteur.matricule || '-'}</a>
+                        </CCol>
+                        <CCol xs={12} sm={12} md={12} className="mb-2">
+                          <span className='h6'>Département : </span>
+                          <a>{nc.emetteur.departement || '-'}</a>
+                        </CCol> */}
+                        <CCol xs={12} sm={12} md={12} className="mb-3">
+                          <span className='h6'>Email : </span>
+                          {nc.emetteur.courriel ? (
+                            <a href={`mailto:${nc.emetteur.courriel}`} style={{ fontWeight: 600 }}>{nc.emetteur.courriel}</a>
+                          ) : (
+                            <a>-</a>
+                          )}
+                        </CCol>
+                        <CCol xs={12} sm={12} md={12} className="mb-3">
+                          <span className='h6'>Téléphone : </span>
+                          {nc.emetteur.telephone ? (
+                            <a href={`tel:${nc.emetteur.telephone}`} style={{ fontWeight: 600 }}>{nc.emetteur.telephone}</a>
+                          ) : (
+                            <a>-</a>
+                          )}
+                        </CCol>
+                      </CRow>
                     </CCol>
                   </CRow>
-                </CCol>
-              </CRow>
-            ) : (
-              <div className="text-muted">Aucun émetteur renseigné</div>
-            )}
-          </CCardBody>
-        </CCard>
+                ) : (
+                  <div className="text-muted">Aucun émetteur renseigné</div>
+                )}
+              </CCardBody>
+            </CCard>
+          </CCol>
+        </CRow>
 
         <CCard className='mb-4'>
           <CCardHeader className="text-center">
@@ -430,23 +407,7 @@ const FicheNC = () => {
                     .toUpperCase();
                   return (
                     <div key={c.id} className="d-flex mb-3">
-                      <div
-                        style={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: '50%',
-                          background: '#6b7785',
-                          color: '#fff',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          marginRight: 12,
-                          flexShrink: 0,
-                        }}
-                        aria-hidden
-                      >
-                        {initials}
-                      </div>
+                      <CAvatar className="me-3 bg-secondary text-white" size="md">{initials}</CAvatar>
                       <div className="flex-grow-1">
                         <div className="d-flex justify-content-between align-items-start">
                           <div>

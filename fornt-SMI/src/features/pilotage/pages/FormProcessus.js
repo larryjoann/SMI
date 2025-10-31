@@ -58,7 +58,7 @@ const FormProcessus = () => {
         </CCol>
         <CCol xs={3} className="d-flex justify-content-end"></CCol>
       </CRow>
-      <CCard>
+      <CCard className='mb-3'>
         <CCardHeader className="text-center">
           <span className="h6">{id ? "Modifier le processus" : "Identité du processus"}</span>
         </CCardHeader>
@@ -183,16 +183,16 @@ const FormProcessus = () => {
                 </CFormFeedback>
               </CCol>
             </CRow>
-            <CRow>
-              <CCol xs={12} className="d-flex justify-content-end">
-                <CButton color="primary" type="submit" disabled={isSubmitting}>
-                  {id ? "Mettre à jour" : "Inserer"}
-                </CButton>
-              </CCol>
-            </CRow>
           </CForm>
         </CCardBody>
       </CCard>
+      <CRow>
+        <CCol xs={12} className="d-flex justify-content-end">
+          <CButton color="primary" type="submit" disabled={isSubmitting}>
+            {id ? "Mettre à jour" : "Inserer"}
+          </CButton>
+        </CCol>
+      </CRow>
     </>
   )
 }

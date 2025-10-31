@@ -30,6 +30,7 @@ export function useProcessusForm(id, reset, setError, navigate) {
             matriculeCopilote: copiloteOptions,
             finalite: data.finalite || '',
             contexte: data.contexte || '',
+            status : data.status,
           })
         })
         .catch(err => {

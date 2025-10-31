@@ -34,6 +34,9 @@ namespace api_SMI.Models
         [Column("finalite")]
         public string? Finalite { get; set; }
 
+        [Column("status")]
+        public bool? Status { get; set; }
+
     // Navigation vers plusieurs pilotes
     public ICollection<Pilote> Pilotes { get; set; } = new List<Pilote>();
 

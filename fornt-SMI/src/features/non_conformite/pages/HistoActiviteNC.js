@@ -58,7 +58,7 @@ const HistoActiviteNC = () => {
                     <CButton
                         color="secondary"
                         className="mb-3"
-                       onClick={() => navigate(`/nc/fiche/${id}`)}
+                       onClick={() => navigate(`/nc/list/fiche/${id}`)}
                     >
                         <CIcon icon={cilArrowLeft} className="me-2" />
                         Retour
