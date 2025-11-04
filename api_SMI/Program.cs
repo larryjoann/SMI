@@ -139,7 +139,16 @@ builder.Services.AddScoped<HistoriqueRepository>();
 builder.Services.AddScoped<ValiditeProcessusRepository>();
 builder.Services.AddScoped<IValiditeProcessusService, ValiditeProcessusService>();
 builder.Services.AddScoped<ValiditeProcessusService>();
-
+builder.Services.AddScoped<ActionRepository>();
+builder.Services.AddScoped<IActionService, ActionService>();
+builder.Services.AddScoped<SuiviActionRepository>();
+builder.Services.AddScoped<ISuiviActionService, SuiviActionService>();
+builder.Services.AddScoped<SourceActionRepository>();
+builder.Services.AddScoped<ISourceActionService, SourceActionService>();
+builder.Services.AddScoped<ResponsableActionRepository>();
+builder.Services.AddScoped<IResponsableActionService, ResponsableActionService>();
+builder.Services.AddScoped<StatusActionRepository>();
+builder.Services.AddScoped<IStatusActionService, StatusActionService>();
 
 var app = builder.Build();
 

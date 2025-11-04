@@ -277,8 +277,7 @@ CREATE TABLE action (
     descr VARCHAR(MAX),
     date_fin_prevue DATE,
     date_fin_reelle DATE,
-    avacement INT,
-    id_pa_smi INT NOT NULL,
+    avancement INT,
 );
 
 CREATE TABLE source_action (

@@ -61,7 +61,7 @@ export function useProcessusForm(id, reset, setError, navigate) {
         setPopType('success')
         setPopMessage('Valeur modifiée avec succès')
         // After updating, go to the fiche (detail) page for this processus
-        navigate(`/pilotage/ficheprocessus/${id}`)
+        navigate(`/pilotage/cartographie/ficheprocessus/${id}`)
         setShowToast(true)
       } else {
         // Create and navigate to the created processus fiche when possible
@@ -72,10 +72,10 @@ export function useProcessusForm(id, reset, setError, navigate) {
         // Try to extract the new id from common response shapes
         const newId = created?.id || created?.idProcessus || created?.processus?.id
         if (newId) {
-          navigate(`/pilotage/ficheprocessus/${newId}`)
+          navigate(`/pilotage/cartographie/ficheprocessus/${newId}`)
         } else {
           // Fallback: go back to cartographie if we can't determine the id
-          navigate('/pilotage/cartographie')
+          navigate('/pilotage/cartographie/cartographie')
         }
         reset()
       }

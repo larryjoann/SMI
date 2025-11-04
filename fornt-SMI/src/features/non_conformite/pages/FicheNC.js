@@ -5,7 +5,9 @@ import {
   CForm, CFormInput,
   CButton , CFormFeedback ,CAlert, CBadge,
   CAvatar,
-  CInputGroup
+  CInputGroup,
+  CProgress,
+  CDropdown, CDropdownToggle, CDropdownMenu, CDropdownItem, CDropdownDivider
 } from '@coreui/react'
 import { CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle, CLink, CPopover, CTooltip } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -15,7 +17,11 @@ import { cilArrowLeft ,
   cilSend,
   cilPen,
   cilMagnifyingGlass,
-  cilFile
+  cilFile,
+  cilOptions,
+  cilX,
+  cilPlus,
+  cilTask,
 } from '@coreui/icons'
 import { useParams, useNavigate } from 'react-router-dom'
 import API_URL from '../../../api/API_URL'
@@ -23,6 +29,7 @@ import { Pop_up } from '../../../components/notification/Pop_up'
 import { useNCDetails } from '../hooks/useNCDetails'
 import QualificationModal from '../components/QualificationModal'
 import AnalyseCausesModal from '../components/AnalyseCausesModal'
+import ActionCurativeModal from '../components/ActionCurativeModal'
 import { createCommentaire } from '../services/nonConformiteService'
 import { CSpinner } from '@coreui/react'
 
@@ -32,6 +39,7 @@ const FicheNC = () => {
   const navigate = useNavigate();
   const [showQualifModal, setShowQualifModal] = useState(false)
   const [showAnalyseModal, setShowAnalyseModal] = useState(false)
+  const [showActionModal, setShowActionModal] = useState(false)
   const [selectedProcessus, setSelectedProcessus] = useState([])
   const [selectedCategorieCause, setSelectedCategorieCause] = useState([])
   const [hoveredFileIndex, setHoveredFileIndex] = useState(null)
@@ -100,6 +108,41 @@ const FicheNC = () => {
   const [commentError, setCommentError] = useState(null)
   const [commentSuccess, setCommentSuccess] = useState(false)
 
+  // Handlers for action card options (accept action as parameter)
+  const handleEditAction = (action) => {
+    // TODO: open edit modal or navigate to edit form
+    console.log('Edit corrective action', action)
+  }
+
+  const handleDeleteAction = async (action) => {
+    console.log('Delete corrective action', action)
+    // find the source record that links this action to the NC (identite/idEntite = 2)
+    const src = Array.isArray(action.sources) ? action.sources.find(s => (s.idEntite === 2) && (s.idObjet === nc?.id)) : null
+    const idToDelete = src.id 
+    if (!idToDelete) {
+      console.log('No id available to delete for action', action)
+      return
+    }
+    console.log('Attempting delete - id:', idToDelete, 'for action', action.id, 'nc', nc.id)
+    try {
+      const deleteUrl = `${API_URL}/SourceAction/${idToDelete}`
+      const res = await fetch(deleteUrl, { method: 'DELETE', credentials: 'include' })
+      if (!res.ok) {
+        const body = await res.text().catch(() => '')
+        console.error('Delete failed', res.status, body)
+        // minimal feedback for now
+        window.alert(`Suppression échouée (${res.status})`)
+        return
+      }
+      console.log('Delete succeeded for id', idToDelete)
+      // refresh details to reflect deletion
+      if (typeof refetch === 'function') await refetch()
+    } catch (err) {
+      console.error('Delete error', err)
+      window.alert('Erreur lors de la suppression')
+    }
+  }
+
   const handleSubmitComment = async () => {
     if (!newComment || !newComment.trim()) return
     setCommentLoading(true)
@@ -139,7 +182,7 @@ const FicheNC = () => {
   if (error) return <CAlert color="danger" className="text-center rounded-pill">{error}</CAlert>;
   if (!data) return null;
 
-  const { nc, piecesJointes, processusConcerne , causes, commentaires } = data;
+  const { nc, piecesJointes, processusConcerne , causes, commentaires, actions } = data;
   // Causes may come from top-level `data.causes` or inside `nc.causes` depending on API
 
   // Format date/heure
@@ -298,7 +341,7 @@ const FicheNC = () => {
               </CCol>
               <CCol xs={12} sm={12} md={12} className='mb-3'>
                 <span className='h6'>Description du fait :</span>
-                <div
+                <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: 8, whiteSpace: 'pre-wrap' }}
                   dangerouslySetInnerHTML={{ __html: nc.descr || '' }}
                 />
               </CCol>
@@ -346,18 +389,20 @@ const FicheNC = () => {
               </CCol>
               <CCol xs={12} sm={12} md={12} className='mb-3'>
                 <span className='h6'>Action curative :</span>
-                <a>{nc.actionCurative || ''}</a>
+                <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: 8, whiteSpace: 'pre-wrap' }}>
+                  {nc.actionCurative || ''}
+                </div>
               </CCol>
             </CRow>
           </CCardBody>
         </CCard>
         {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 2&&(
-        <CCard className='mb-4'>
+        <CCard className='mb-4 '>
           <CCardHeader className="position-relative text-center">
-                <span className="h6 mb-0 d-block">ANALYSE DES CAUSES</span>
+                <span className="h6 mb-0 d-block">ANALYSE DES CAUSES </span>
                 <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
                   <CButton
-                    size="sm"
+                    size="md"
                     onClick={() => {
                       const init = (causes || []).map(c => ({ value: c.idCategorieCauseNc, label: c.categorieCauseNc?.nom }))
                       setSelectedCategorieCause(init)
@@ -388,13 +433,126 @@ const FicheNC = () => {
             </CCardBody>
         </CCard>
       )}
-
+        {Array.isArray(actions) && actions.length > 0 && (
         <CCard className='mb-4'>
-          <CCardHeader className="text-center">
-            <span className="h6">COMMENTAIRES</span>
+          <CCardHeader className="position-relative text-center">
+            <span className="h6 mb-0 d-block">ACTION(s) CURATIVES</span>
+                <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
+                  <CButton
+                    size="md"
+                    onClick={() => {
+                      // open action curative modal
+                      setShowActionModal(true)
+                    }}
+                  >
+                    <CIcon icon={cilPlus} className="text-primary" />
+                  </CButton>
+                </div>
           </CCardHeader>
           <CCardBody>
-            {Array.isArray(commentaires) && commentaires.length > 0 ? (
+            {actions.map((action) => {
+                // pick the suivi with the most recent dateSuivi (not simply the last array item)
+                const lastSuivi = (Array.isArray(action.suivis) && action.suivis.length > 0)
+                  ? action.suivis.reduce((latest, s) => {
+                      if (!latest) return s
+                      const ds = s.dateSuivi ? new Date(s.dateSuivi) : null
+                      const dl = latest.dateSuivi ? new Date(latest.dateSuivi) : null
+                      if (!ds) return latest
+                      if (!dl) return s
+                      return ds > dl ? s : latest
+                    }, null)
+                  : null
+                const progress = lastSuivi && typeof lastSuivi.avancement === 'number' ? lastSuivi.avancement : 0
+                const statusLabel = action.statusAction.nom
+                const statusColor = action.statusAction.color
+                const dateDebutStr = action.dateDebut ? new Date(action.dateDebut).toLocaleDateString() : '-'
+                const dateFinStr = action.dateFinPrevue ? new Date(action.dateFinPrevue).toLocaleDateString() : '-'
+                const title = action.titre && action.titre.trim() !== '' ? action.titre : '(Sans titre)'
+                return (
+                  <CCard 
+                    className="mb-3 card-list-hover" 
+                    onClick={() => navigate(`/action/fiche/${action.id}`)}
+                    key={action.id}
+                    >
+                    <CCardBody className="position-relative">
+                      <div
+                        className="position-absolute end-0 top-0 me-2 mt-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <CDropdown alignment="end">
+                          <CDropdownToggle caret={false} className="p-0">
+                            <CIcon icon={cilOptions} className="text-dark" />
+                          </CDropdownToggle>
+                          <CDropdownMenu>
+                            <CDropdownItem
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteAction(action)
+                              }}
+                            >
+                              <CIcon icon={cilX} className="text-secondary me-3" />
+                              <span className="text-secondary">Détacher</span>
+                            </CDropdownItem>
+                            <CDropdownDivider />
+                            <CDropdownItem
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleEditAction(action)
+                              }}
+                            >
+                              <CIcon icon={cilPen} className="text-warning me-3" />
+                              <span className="text-warning">Modifier</span>
+                            </CDropdownItem>
+                          </CDropdownMenu>
+                        </CDropdown>
+                      </div>
+
+                      <div className="">
+                        {action.priorite && <><span className='h6'>Priorité : </span><CBadge color="danger" className="mb-3">{action.priorite.nom}</CBadge></>}
+                        <h6>{title}</h6>
+                        <p>{action.descr}</p>
+                        <span className='h6'>Status : </span><CBadge color={statusColor} className="mb-3">{statusLabel}</CBadge>
+                        <CProgress value={progress} variant="striped" animated>{progress}%</CProgress>
+                        <div className="d-flex justify-content-between align-items-center mt-2">
+                          <div>
+                            <span>{dateDebutStr} - {dateFinStr}</span>
+                          </div>
+                          <div className="d-flex align-items-center">
+                            {Array.isArray(action.responsables) && action.responsables.length > 0 ? (
+                              action.responsables.map((r) => {
+                                const name = r.responsable?.nomAffichage || r.responsable?.nomComplet || r.matriculeResponsable || ''
+                                const initials = name
+                                  .split(' ')
+                                  .map((n) => n?.[0])
+                                  .filter(Boolean)
+                                  .slice(0, 2)
+                                  .join('')
+                                  .toUpperCase()
+                                return (
+                                  <CAvatar key={r.id} className="ms-2 bg-secondary text-white" size="md">{initials}</CAvatar>
+                                )
+                              })
+                            ) : (
+                              <CAvatar className="ms-2 bg-secondary text-white" size="md">-</CAvatar>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                    </CCardBody>
+                  </CCard>
+                )
+              })}
+          </CCardBody>
+        </CCard>
+        )}
+
+        {Array.isArray(commentaires) && commentaires.length > 0 && (
+          <CCard className='mb-4'>
+            <CCardHeader className="text-center">
+              <span className="h6">COMMENTAIRES</span>
+            </CCardHeader>
+            <CCardBody>
               <div>
                 {commentaires.map((c) => {
                   const name = c.collaborateur?.nomAffichage || c.matriculeCollaborateur || 'Utilisateur';
@@ -424,11 +582,9 @@ const FicheNC = () => {
                   );
                 })}
               </div>
-            ) : (
-              <div className="text-muted">Aucun commentaire</div>
-            )}
-          </CCardBody>
-        </CCard>
+            </CCardBody>
+          </CCard>
+        )}
       </CForm>
       {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 1 && (nc.statusNc.id === 1 || nc.statusNc.id === 2) &&(
         <CCol xs={12} className="d-flex justify-content-center">
@@ -443,6 +599,21 @@ const FicheNC = () => {
           >
             <CIcon icon={cilStar} className="me-2" />
             Qualifier la non-conformité
+          </CButton>
+        </CCol>
+      )}
+      {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 2 && (nc.statusNc.id === 5 || nc.statusNc.id === 5) &&(
+        <CCol xs={12} className="d-flex justify-content-center">
+          <CButton
+            color='primary'
+            className="mb-3"
+            onClick={() => {
+            
+                      setShowActionModal(true)
+                    }}
+          >
+            <CIcon icon={cilTask} className="me-2" />
+            Assigner action curative
           </CButton>
         </CCol>
       )}
@@ -481,6 +652,16 @@ const FicheNC = () => {
         onSuccess={() => {
           if (typeof refetch === 'function') refetch()
           setShowAnalyseModal(false)
+        }}
+      />
+      <ActionCurativeModal
+        visible={showActionModal}
+        onClose={() => setShowActionModal(false)}
+        nc={nc}
+        onSuccess={(action) => {
+          // When an action is created, refresh details to show it
+          if (typeof refetch === 'function') refetch()
+          setShowActionModal(false)
         }}
       />
       {commentError && <CAlert color="danger" className="py-1">{commentError}</CAlert>}

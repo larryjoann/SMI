@@ -11,6 +11,7 @@ namespace api_SMI.Services
         private readonly ICauseNcService _causeNcService;
         private readonly ICommentaireNcService _commentaireNcService;
         private readonly IHistoriqueService _historiqueService;
+        private readonly IActionService _actionService;
 
         public NCDetailsService(
             INonConformiteService ncService,
@@ -18,6 +19,7 @@ namespace api_SMI.Services
             ICauseNcService causeNcService,
             ICommentaireNcService commentaireNcService,
             IHistoriqueService historiqueService,
+            IActionService actionService,
             IProcessusConcerneNcService processusConcerneService)
         {
             _ncService = ncService;
@@ -25,6 +27,7 @@ namespace api_SMI.Services
             _causeNcService = causeNcService;
             _commentaireNcService = commentaireNcService;
             _historiqueService = historiqueService;
+            _actionService = actionService;
             _processusConcerneService = processusConcerneService;
 
         }
@@ -38,6 +41,7 @@ namespace api_SMI.Services
             var processusConcerne = _processusConcerneService.GetByNonConformite(ncId).ToList();
             var causes = _causeNcService.GetByNc(ncId).ToList();
             var commentaires = _commentaireNcService.GetByNc(ncId).ToList();
+            var actions = _actionService.GetByEntiteAndObject(2, ncId).ToList();
 
             return new NCDetails
             {
@@ -45,7 +49,8 @@ namespace api_SMI.Services
                 PiecesJointes = pieces,
                 ProcessusConcerne = processusConcerne,
                 Causes = causes,
-                Commentaires = commentaires
+                Commentaires = commentaires,
+                Actions = actions
             };
         }
 

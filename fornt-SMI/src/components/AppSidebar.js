@@ -24,7 +24,7 @@ const AppSidebar = () => {
   return (
     <CSidebar
       className="border-end"
-      style={{backgroundColor: "#035668ff"}}
+      style={{backgroundColor: "#016172"}}
       // style={{ backgroundColor: "#2E2F2F" }}
       colorScheme="dark"
       position="fixed"

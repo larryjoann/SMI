@@ -10,6 +10,7 @@ namespace api_SMI.Models
         public List<ProcessusConcerneNc> ProcessusConcerne { get; set; } = new();
         public List<CauseNc> Causes { get; set; } = new();
         public List<CommentaireNc> Commentaires { get; set; } = new();
+        public List<Action> Actions { get; set; } = new();
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

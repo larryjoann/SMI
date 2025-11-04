@@ -34,8 +34,13 @@ namespace api_SMI.Data
         public DbSet<Entite> Entites { get; set; }
         public DbSet<Operation> Operations { get; set; }
         public DbSet<Historique> Historiques { get; set; }
-
         public DbSet<ValiditeProcessus> ValiditeProcessus { get; set; }
+        public DbSet<StatusAction> StatusActions { get; set; }
+        public DbSet<api_SMI.Models.Action> Actions { get; set; }
+        public DbSet<SuiviAction> SuiviActions { get; set; }
+        public DbSet<SourceAction> SourceActions { get; set; }
+        public DbSet<ResponsableAction> ResponsableActions { get; set; }
+    
         
     }
 }

@@ -65,7 +65,7 @@ CREATE TABLE Copilote (
 
 
 -- =========================
--- 3. Gestion des rôles et permissions
+-- 2. Gestion des rôles et permissions
 -- =========================
 
 CREATE TABLE Categorie_permission (
@@ -104,7 +104,7 @@ CREATE TABLE Role_collaborateur (
 );
 
 -- =========================
--- 4. Non-conformité
+-- 3. Non-conformité
 -- =========================
 
 CREATE TABLE Lieu (
@@ -245,7 +245,7 @@ CREATE TABLE Commentaire_nc (
 );
 
 -- =========================
--- 6. Historique activite
+-- 4. Historique activite
 -- =========================
 
 CREATE TABLE Operation (
@@ -278,6 +278,60 @@ CREATE TABLE Historique (
     FOREIGN KEY(id_entite) REFERENCES Entite(id),
     FOREIGN KEY(id_operation) REFERENCES Operation(id),
     FOREIGN KEY(matricule_collaborateur) REFERENCES Collaborateur(matricule)
+);
+
+-- =========================
+-- 5. Actions
+-- =========================
+
+CREATE TABLE Status_action (
+    id INT IDENTITY PRIMARY KEY,
+    nom VARCHAR(50),
+    color VARCHAR(50),
+);
+
+INSERT INTO Status_action (nom, color) VALUES ('Backlog', 'backlog');
+INSERT INTO Status_action (nom, color) VALUES ('En cours', 'en_cours');
+INSERT INTO Status_action (nom, color) VALUES ('Terminée', 'terminée');
+INSERT INTO Status_action (nom, color) VALUES ('Suspendu', 'suspendu');
+
+CREATE TABLE Action (
+    id INT IDENTITY PRIMARY KEY,
+    titre VARCHAR(MAX) NOT NULL,
+    date_debut DATE,
+    descr VARCHAR(MAX),
+    id_status_action INT NOT NULL,
+    date_fin_prevue DATE,
+    date_fin_reelle DATE,
+    status BIT NOT NULL DEFAULT 1,
+    FOREIGN KEY(id_status_action) REFERENCES Status_action(id)
+);
+
+CREATE TABLE Suivi_action (
+    id INT IDENTITY PRIMARY KEY,
+    id_action INT NOT NULL,
+    date_suivi DATETIME DEFAULT GETDATE(),
+    avancement INT,
+    FOREIGN KEY(id_action) REFERENCES Action(id)
+);
+
+CREATE TABLE Source_action (
+    id INT IDENTITY PRIMARY KEY,
+    id_action INT NOT NULL,
+    id_entite INT NOT NULL,
+    id_objet INT NOT NULL,
+    FOREIGN KEY(id_entite) REFERENCES Entite(id),
+    FOREIGN KEY(id_action) REFERENCES Action(id)
+);
+
+CREATE TABLE Responsable_action (
+    id INT IDENTITY PRIMARY KEY,
+    id_action INT NOT NULL,
+    matricule_assignateur VARCHAR(50) NOT NULL,
+    matricule_responsable VARCHAR(50) NOT NULL,
+    FOREIGN KEY(id_action) REFERENCES Action(id),
+    FOREIGN KEY(matricule_assignateur) REFERENCES Collaborateur(matricule),
+    FOREIGN KEY(matricule_responsable) REFERENCES Collaborateur(matricule)
 );
 
 

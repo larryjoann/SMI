@@ -20,7 +20,12 @@ $custom-colors: (
   "assigné":  #F0D876,
   "suspendue":      #d5d2cd,
   "vérifié":     #90B77F,
-  "cloturé":        #6CBA42
+  "cloturé":        #6CBA42,
+
+  "backlog" : #cca300,
+  "en_cours": #3399FF,
+  "terminée": #78C043,
+  "suspendu": #d5d2cd
 );
 
 @use "@coreui/coreui/scss/coreui" with (

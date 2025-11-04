@@ -5,7 +5,8 @@ import {
   cilPuzzle,
   cilSpeedometer,
   cilTask,
-  cilSettings
+  cilSettings,
+  cilClipboard
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -66,7 +67,7 @@ const _nav = [
     component: CNavGroup,
     name: 'Plan d\'action',
     to: '/#',
-    icon: <CIcon icon={cilTask} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilClipboard} customClassName="nav-icon" />,
     items: [
       {
         component: CNavItem,
@@ -80,6 +81,12 @@ const _nav = [
       },
       
     ],
+  },
+  {
+    component: CNavItem,
+    name: 'Suivi des actions',
+    to: '/action',
+    icon: <CIcon icon={cilTask} customClassName="nav-icon" />,
   },
   {
     component: CNavGroup,

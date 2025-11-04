@@ -183,16 +183,16 @@ const FormProcessus = () => {
                 </CFormFeedback>
               </CCol>
             </CRow>
+            <CRow>
+            <CCol xs={12} className="d-flex justify-content-end">
+              <CButton color="primary" type="submit" disabled={isSubmitting}>
+                {id ? "Mettre à jour" : "Inserer"}
+              </CButton>
+            </CCol>
+          </CRow>
           </CForm>
         </CCardBody>
       </CCard>
-      <CRow>
-        <CCol xs={12} className="d-flex justify-content-end">
-          <CButton color="primary" type="submit" disabled={isSubmitting}>
-            {id ? "Mettre à jour" : "Inserer"}
-          </CButton>
-        </CCol>
-      </CRow>
     </>
   )
 }
