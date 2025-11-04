@@ -7,13 +7,48 @@ using api_SMI.Ldap;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Reflection;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    // Basic OpenAPI info
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "api_SMI", Version = "v1" });
+
+    // JWT Bearer support in Swagger UI
+    var securityScheme = new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Enter 'Bearer' [space] and then your token. Example: \"Bearer {token}\""
+    };
+    c.AddSecurityDefinition("Bearer", securityScheme);
+    var securityRequirement = new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        { securityScheme, new string[] { } }
+    };
+    c.AddSecurityRequirement(securityRequirement);
+
+    // Include XML comments if available (requires GenerateDocumentationFile in csproj)
+    try
+    {
+        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        if (File.Exists(xmlPath)) c.IncludeXmlComments(xmlPath);
+    }
+    catch
+    {
+        // ignore if reflection/path fails in some environments
+    }
+});
 builder.Services.AddControllers();
 
 // Ajout de l'authentification JWT
