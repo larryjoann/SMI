@@ -71,13 +71,13 @@ const _nav = [
     items: [
       {
         component: CNavItem,
-        name: 'Inserer une action',
-        to: '/#',
+        name: 'Inserer une PA',
+        to: '/pa/form',
       },
       {
         component: CNavItem,
-        name: 'Suivie des actions',
-        to: '/#',
+        name: 'Suivie des PA',
+        to: '/pa/list',
       },
       
     ],

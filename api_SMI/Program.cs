@@ -99,18 +99,25 @@ builder.Services.AddSession(options =>
     }
 });
 
-// Ajoutez cette ligne pour configurer CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReact",
-        builder =>
-        {
-            builder
-                .WithOrigins("http://localhost:3000") // adapte selon ton front
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
-        });
+    // Policy used by the React front-end running on http://localhost:3000
+    options.AddPolicy("AllowReact", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // allow cookies/credentials from the front-end
+    });
+
+    // A permissive policy you can use for testing from other origins/tools
+    options.AddPolicy("AllowAll", builder => builder
+        .AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod());
+
+    // Default policy (same as AllowAll)
+    options.AddDefaultPolicy(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 });
 
 // Ajoute cette ligne pour configurer le DbContext avec la chaîne de connexion
@@ -184,6 +191,14 @@ builder.Services.AddScoped<ResponsableActionRepository>();
 builder.Services.AddScoped<IResponsableActionService, ResponsableActionService>();
 builder.Services.AddScoped<StatusActionRepository>();
 builder.Services.AddScoped<IStatusActionService, StatusActionService>();
+builder.Services.AddScoped<StatusPARepository>();
+builder.Services.AddScoped<IStatusPAService, StatusPAService>();
+builder.Services.AddScoped<SourcePARepository>();
+builder.Services.AddScoped<ISourcePAService, SourcePAService>();
+builder.Services.AddScoped<PlanActionRepository>();
+builder.Services.AddScoped<IPlanActionService, PlanActionService>();
+builder.Services.AddScoped<ProcessusConcernePARepository>();
+builder.Services.AddScoped<IProcessusConcernePAService, ProcessusConcernePAService>();
 
 var app = builder.Build();
 
@@ -195,11 +210,11 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+// if (app.Environment.IsDevelopment())
+// {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+// }
 
 app.UseHttpsRedirection();
 app.UseRouting();

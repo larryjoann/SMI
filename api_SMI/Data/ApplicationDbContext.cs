@@ -40,6 +40,10 @@ namespace api_SMI.Data
         public DbSet<SuiviAction> SuiviActions { get; set; }
         public DbSet<SourceAction> SourceActions { get; set; }
         public DbSet<ResponsableAction> ResponsableActions { get; set; }
+        public DbSet<SourcePA> SourcePAs { get; set; }
+        public DbSet<PlanAction> PlanActions { get; set; }
+        public DbSet<ProcessusConcernePA> ProcessusConcernePAs { get; set; }
+    public DbSet<StatusPA> StatusPAs { get; set; }
     
         
     }

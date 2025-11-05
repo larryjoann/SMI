@@ -43,3 +43,25 @@ export async function fetchLieuOptions() {
       ]
     : [{ id: 'all', label: 'Tous' }]
 }
+
+export async function fetchSourcePA() {
+  const res = await fetch(`${API_URL}/SourcePA`)
+  const data = await res.json()
+  return Array.isArray(data)
+    ? [
+        { id: 'all', label: 'Tous' },
+        ...data.map(s => ({ id: s.id, label: s.descr }))
+      ]
+    : [{ id: 'all', label: 'Tous' }]
+}
+
+export async function fetchStatusPA() {
+  const res = await fetch(`${API_URL}/StatusPA`)
+  const data = await res.json()
+  return Array.isArray(data)
+    ? [
+        { id: 'all', label: 'Tous' },
+        ...data.map(st => ({ id: st.id, label: st.nom, color: st.color}))
+      ]
+    : [{ id: 'all', label: 'Tous' }]
+}

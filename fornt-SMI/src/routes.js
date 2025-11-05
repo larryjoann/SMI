@@ -20,6 +20,11 @@ const Fiche_NC = React.lazy(() => import('./features/non_conformite/pages/FicheN
 const Arcive_NC = React.lazy(() => import('./features/non_conformite/pages/ArchiveNC'))
 const HistoActiviteNC = React.lazy(() => import('./features/non_conformite/pages/HistoActiviteNC'))
 
+// plan d'action
+const Liste_PA = React.lazy(() => import('./features/pa/pages/ListePA'))
+const Form_PA = React.lazy(() => import('./features/pa/pages/FormPA'))
+const Fiche_PA = React.lazy(() => import('./features/pa/pages/FichePA'))
+
 // actions
 const Fiche_Action = React.lazy(() => import('./features/action/pages/FicheAction'))
 const Liste_Action = React.lazy(() => import('./features/action/pages/ListeAction'))
@@ -51,6 +56,12 @@ const routes = [
   { path: '/nc/list/fiche/:id', name: 'Fiche', element: Fiche_NC },
   { path: '/nc/list/fiche/histoactivite/:id', name: 'Historique des activités', element: HistoActiviteNC },
   { path: '/nc/list/form/:id', name: 'Modification', element: Form_NC },
+
+  { path: '/pa', name: 'Plan d\'action', element: Liste_PA, exact: true },
+  { path: '/pa/list', name: 'Suivie des plans d\'action', element: Liste_PA },
+  { path: '/pa/form', name: 'Nouveau plan d\'action', element: Form_PA },
+  { path: '/pa/form/:id', name: 'Modification plan d\'action', element: Form_PA },
+  { path: '/pa/fiche/:id', name: 'Fiche plan d\'action', element: Fiche_PA },
 
   { path: '/action', name: 'Action', element: Liste_Action, exact: true },
   { path: '/action/fiche/:id', name: 'Fiche', element: Fiche_Action },

@@ -334,4 +334,47 @@ CREATE TABLE Responsable_action (
     FOREIGN KEY(matricule_responsable) REFERENCES Collaborateur(matricule)
 );
 
+-- =========================
+-- 6. Plan d'action
+-- =========================
+
+CREATE TABLE Source_PA (
+    id INT IDENTITY PRIMARY KEY,
+    descr VARCHAR(MAX),
+);
+
+INSERT INTO Source_PA (descr) VALUES ('Audit interne');
+INSERT INTO Source_PA (descr) VALUES ('Audit externe');
+INSERT INTO Source_PA (descr) VALUES ('Revue de direction');
+
+
+CREATE TABLE Status_PA (
+    id INT IDENTITY PRIMARY KEY,
+    nom VARCHAR(50),
+    color VARCHAR(50),
+);
+
+INSERT INTO Status_PA (nom, color) VALUES ('Ouvert', 'en_qualification');
+INSERT INTO Status_PA (nom, color) VALUES ('Assigné', 'assigné');
+INSERT INTO Status_PA (nom, color) VALUES ('Vérifié', 'vérifiéé');
+INSERT INTO Status_PA (nom, color) VALUES ('Cloturé', 'cloturé');
+
+CREATE TABLE Plan_action (
+    id INT IDENTITY PRIMARY KEY,
+    id_source_pa INT NOT NULL,
+    date_constat DATETIME DEFAULT GETDATE(),
+    constat VARCHAR(MAX),
+    id_status_pa INT NOT NULL,
+    status BIT NOT NULL DEFAULT 1,
+    FOREIGN KEY(id_status_pa) REFERENCES Status_PA(id),
+    FOREIGN KEY(id_source_pa) REFERENCES Source_PA(id)
+);
+
+CREATE TABLE Processus_concerne_PA (
+    id INT IDENTITY PRIMARY KEY,
+    id_pa INT NOT NULL,
+    id_processus INT NOT NULL,
+    FOREIGN KEY(id_pa) REFERENCES Plan_action(id),
+    FOREIGN KEY(id_processus) REFERENCES Processus(id)
+);
 
