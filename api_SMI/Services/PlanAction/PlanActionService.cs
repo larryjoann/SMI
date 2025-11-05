@@ -7,16 +7,36 @@ namespace api_SMI.Services
     {
         private readonly PlanActionRepository _planRepo;
         private readonly ProcessusConcernePARepository _pcRepo;
+        private readonly IActionService _actionService;
+       
 
-        public PlanActionService(PlanActionRepository planRepo, ProcessusConcernePARepository pcRepo)
+        public PlanActionService(PlanActionRepository planRepo, ProcessusConcernePARepository pcRepo, IActionService actionService)
         {
             _planRepo = planRepo;
             _pcRepo = pcRepo;
+            _actionService = actionService;
         }
 
-        public IEnumerable<PlanAction> GetAll() => _planRepo.GetAll();
+        public IEnumerable<PlanAction> GetAll()
+        {
+            // Récupère les plans et ajoute les actions liées via SourceAction (Entite = 3 -> "Plan d'action")
+            var plans = _planRepo.GetAll();
+            foreach (var pa in plans)
+            {
+                var actions = _actionService.GetByEntiteAndObject(3, pa.Id).ToList();
+                // Remplit la collection Actions (navigation property)
+                pa.Actions = actions;
+            }
+            return plans;
+        }
 
-        public PlanAction? GetById(int id) => _planRepo.GetById(id);
+        public PlanAction? GetById(int id)
+        {
+            var pa = _planRepo.GetById(id);
+            if (pa == null) return null;
+            pa.Actions = _actionService.GetByEntiteAndObject(3, pa.Id).ToList();
+            return pa;
+        }
 
         public void Add(PlanAction planAction)
         {

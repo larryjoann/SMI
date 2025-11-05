@@ -265,6 +265,7 @@ CREATE TABLE Entite (
 
 INSERT INTO entite (nom) VALUES ('Processus');
 INSERT INTO entite (nom) VALUES ('Non-conformité');
+INSERT INTO entite (nom) VALUES ('Plan d''action');
 
 CREATE TABLE Historique (
     id INT IDENTITY PRIMARY KEY,
@@ -323,6 +324,8 @@ CREATE TABLE Source_action (
     FOREIGN KEY(id_entite) REFERENCES Entite(id),
     FOREIGN KEY(id_action) REFERENCES Action(id)
 );
+
+INSERT INTO Source_action (id_action, id_entite, id_objet) VALUES (1, 2, 1); -- Exemple d'insertion liant une action à une non-conformité
 
 CREATE TABLE Responsable_action (
     id INT IDENTITY PRIMARY KEY,

@@ -15,7 +15,7 @@ namespace api_SMI.Models
         [Required]
         [Column("id_status_pa")]
         public int? IdStatusPA { get; set; }
-        
+
         [ForeignKey("IdStatusPA")]
         public StatusPA? StatusPA { get; set; }
 
@@ -37,5 +37,11 @@ namespace api_SMI.Models
 
         // Navigation vers plusieurs enregistrements de processus concernés
         public ICollection<ProcessusConcernePA> ProcessusConcernes { get; set; } = new List<ProcessusConcernePA>();
+
+    // This navigation property is populated manually via the Action service
+    // and is not mapped to the database to avoid EF creating a shadow FK
+    // (which would expect a non-existent column like `PlanActionId`).
+    [NotMapped]
+    public ICollection<api_SMI.Models.Action> Actions { get; set; } = new List<api_SMI.Models.Action>();
     }
 }

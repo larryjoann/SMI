@@ -110,8 +110,9 @@ const FicheNC = () => {
 
   // Handlers for action card options (accept action as parameter)
   const handleEditAction = (action) => {
-    // TODO: open edit modal or navigate to edit form
-    console.log('Edit corrective action', action)
+    // Navigate to the action edit form
+    if (!action || !action.id) return
+    navigate(`/action/form/${action.id}`)
   }
 
   const handleDeleteAction = async (action) => {

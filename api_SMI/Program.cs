@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Reflection;
 using System.IO;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -99,25 +100,28 @@ builder.Services.AddSession(options =>
     }
 });
 
+// Ajoutez cette ligne pour configurer CORS
 builder.Services.AddCors(options =>
 {
-    // Policy used by the React front-end running on http://localhost:3000
-    options.AddPolicy("AllowReact", policy =>
-    {
-        policy.WithOrigins("http://localhost:3000")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials(); // allow cookies/credentials from the front-end
-    });
+    options.AddPolicy("AllowReact",
+        builder =>
+        {
+            builder
+                .WithOrigins("http://localhost:3000") // adapte selon ton front
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+});
 
-    // A permissive policy you can use for testing from other origins/tools
-    options.AddPolicy("AllowAll", builder => builder
-        .AllowAnyOrigin()
-        .AllowAnyHeader()
-        .AllowAnyMethod());
-
-    // Default policy (same as AllowAll)
-    options.AddDefaultPolicy(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+// Cookie policy: explicit SameSite and Secure handling so cookies are accepted cross-site in production
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    // Keep unspecified for dev; set explicit handling below
+    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
+    options.HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always;
+    // In production we'll require Secure cookies (browsers require Secure when SameSite=None)
+    options.Secure = CookieSecurePolicy.SameAsRequest;
 });
 
 // Ajoute cette ligne pour configurer le DbContext avec la chaîne de connexion
@@ -210,15 +214,25 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
-// if (app.Environment.IsDevelopment())
-// {
+if (app.Environment.IsDevelopment())
+{
     app.UseSwagger();
     app.UseSwaggerUI();
-// }
+}
+
+// If the app is deployed behind a reverse proxy (NGINX, IIS, Azure LB...),
+// enable forwarded headers so the app can see the original scheme (https) and client IP.
+// This is important so cookies marked Secure and redirects work correctly when TLS is terminated upstream.
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+    // For increased security, configure KnownProxies or KnownNetworks in production
+});
 
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("AllowReact");
+app.UseCookiePolicy();
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();

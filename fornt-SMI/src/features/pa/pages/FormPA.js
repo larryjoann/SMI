@@ -51,9 +51,9 @@ const FormPA = () => {
       try {
         const json = await paService.getPA(id)
         if (!mounted) return
-  const sourceId = json.id_source_pa || json.source?.id || ''
-  const dateConstat = json.date_constat ? new Date(json.date_constat).toISOString().slice(0,10) : ''
-        const processus = Array.isArray(json.processusConcerne) ? json.processusConcerne.map(p => ({ value: p.id_processus, label: p.processus?.nom || String(p.id_processus) })) : []
+  const sourceId = json.sourcePA.id
+  const dateConstat = json.dateConstat ? new Date(json.dateConstat).toISOString().slice(0,10) : ''
+        const processus = Array.isArray(json.processusConcernes) ? json.processusConcernes.map(p => ({ value: p.processus.id, label: p.processus.nom || String(p.processus.id) })) : []
   reset({ sourceId, dateConstat, constat: json.constat || '', status: !!json.status, processus })
       } catch (err) {
         console.error('Erreur chargement PA', err)
@@ -154,12 +154,6 @@ const FormPA = () => {
               <CCol md={4} className='mb-3'>
                 <CFormLabel>Date constat</CFormLabel>
                 <CFormInput type="date" {...register('dateConstat')} />
-              </CCol>
-              <CCol md={4} className='mb-3'>
-                <CFormLabel>Statut</CFormLabel>
-                <div>
-                  <input type="checkbox" {...register('status')} /> Actif
-                </div>
               </CCol>
               <CCol md={12} className='mb-3'>
                 <CFormLabel>Constat</CFormLabel>
