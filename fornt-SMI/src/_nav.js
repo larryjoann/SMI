@@ -34,7 +34,7 @@ const _nav = [
       {
         component: CNavItem,
         name: 'Tableau de bord',
-        to: '/#',
+        to: '/indicateur/tdb',
       },
       {
         component: CNavItem,
@@ -97,7 +97,7 @@ const _nav = [
       {
         component: CNavItem,
         name: 'Roles',
-        to: '/#',
+        to: '/administration/roles',
       },
       {
         component: CNavItem,

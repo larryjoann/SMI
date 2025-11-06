@@ -16,6 +16,11 @@ import {
   CDropdownItem,
   CDropdownDivider,
   CCardHeader,
+  CModal,
+  CModalHeader,
+  CModalTitle,
+  CModalBody,
+  CModalFooter,
   CForm,
   CFormInput,
   CFormSelect,
@@ -193,6 +198,32 @@ const ListeAction = () => {
       // revert by refetching actions from server
       console.warn('Reverting local move due to server error')
       fetchActions()
+    }
+  }
+
+  // Delete confirmation modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [actionToDelete, setActionToDelete] = useState(null)
+
+  const askDeleteAction = (action) => {
+    setActionToDelete(action)
+    setShowDeleteModal(true)
+  }
+
+  const confirmDeleteAction = async () => {
+    if (!actionToDelete) return
+    try {
+      const ok = await deleteAction(actionToDelete.id)
+      setShowDeleteModal(false)
+      setActionToDelete(null)
+      // refresh list
+      fetchActions()
+      return ok
+    } catch (err) {
+      console.error('Error deleting action', err)
+      setShowDeleteModal(false)
+      setActionToDelete(null)
+      return false
     }
   }
 
@@ -374,18 +405,9 @@ const ListeAction = () => {
                                 </CDropdownToggle>
                                 <CDropdownMenu>
                                   <CDropdownItem
-                                    onClick={async (e) => {
+                                    onClick={(e) => {
                                       e.stopPropagation()
-                                      
-                                      try {
-                                        const ok = await deleteAction(a.id)
-                                        if (!ok) {
-                                          
-                                        }
-                                      } catch (err) {
-                                        console.error('Delete error', err)
-                                       
-                                      }
+                                      askDeleteAction(a)
                                     }}
                                   >
                                     <CIcon icon={cilTrash} className="text-danger me-2" />
@@ -460,6 +482,26 @@ const ListeAction = () => {
           )}
         </CRow>
       )}
+      <CModal alignment="center" backdrop="static" visible={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
+        <CModalHeader>
+          <CModalTitle>Confirmer la suppression</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          {actionToDelete ? (
+            <div>
+              Voulez-vous vraiment supprimer l'action <strong>{actionToDelete.titre}</strong> ? Cette opération est irréversible.
+            </div>
+          ) : (
+            <div>Action à supprimer inconnue</div>
+          )}
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setShowDeleteModal(false)}>Non</CButton>
+          <CButton color="danger" onClick={confirmDeleteAction}>
+            {saving ? 'Suppression...' : 'Oui, supprimer'}
+          </CButton>
+        </CModalFooter>
+      </CModal>
       {saving && <div className="mt-2 small text-muted">Saving...</div>}
     </div>
   )

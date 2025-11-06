@@ -22,6 +22,7 @@ import { cilArrowLeft ,
   cilX,
   cilPlus,
   cilTask,
+  cilCheckAlt
 } from '@coreui/icons'
 import { useParams, useNavigate } from 'react-router-dom'
 import API_URL from '../../../api/API_URL'
@@ -30,6 +31,7 @@ import { useNCDetails } from '../hooks/useNCDetails'
 import QualificationModal from '../components/QualificationModal'
 import AnalyseCausesModal from '../components/AnalyseCausesModal'
 import ActionCurativeModal from '../components/ActionCurativeModal'
+import VerifierEfficaciteModal from '../components/VerifierEfficaciteModal'
 import { createCommentaire } from '../services/nonConformiteService'
 import { CSpinner } from '@coreui/react'
 
@@ -40,6 +42,7 @@ const FicheNC = () => {
   const [showQualifModal, setShowQualifModal] = useState(false)
   const [showAnalyseModal, setShowAnalyseModal] = useState(false)
   const [showActionModal, setShowActionModal] = useState(false)
+  const [showVerifyModal, setShowVerifyModal] = useState(false)
   const [selectedProcessus, setSelectedProcessus] = useState([])
   const [selectedCategorieCause, setSelectedCategorieCause] = useState([])
   const [hoveredFileIndex, setHoveredFileIndex] = useState(null)
@@ -367,20 +370,18 @@ const FicheNC = () => {
                         >
                           <small className="text-truncate" style={{ maxWidth: '120px', display: 'block' }}>{pj.nomFichier}</small>
                         </a>
-                        {hoveredFileIndex === idx && (
-                          <CButton
-                            color="outline-primary"
-                            size="sm"
-                            className="mt-2"
-                            style={{ fontSize: 12 }}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              downloadAttachment(pj, idx)
-                            }}
-                          >
-                            {downloadingIndex === idx ? <CSpinner size="sm" /> : 'Télécharger'}
-                          </CButton>
-                        )}
+                            <CButton
+                              color="primary"
+                              size="sm"
+                              className="mt-2"
+                              style={{ fontSize: 12 }}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                downloadAttachment(pj, idx)
+                              }}
+                            >
+                              {downloadingIndex === idx ? <CSpinner size="sm" /> : 'Télécharger'}
+                            </CButton>
                       </div>
                     ))}
                   </div>
@@ -437,7 +438,7 @@ const FicheNC = () => {
         {Array.isArray(actions) && actions.length > 0 && (
         <CCard className='mb-4'>
           <CCardHeader className="position-relative text-center">
-            <span className="h6 mb-0 d-block">ACTION(s) CURATIVES</span>
+            <span className="h6 mb-0 d-block">ACTION CORRECTIVES</span>
                 <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
                   <CButton
                     size="md"
@@ -618,6 +619,20 @@ const FicheNC = () => {
           </CButton>
         </CCol>
       )}
+      {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 2 && (nc.statusNc.id === 6 || nc.statusNc.id === 6) &&(
+        <CCol xs={12} className="d-flex justify-content-center">
+          <CButton
+            color='primary'
+            className="mb-3"
+            onClick={() => {
+                      setShowVerifyModal(true)
+                    }}
+          >
+            <CIcon icon={cilCheckAlt} className="me-2" />
+            Vérifier efficaciter
+          </CButton>
+        </CCol>
+      )}
       {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 1 && nc.statusNc.id === 3 &&(
         <CCol xs={12} className="d-flex justify-content-center">
           <CButton
@@ -663,6 +678,15 @@ const FicheNC = () => {
           // When an action is created, refresh details to show it
           if (typeof refetch === 'function') refetch()
           setShowActionModal(false)
+        }}
+      />
+      <VerifierEfficaciteModal
+        visible={showVerifyModal}
+        onClose={() => setShowVerifyModal(false)}
+        onSubmitSuccess={(payload) => {
+          // Demo: just log and refresh details
+          console.log('VerifierEfficacite submitted (demo):', payload)
+          if (typeof refetch === 'function') refetch()
         }}
       />
       {commentError && <CAlert color="danger" className="py-1">{commentError}</CAlert>}

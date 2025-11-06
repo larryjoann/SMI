@@ -12,6 +12,7 @@ const FicheProcessus = React.lazy(() => import('./features/pilotage/pages/FicheP
 // Indicateurs
 const Liste_indicateur = React.lazy(() => import('./features/indicateur/pages/Tableau_indicateur'))
 const Form_indicateur = React.lazy(() => import('./features/indicateur/pages/Form_indicateur'))
+const TDB_indicateur = React.lazy(() => import('./features/indicateur/pages/TDB_indicateur'))
 
 // Non conformité
 const Liste_NC = React.lazy(() => import('./features/non_conformite/pages/Liste_NC'))
@@ -33,6 +34,7 @@ const Form_Action = React.lazy(() => import('./features/action/pages/FormAction'
 //Administration
 // const Roles = React.lazy(() => import('./features/administration/pages/Roles'))
 const Logs = React.lazy(() => import('./features/admin/pages/Logs'))
+const Roles = React.lazy(() => import('./features/admin/pages/Roles'))
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
@@ -46,6 +48,7 @@ const routes = [
   { path: '/pilotage/cartographie/ficheprocessus/:id', name: 'Fiche processus', element: FicheProcessus },
 
   { path: '/indicateur', name: 'Indicateur', element: Liste_indicateur, exact: true },
+  { path : '/indicateur/tdb', name: 'Tableau de bord des indicateurs', element: TDB_indicateur },
   { path: '/indicateur/tableau', name: 'Saisie des indicateurs', element: Liste_indicateur },
   { path: '/indicateur/form', name: 'Form indicateur', element: Form_indicateur },
 
@@ -69,7 +72,9 @@ const routes = [
   { path: '/action/form/:id', name: 'Modification action', element: Form_Action },
 
   { path: '/administration', name: 'Administration', element: Logs, exact: true },
+  { path : '/administration/roles', name: 'Gestion des rôles', element: Roles },
   { path: '/administration/logs', name: 'Logs', element: Logs },
+
   
 ]
 

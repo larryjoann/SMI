@@ -152,15 +152,31 @@ const FormNC = () => {
             {/* ...existing code... */}
             <CRow>
               <CCol xs={12} sm={6} md={4} className='mb-3'>
-                <CFormLabel htmlFor="date">Date <span className="text-danger">*</span> :</CFormLabel>
-                <CFormInput type='date' id="date" value={date} onChange={e => setDate(e.target.value)} invalid={!!errors['NC.DateTimeFait']}/>
-                  {errors['NC.DateTimeFait'] && (
+                <CFormLabel htmlFor="dateTime">Date et heure du fait <span className="text-danger">*</span> :</CFormLabel>
+                {/* Combine existing `date` (YYYY-MM-DD) and `heure` (HH:MM) into a single datetime-local input
+                    and keep backing state in `date` and `heure` via setDate/setHeure for compatibility */}
+                <CFormInput
+                  type="datetime-local"
+                  id="dateTime"
+                  value={date ? `${date}T${heure || '00:00'}` : ''}
+                  onChange={(e) => {
+                    const v = e.target.value || ''
+                    if (!v) {
+                      setDate('')
+                      setHeure('')
+                      return
+                    }
+                    const parts = v.split('T')
+                    setDate(parts[0] || '')
+                    // keep only HH:MM (strip seconds if present)
+                    const timePart = parts[1] || ''
+                    setHeure(timePart ? timePart.slice(0,5) : '')
+                  }}
+                  invalid={!!errors['NC.DateTimeFait']}
+                />
+                {errors['NC.DateTimeFait'] && (
                   <CFormFeedback invalid>{errors['NC.DateTimeFait'][0]}</CFormFeedback>
                 )}
-              </CCol>
-              <CCol xs={12} sm={6} md={4} className='mb-3'>
-                <CFormLabel htmlFor="heure">Heure <span className="text-danger">*</span> :</CFormLabel>
-                <CFormInput type='time' id="heure" value={heure} onChange={e => setHeure(e.target.value)} invalid={!!errors['NC.DateTimeFait']}/>
               </CCol>
               <CCol xs={12} sm={12} md={12} className='mb-3'>
                 <CFormLabel htmlFor="description">Description du fait <span className="text-danger">*</span> :</CFormLabel>

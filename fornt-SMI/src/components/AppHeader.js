@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   CContainer,
@@ -31,7 +31,6 @@ import { AppHeaderDropdown } from './header/index'
 const AppHeader = () => {
   const headerRef = useRef()
   const { colorMode, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
-  const navigate = useNavigate()
 
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
@@ -42,15 +41,6 @@ const AppHeader = () => {
         headerRef.current.classList.toggle('shadow-sm', document.documentElement.scrollTop > 0)
     })
   }, [])
-
-  // Force light theme on mount and keep it fixed
-  useEffect(() => {
-    try {
-      setColorMode('light')
-    } catch (err) {
-      // ignore
-    }
-  }, [setColorMode])
 
   return (
     <CHeader position="sticky" className="mb-4 p-0" ref={headerRef}>
@@ -67,6 +57,46 @@ const AppHeader = () => {
         </div>
 
         <CHeaderNav className="ms-auto">
+          <CDropdown variant="nav-item" placement="bottom-end">
+            <CDropdownToggle caret={false}>
+              {colorMode === 'dark' ? (
+                <CIcon icon={cilMoon} size="lg" />
+              ) : colorMode === 'auto' ? (
+                <CIcon icon={cilContrast} size="lg" />
+              ) : (
+                <CIcon icon={cilSun} size="lg" />
+              )}
+            </CDropdownToggle>
+            <CDropdownMenu>
+              <CDropdownItem
+                active={colorMode === 'light'}
+                className="d-flex align-items-center"
+                as="button"
+                type="button"
+                onClick={() => setColorMode('light')}
+              >
+                <CIcon className="me-2" icon={cilSun} size="lg" /> Light
+              </CDropdownItem>
+              <CDropdownItem
+                active={colorMode === 'dark'}
+                className="d-flex align-items-center"
+                as="button"
+                type="button"
+                onClick={() => setColorMode('dark')}
+              >
+                <CIcon className="me-2" icon={cilMoon} size="lg" /> Dark
+              </CDropdownItem>
+              <CDropdownItem
+                active={colorMode === 'auto'}
+                className="d-flex align-items-center"
+                as="button"
+                type="button"
+                onClick={() => setColorMode('auto')}
+              >
+                <CIcon className="me-2" icon={cilContrast} size="lg" /> Auto
+              </CDropdownItem>
+            </CDropdownMenu>
+          </CDropdown>
           <CNavItem>
             <CNavLink href="#/notifications">
               <div className="position-relative">

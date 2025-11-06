@@ -76,7 +76,7 @@ const FormProcessus = () => {
                 </CFormFeedback>
               </CCol>
               <CCol xs={12} sm={6} md={4} className='mb-3'>
-                <CFormLabel htmlFor="sigle">Sigle <span className="text-danger">*</span></CFormLabel>
+                <CFormLabel htmlFor="sigle">Sigle <span className="text-danger">*</span> :</CFormLabel>
                 <CFormInput
                   {...register('sigle', { required: 'Le sigle est requis' })}
                   invalid={!!errors.sigle}
@@ -86,7 +86,7 @@ const FormProcessus = () => {
                 </CFormFeedback>
               </CCol>
               <CCol xs={12} sm={6} md={4} className='mb-3'>
-                <CFormLabel htmlFor="categorie">Categorie <span className="text-danger">*</span></CFormLabel>
+                <CFormLabel htmlFor="categorie">Categorie <span className="text-danger">*</span> :</CFormLabel>
                 <Controller
                   control={control}
                   name="idCategorieProcessus"
@@ -105,7 +105,7 @@ const FormProcessus = () => {
             </CRow>
             <CRow>
               <CCol xs={12} sm={6} md={6} className='mb-3'>
-                <CFormLabel>Pilotes <span className="text-danger">*</span></CFormLabel>
+                <CFormLabel>Pilote(s) <span className="text-danger">*</span> :</CFormLabel>
                 <Controller
                   control={control}
                   name="matriculePilote"
@@ -130,7 +130,7 @@ const FormProcessus = () => {
                 )}
               </CCol>
               <CCol xs={12} sm={6} md={6} className='mb-3'>
-                <CFormLabel>Copilotes <span className="text-danger">*</span></CFormLabel>
+                <CFormLabel>Copilote(s) <span className="text-danger">*</span> :</CFormLabel>
                 <Controller
                   control={control}
                   name="matriculeCopilote"
@@ -157,7 +157,7 @@ const FormProcessus = () => {
             </CRow>
             <CRow>
               <CCol xs={12} className='mb-3'>
-                <CFormLabel htmlFor="finalite">Finalité</CFormLabel>
+                <CFormLabel htmlFor="finalite">Finalité :</CFormLabel>
                 <CFormTextarea
                   {...register('finalite')}
                   id="finalite"
@@ -171,7 +171,7 @@ const FormProcessus = () => {
             </CRow>
             <CRow>
               <CCol xs={12} className='mb-3'>
-                <CFormLabel htmlFor="contexte">Contexte</CFormLabel>
+                <CFormLabel htmlFor="contexte">Contexte :</CFormLabel>
                 <CFormTextarea
                   {...register('contexte')}
                   id="contexte"

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {
   CRow, CCol, CButton,
-  CCard, CCardHeader, CCardBody, CBadge,
+  CCard, CCardHeader, CCardBody, CBadge, CAvatar,
   CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter, CFormInput, CForm, CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -124,35 +124,57 @@ const FicheProcessus = () => {
               </CCol>
               <CCol md={6}>
                 <h6 className="mb-2">Pilotes :</h6>
-                <p>
+                <div>
                   {Array.isArray(localProcessus?.pilotes || processus.pilotes) && (localProcessus?.pilotes || processus.pilotes).length > 0
-                    ? (localProcessus?.pilotes || processus.pilotes).map((pi, idx) =>
-                        pi.collaborateur
-                          ? (
-                              <span key={idx}>
-                                {pi.collaborateur.nomComplet} <span className="text-muted">({pi.collaborateur.poste})</span><br />
-                              </span>
-                            )
-                          : null
-                      )
+                    ? (localProcessus?.pilotes || processus.pilotes).map((pi, idx) => {
+                        if (!pi || !pi.collaborateur) return null
+                        const name = pi.collaborateur.nomAffichage || pi.collaborateur.nomComplet || pi.collaborateur.matricule || ''
+                        const initials = name
+                          .split(' ')
+                          .map((n) => n?.[0])
+                          .filter(Boolean)
+                          .slice(0, 2)
+                          .join('')
+                          .toUpperCase()
+                        return (
+                          <div key={idx} className="d-flex align-items-center mb-2">
+                            <CAvatar className="me-3 bg-secondary text-white" size="md">{initials || '-'}</CAvatar>
+                            <div>
+                              <div style={{ fontWeight: 700 }}>{pi.collaborateur.nomComplet}</div>
+                              <div className="text-muted" style={{ fontSize: '0.85rem' }}>{pi.collaborateur.poste || ''}</div>
+                            </div>
+                          </div>
+                        )
+                      })
                     : '-'}
-                </p>
+                </div>
               </CCol>
               <CCol md={6}>
                 <h6 className="mb-2">Copilotes :</h6>
-                <p>
+                <div>
                   {Array.isArray(localProcessus?.copilotes || processus.copilotes) && (localProcessus?.copilotes || processus.copilotes).length > 0
-                    ? (localProcessus?.copilotes || processus.copilotes).map((co, idx) =>
-                        co.collaborateur
-                          ? (
-                              <span key={idx}>
-                                {co.collaborateur.nomComplet} <span className="text-muted">({co.collaborateur.poste})</span><br />
-                              </span>
-                            )
-                          : null
-                      )
+                    ? (localProcessus?.copilotes || processus.copilotes).map((co, idx) => {
+                        if (!co || !co.collaborateur) return null
+                        const name = co.collaborateur.nomAffichage || co.collaborateur.nomComplet || co.collaborateur.matricule || ''
+                        const initials = name
+                          .split(' ')
+                          .map((n) => n?.[0])
+                          .filter(Boolean)
+                          .slice(0, 2)
+                          .join('')
+                          .toUpperCase()
+                        return (
+                          <div key={idx} className="d-flex align-items-center mb-2">
+                            <CAvatar className="me-3 bg-secondary text-white" size="md">{initials || '-'}</CAvatar>
+                            <div>
+                              <div style={{ fontWeight: 700 }}>{co.collaborateur.nomComplet}</div>
+                              <div className="text-muted" style={{ fontSize: '0.85rem' }}>{co.collaborateur.poste || ''}</div>
+                            </div>
+                          </div>
+                        )
+                      })
                     : '-'}
-                </p>
+                </div>
               </CCol>
               <CCol md={6}>
                 <h6 className="mb-2">Finalité :</h6>
