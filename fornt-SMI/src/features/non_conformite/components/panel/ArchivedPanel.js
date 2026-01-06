@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { useArchiveNC, useRestoreNC } from '../../hooks/useNCDetails'
+import { useArchiveNC, useRestoreNC, useDeleteNC } from '../../hooks/useNCDetails'
 import { Pop_up } from '../../../../components/notification/Pop_up'
 import {
   CRow, CCol, CCard, CCardBody, CBadge,
-  CPagination, CPaginationItem
+  CPagination, CPaginationItem, CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter, CButton
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilActionUndo } from '@coreui/icons'
+import { cilActionUndo, cilTrash } from '@coreui/icons'
 
 import FilterDropdown from '../filter/FilterDropdown'
 import DateFilterDropdown from '../filter/DateFilterDropdown'
@@ -27,7 +27,11 @@ const ArchivedPanel = ({ ncData = [], loading = false, error = null, onReload })
   const { archive, loading: archiving, error: archiveError, showToast, setShowToast, popType, popMessage } = useArchiveNC();
   // Hook pour restaurer une NC
   const { restaure, loading: restoring, error: restoreError, showToast: showRestoreToast, setShowToast: setShowRestoreToast, popType: restorePopType, popMessage: restorePopMessage } = useRestoreNC();
+  // Hook pour supprimer définitivement une NC
+  const { supprimer, loading: deleting, error: deleteError, showToast: showDeleteToast, setShowToast: setShowDeleteToast, popType: deletePopType, popMessage: deletePopMessage } = useDeleteNC();
   const [archivedId, setArchivedId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
   const [selectedProcesses, setSelectedProcesses] = useState([])
   const [selectedTypes, setSelectedTypes] = useState([])
@@ -100,6 +104,39 @@ const ArchivedPanel = ({ ncData = [], loading = false, error = null, onReload })
         message={restorePopMessage}
         onClose={() => setShowRestoreToast(false)}
       />
+      <Pop_up
+        show={showDeleteToast}
+        type={deletePopType}
+        message={deletePopMessage}
+        onClose={() => setShowDeleteToast(false)}
+      />
+      <CModal alignment="center" visible={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
+        <CModalHeader>
+          <CModalTitle>Confirmer la suppression définitive</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          Êtes-vous sûr de vouloir supprimer définitivement cette non-conformité ? Cette action est irréversible.
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setShowDeleteModal(false)}>
+            Annuler
+          </CButton>
+          <CButton
+            color="danger"
+            onClick={async () => {
+              if (deleteConfirmId) {
+                setArchivedId(deleteConfirmId);
+                await supprimer(deleteConfirmId);
+                setShowDeleteModal(false);
+                if (typeof onReload === 'function') onReload();
+              }
+            }}
+            disabled={deleting}
+          >
+            {deleting ? 'Suppression...' : 'Supprimer'}
+          </CButton>
+        </CModalFooter>
+      </CModal>
           <CRow>
         <CCol xs={2}>
           <FilterDropdown
@@ -182,8 +219,23 @@ const ArchivedPanel = ({ ncData = [], loading = false, error = null, onReload })
                     }
                   }}
                   aria-label="Restaurer"
+                  title='Restaurer'
                 >
-                  <CIcon icon={cilActionUndo} size='lg' className="text-success" title='Restaurer' />
+                  <CIcon icon={cilActionUndo} size='lg' className="text-success me-2" />
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-link p-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    setDeleteConfirmId(nc.nc.id);
+                    setShowDeleteModal(true);
+                  }}
+                  aria-label="Supprimer"
+                  title='Supprimer définitivement'
+                >
+                  <CIcon icon={cilTrash} size='lg' className="text-danger me-2" />
                 </button>
               </CCol>
             </CRow>

@@ -59,7 +59,7 @@ const Liste_NC = () => {
                         key='1'
                         shape=""
                         className="mb-3"
-                        href='#/nc/list/archive'
+                        href='/nc/list/archive'
                     >
                         <CIcon icon={cilStorage} className="me-2" />
                         Archives
@@ -83,7 +83,7 @@ const Liste_NC = () => {
                                 </CBadge>
                             </CTab>
                             <CTab itemKey="tous" className="d-flex align-items-center">
-                                <h6 className='m-1'>Tous</h6>
+                                <h6 className='m-1'>Mes non-conformités</h6>
                                 <CBadge className="custom-badge">
                                     {loadingall ? '...' : all.length}
                                 </CBadge>

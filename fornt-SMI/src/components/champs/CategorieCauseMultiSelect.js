@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import Select from 'react-select'
 import API_URL from '../../api/API_URL'
+import axiosInstance from '../../api/axiosInstance'
 
 function CategorieCauseMultiSelect({ placeholder = 'Sélectionner les categorie ', onChange, value, invalid }) {
   const [options, setOptions] = useState([])
 
   useEffect(() => {
-    fetch(`${API_URL}/CategorieCauseNC`)
-      .then(res => res.json())
-      .then(data => {
+    axiosInstance.get('/CategorieCauseNC')
+      .then(res => {
+        const data = res.data
         const opts = Array.isArray(data)
           ? data.map(CatCause => ({
               value: CatCause.id,
@@ -17,7 +18,7 @@ function CategorieCauseMultiSelect({ placeholder = 'Sélectionner les categorie 
           : []
         setOptions(opts)
       })
-      .catch(() => setOptions([]))
+        .catch(() => setOptions([]))
   }, [])
 
   return (

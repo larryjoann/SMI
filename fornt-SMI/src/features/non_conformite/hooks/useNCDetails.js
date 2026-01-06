@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useCallback } from 'react'
-import { getNC, archiverNC, draftToDeclareNC, restorerNC } from '../services/nonConformiteService'
+import { getNC, archiverNC, draftToDeclareNC, restorerNC, supprimerNC } from '../services/nonConformiteService'
 
 export function useNCDetails(id) {
   const [data, setData] = useState(null)
@@ -187,4 +187,42 @@ export function useDraftToDeclareNC() {
     }
   }, []);
   return { declare, loading, error, success, showToast, setShowToast, popType, popMessage }
+}
+
+// Hook pour supprimer définitivement une NC
+export function useDeleteNC() {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(false)
+  const [showToast, setShowToast] = useState(false)
+  const [popType, setPopType] = useState('success')
+  const [popMessage, setPopMessage] = useState('')
+
+  const supprimer = useCallback(async (id) => {
+    setLoading(true)
+    setError(null)
+    setSuccess(false)
+    setShowToast(false)
+    try {
+      await supprimerNC(id)
+      setSuccess(true)
+      setPopType('success')
+      setPopMessage('Non-conformité supprimée définitivement !')
+      setShowToast(true)
+    } catch (err) {
+      let msg = "Erreur lors de la suppression"
+      if (err?.response?.data?.message) {
+        msg = err.response.data.message
+      } else if (err instanceof TypeError) {
+        msg = "Erreur réseau : impossible de contacter le serveur."
+      }
+      setError(msg)
+      setPopType('danger')
+      setPopMessage(msg)
+      setShowToast(true)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+  return { supprimer, loading, error, success, showToast, setShowToast, popType, popMessage }
 }

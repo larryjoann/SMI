@@ -1,0 +1,48 @@
+   "DefaultConnection": "Server=TNR-SRV-DEV1\\SQL_DEV1;Database=SMIDB;User Id=sa_smi;Password=S4m1Xdb;TrustServerCertificate=True"
+
+"DefaultConnection": "Server=tnr-srv-sql6;Database=KPI_DQRSE_SMI;User Id=sa;Password=D@taSA_23;TrustServerCertificate=True"
+
+
+"DefaultConnection": "Server=JOANN;Database=SMI;Trusted_Connection=True;TrustServerCertificate=True"
+
+A faire avant presentation : 
+ - liste activité d'un NC
+ - liste NC archivé
+ - continuité NC vers action
+ - notification NC
+ + correction retsy ambony retsy
+
+Reste a faire : 
+- saisie valeur KPI
+- intégration TDB KPI
+- plan d'action 
+- définition des roles/ acces
+- histo / logs activité de l'appli
+
+038 43 904 43
+
+{
+  "idAction": 15,
+  "dateSuivi": "2025-12-02T00:40:01",
+  "avancement": 40
+}
+
+uploads\canva link_abaae9af-1948-4231-b0ca-cd448f0600ae.md
+
+add action : 
+titre
+descr
+responsables[]
+date debut
+date fin
+sources[]
+date fin relle ?
+id_status ?
+suivi[] ? 
+
+
+{
+    "idAction":20,
+    "dateSuivi":"2026-11-02T00:40:01",
+    "avancement":60
+}

@@ -1,6 +1,18 @@
 -- =========================
 -- 1. Tables de base
 -- =========================
+CREATE TABLE Entite (
+    id INT IDENTITY PRIMARY KEY,
+    nom VARCHAR(50)
+);
+
+INSERT INTO entite (nom) VALUES ('Processus');
+INSERT INTO entite (nom) VALUES ('Non-conformité');
+INSERT INTO entite (nom) VALUES ('Plan d''action');
+INSERT INTO entite (nom) VALUES ('Action');
+INSERT INTO entite (nom) VALUES ('Dashboard');
+INSERT INTO entite (nom) VALUES ('KPI');
+INSERT INTO entite (nom) VALUES ('Admin');
 
 CREATE TABLE Categorie_processus (
     id INT IDENTITY PRIMARY KEY,
@@ -10,7 +22,7 @@ CREATE TABLE Categorie_processus (
 INSERT INTO Categorie_processus (nom) VALUES ('Management');
 INSERT INTO Categorie_processus (nom) VALUES ('Système et amélioration');
 INSERT INTO Categorie_processus (nom) VALUES ('Réalisation');
-INSERT  INTO Categorie_processus (nom) VALUES ('Support');
+INSERT INTO Categorie_processus (nom) VALUES ('Support');
 
 CREATE TABLE Collaborateur (
     matricule VARCHAR(50) PRIMARY KEY,
@@ -47,44 +59,130 @@ CREATE TABLE Validite_processus (
     CONSTRAINT UQ_annee_dispoProcessus_Processus_Annee UNIQUE (id_processus, annee)
 );
 
-CREATE TABLE Pilote (
+CREATE TABLE Type_responsable_processus (
+    id INT IDENTITY PRIMARY KEY,
+    id_role INT NOT NULL,
+    FOREIGN KEY(id_role) REFERENCES Role(id),
+    CONSTRAINT UQ_Type_Responsable_Processus UNIQUE (id_role)
+);
+
+INSERT INTO Type_responsable_processus (id_role) VALUES (4); -- Pilote de processus
+INSERT INTO Type_responsable_processus (id_role) VALUES (5); -- Co-p
+
+
+CREATE TABLE Responsable_processus (
     id INT IDENTITY PRIMARY KEY,
     matricule_collaborateur VARCHAR(50) NOT NULL, 
     id_processus INT NOT NULL,
+    id_type_responsable_processus INT NOT NULL,
     FOREIGN KEY(id_processus) REFERENCES Processus(id),
-    FOREIGN KEY(matricule_collaborateur) REFERENCES Collaborateur(matricule)
+    FOREIGN KEY(matricule_collaborateur) REFERENCES Collaborateur(matricule),
+    FOREIGN KEY(id_type_responsable_processus) REFERENCES Type_responsable_processus(id),
+    CONSTRAINT UQ_Responsable_Processus UNIQUE (matricule_collaborateur, id_processus, id_type_responsable_processus)
 );
 
-CREATE TABLE Copilote (
+CREATE TABLE Intercation (
     id INT IDENTITY PRIMARY KEY,
-    matricule_collaborateur VARCHAR(50) NOT NULL, 
     id_processus INT NOT NULL,
+    id_processus_interagi INT NOT NULL,
+    descr VARCHAR(MAX),
     FOREIGN KEY(id_processus) REFERENCES Processus(id),
-    FOREIGN KEY(matricule_collaborateur) REFERENCES Collaborateur(matricule)
+    FOREIGN KEY(id_processus_interagi) REFERENCES Processus(id)
 );
 
+CREATE TABLE Categorie_ressources (
+    id INT IDENTITY PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL
+)
+
+INSERT INTO Categorie_ressources (nom) VALUES ('Humaines');
+INSERT INTO Categorie_ressources (nom) VALUES ('Matérielles');
+INSERT INTO Categorie_ressources (nom) VALUES ('Connaissance organisationnelle');
+INSERT INTO Categorie_ressources (nom) VALUES ('documentaires');
+INSERT INTO Categorie_ressources (nom) VALUES ('Naturelles');
+
+CREATE TABLE Ressource_processus (
+    id INT IDENTITY PRIMARY KEY,
+    id_processus INT NOT NULL,
+    id_categorie_ressources INT NOT NULL,
+    descr VARCHAR(MAX),
+    FOREIGN KEY(id_processus) REFERENCES Processus(id),
+    FOREIGN KEY(id_categorie_ressources) REFERENCES Categorie_ressources(id)
+);
+
+CREATE TABLE Partie_interesse_attente (
+    id INT IDENTITY PRIMARY KEY,
+    id_processus INT NOT NULL,
+    partie_interesse VARCHAR(MAX),
+    groupe INT NOT NULL,
+    attente VARCHAR(MAX),
+    FOREIGN KEY(id_processus) REFERENCES Processus(id)
+);
+
+CREATE TABLE Activite (
+    id INT IDENTITY PRIMARY KEY,
+    id_processus INT NOT NULL,
+    processus_fournisseur VARCHAR(MAX),
+    element_entrante VARCHAR(MAX),
+    processus_client VARCHAR(MAX),
+    element_sortante VARCHAR(MAX),
+    descr VARCHAR(MAX),
+    FOREIGN KEY(id_processus) REFERENCES Processus(id)
+);
 
 -- =========================
 -- 2. Gestion des rôles et permissions
 -- =========================
 
-CREATE TABLE Categorie_permission (
-    id INT IDENTITY PRIMARY KEY,
-    nom VARCHAR(50) NOT NULL
-);
 
 CREATE TABLE Permission (
     id INT IDENTITY PRIMARY KEY,
-    nom VARCHAR(50) NOT NULL,
+    nom VARCHAR(MAX) NOT NULL,
     reference VARCHAR(20) NOT NULL,
-    id_categorie_permission INT NOT NULL,
-    FOREIGN KEY(id_categorie_permission) REFERENCES Categorie_permission(id)
+    id_entite INT NOT NULL,
+    FOREIGN KEY(id_entite) REFERENCES Entite(id)
 );
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Consulation tableau de bord', 'READ_TDB', 9);
+
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Consulation du cartographie', 'READ_CARTO', 1);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('CRUD de mes processus', 'CRUD_MA_PROCESSUS', 1);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('CRUD de tous les processus', 'CRUD_TOUS_PROCESSUS', 1);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Gestion des responsable processus', 'MANAGE_RESP', 1);
+
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Consultation TDB KPI', 'READ_KPI', 10);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Saisie KPI', 'CRUD_KPI', 10);
+
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Déclaration de NC', 'DECL_NC', 2);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Suivi des NC', 'SUIVI_NC', 2);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Qualification des NC', 'QUALIF_NC', 2);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Analyse des causes des NC', 'ANALYSE_NC', 2);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Verification éfficacité NC', 'VERIF_NC', 2);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Clôture des NC', 'CLOTURE_NC', 2);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Assignation des actions NC', 'ASSIGN_NC', 2);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Ajout des commentaires sur NC', 'COMMENT_NC', 2);
+
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Insertion de PA', 'INSERT_PA',3);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Suivi des PA', 'SUIVI_PA', 3);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Assignation des actions PA', 'ASSIGN_PA', 3);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Clôture des PA', 'CLOTURE_PA', 3);
+
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Suivi des actions', 'SUIVI_ACT', 4);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Mise à jour des actions', 'CRUD_ACT', 4);
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Avancement des actions', 'AVC_ACT', 4);
+
+INSERT INTO Permission (nom, reference, id_entite) VALUES ('Administration', 'ADMIN', 11);
 
 CREATE TABLE Role (
     id INT IDENTITY PRIMARY KEY,
-    nom VARCHAR(50) NOT NULL
+    nom VARCHAR(50) NOT NULL, 
+    est_automatique BIT NOT NULL DEFAULT 0
 );
+
+INSERT INTO Role (nom, est_automatique) VALUES ('Administrateur', 0);
+INSERT INTO Role (nom, est_automatique) VALUES ('Responsable Qualité',0);
+INSERT INTO Role (nom, est_automatique) VALUES ('Pilote de processus',1);
+INSERT INTO Role (nom, est_automatique) VALUES ('Co-pilote de processus',1);
+INSERT INTO Role (nom, est_automatique) VALUES ('Collaborateur', 1);
 
 CREATE TABLE Role_permission (
     id INT IDENTITY PRIMARY KEY,
@@ -94,14 +192,18 @@ CREATE TABLE Role_permission (
     FOREIGN KEY(id_permission) REFERENCES Permission(id)
 );
 
+INSERT INTO Role_permission (id_role, id_permission) VALUES (1, 2);
+INSERT INTO Role_permission (id_role, id_permission) VALUES (1, 3);
+
 CREATE TABLE Role_collaborateur (
     id INT IDENTITY PRIMARY KEY,
     matricule_collaborateur VARCHAR(50) NOT NULL, 
     id_role INT NOT NULL,
-    etat INT,
     FOREIGN KEY(matricule_collaborateur) REFERENCES Collaborateur(matricule),
     FOREIGN KEY(id_role) REFERENCES Role(id)
 );
+
+--INSERT INTO Role_collaborateur (matricule_collaborateur, id_role) VALUES ('ST151', 1); -- Administrateur
 
 -- =========================
 -- 3. Non-conformité
@@ -160,7 +262,6 @@ VALUES
 ('Traitement',2),
 ('Cloture',3);
 
-
 DELETE FROM Status_nc;
 DBCC CHECKIDENT ('Status_nc', RESEED, 0);
 
@@ -189,7 +290,7 @@ CREATE TABLE Non_conformite (
     id_type_nc INT NULL,
     id_status_nc INT NULL,      -- Foreign key vers Status_nc
     id_priorite_nc INT NULL,    -- Foreign key vers Priorite_nc
-    status BIT NOT NULL DEFAULT 1,
+    status BIT DEFAULT 1,
     FOREIGN KEY(id_lieu) REFERENCES Lieu(id),
     FOREIGN KEY(id_type_nc) REFERENCES Type_nc(id),
     FOREIGN KEY(id_status_nc) REFERENCES Status_nc(id),
@@ -224,7 +325,6 @@ INSERT INTO Categorie_cause_nc (nom) VALUES ('Matériel');
 INSERT INTO Categorie_cause_nc (nom) VALUES ('Matière');
 INSERT INTO Categorie_cause_nc (nom) VALUES ('Main d''oeuvre');
 
-
 CREATE TABLE Cause_nc (
     id INT IDENTITY PRIMARY KEY,
     id_categorie_cause_nc INT NOT NULL,
@@ -257,15 +357,10 @@ INSERT INTO operation (nom) VALUES ('Création');
 INSERT INTO operation (nom) VALUES ('Modification');
 INSERT INTO operation (nom) VALUES ('Suppression');
 
-
-CREATE TABLE Entite (
-    id INT IDENTITY PRIMARY KEY,
-    nom VARCHAR(50)
-);
-
 INSERT INTO entite (nom) VALUES ('Processus');
 INSERT INTO entite (nom) VALUES ('Non-conformité');
 INSERT INTO entite (nom) VALUES ('Plan d''action');
+INSERT INTO entite (nom) VALUES ('Action');
 
 CREATE TABLE Historique (
     id INT IDENTITY PRIMARY KEY,
@@ -325,7 +420,7 @@ CREATE TABLE Source_action (
     FOREIGN KEY(id_action) REFERENCES Action(id)
 );
 
-INSERT INTO Source_action (id_action, id_entite, id_objet) VALUES (1, 2, 1); -- Exemple d'insertion liant une action à une non-conformité
+--INSERT INTO Source_action (id_action, id_entite, id_objet) VALUES (1, 2, 1); -- Exemple d'insertion liant une action à une non-conformité
 
 CREATE TABLE Responsable_action (
     id INT IDENTITY PRIMARY KEY,
@@ -379,5 +474,22 @@ CREATE TABLE Processus_concerne_PA (
     id_processus INT NOT NULL,
     FOREIGN KEY(id_pa) REFERENCES Plan_action(id),
     FOREIGN KEY(id_processus) REFERENCES Processus(id)
+);
+
+-- =========================
+-- 6. Notifications
+-- =========================
+
+CREATE TABLE Notification (
+    id INT IDENTITY PRIMARY KEY,
+    matricule_collaborateur VARCHAR(50) NOT NULL,
+    datetime_notification DATETIME DEFAULT GETDATE(),
+    titre VARCHAR(200) NOT NULL,
+    contenu VARCHAR(MAX) NOT NULL,
+    lue BIT NOT NULL DEFAULT 0,
+    id_entite INT NOT NULL,
+    id_object INT NOT NULL,
+    FOREIGN KEY(id_entite) REFERENCES Entite(id),
+    FOREIGN KEY(matricule_collaborateur) REFERENCES Collaborateur(matricule)
 );
 

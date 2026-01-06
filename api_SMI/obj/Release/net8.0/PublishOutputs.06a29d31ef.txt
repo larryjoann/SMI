@@ -21,6 +21,7 @@ C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Microsoft.Extens
 C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Microsoft.Extensions.Configuration.Abstractions.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Microsoft.Extensions.DependencyInjection.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Microsoft.Extensions.DependencyModel.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Microsoft.Extensions.Logging.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Microsoft.Extensions.Logging.Abstractions.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Microsoft.Extensions.Options.dll
@@ -35,6 +36,7 @@ C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Microsoft.Identi
 C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Microsoft.IdentityModel.Tokens.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Microsoft.OpenApi.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Microsoft.SqlServer.Server.dll
+C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Scrutor.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Swashbuckle.AspNetCore.SwaggerGen.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\publish\Swashbuckle.AspNetCore.SwaggerUI.dll

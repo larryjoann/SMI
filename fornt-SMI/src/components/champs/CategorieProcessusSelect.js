@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { CFormSelect } from '@coreui/react'
 import API_URL from '../../api/API_URL'
+import axiosInstance from '../../api/axiosInstance'
 
 // Props:
 // - allowEmpty: whether to include an empty option
@@ -9,9 +10,8 @@ const CategorieProcessusSelect = ({ allowEmpty = true, emptyLabel = 'Sélectionn
   const [categories, setCategories] = useState([])
 
   useEffect(() => {
-    fetch(`${API_URL}/CategorieProcessus`)
-      .then(res => res.json())
-      .then(data => setCategories(data))
+    axiosInstance.get('/CategorieProcessus')
+      .then(res => setCategories(res.data || []))
       .catch(() => setCategories([]))
   }, [])
 

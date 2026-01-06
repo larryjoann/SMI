@@ -1,11 +1,14 @@
 using api_SMI.Models;
 using api_SMI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using api_SMI.Extensions;
 
 namespace api_SMI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class NonConformiteController : ControllerBase
     {
         private readonly INonConformiteService _service;
@@ -44,7 +47,7 @@ namespace api_SMI.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            var matricule = HttpContext.Session.GetString("matricule");
+            var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
@@ -58,7 +61,7 @@ namespace api_SMI.Controllers
         [HttpPost("draft")]
         public IActionResult Draft(NonConformite nonConformite)
         {
-            var matricule = HttpContext.Session.GetString("matricule");
+            var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
@@ -77,6 +80,28 @@ namespace api_SMI.Controllers
             return NoContent();
         }
 
+        [HttpPost("verifier")]
+        public IActionResult Verifier(int id)
+        {
+            Console.WriteLine("Verifier called for ID: " + id);
+            var nc = _service.GetById(id);
+            if (nc == null) return NotFound();
+            nc.IdStatusNc = 8;
+            _service.Update(nc);
+            return NoContent();
+        }
+
+        [HttpPost("cloture")]
+        public IActionResult Cloturer(int id)
+        {
+            Console.WriteLine("Cloturer called for ID: " + id);
+            var nc = _service.GetById(id);
+            if (nc == null) return NotFound();
+            nc.IdStatusNc = 9;
+            _service.Update(nc);
+            return NoContent();
+        }
+
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
@@ -90,6 +115,15 @@ namespace api_SMI.Controllers
             var nc = _service.GetById(id);
             if (nc == null) return NotFound();
             _service.Archiver(id);
+            return NoContent();
+        }
+
+        [HttpPut("supprimer/{id}")]
+        public IActionResult Supprimer(int id)
+        {
+            var nc = _service.GetById(id);
+            if (nc == null) return NotFound();
+            _service.Supprimer(id);
             return NoContent();
         }
     }

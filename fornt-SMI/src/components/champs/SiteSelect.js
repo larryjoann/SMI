@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { CFormSelect } from '@coreui/react'
 import API_URL from '../../api/API_URL'
+import axiosInstance from '../../api/axiosInstance'
 
 const SiteSelect = (props) => {
   const [sites, setSites] = useState([])
 
   useEffect(() => {
-    fetch(`${API_URL}/lieu`)
-      .then(res => res.json())
-      .then(data => setSites(data))
+    axiosInstance.get('/lieu')
+      .then(res => setSites(res.data || []))
       .catch(() => setSites([]))
   }, [])
 

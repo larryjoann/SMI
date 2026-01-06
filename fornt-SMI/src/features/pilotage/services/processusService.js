@@ -1,50 +1,48 @@
 import API_URL from '../../../api/API_URL'
+import axiosInstance from '../../../api/axiosInstance'
 
 export async function createProcessus(data) {
-  const res = await fetch(`${API_URL}/Processus`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  })
-  const text = await res.text()
-  if (!res.ok) {
-    let error
+  try {
+    const res = await axiosInstance.post('/Processus', data)
+    return res.data || {}
+  } catch (error) {
+    const status = error?.response?.status || 500
+    const dataText = error?.response?.data ? (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) : (error.message || '')
+    let parsed
     try {
-      error = text ? JSON.parse(text) : { message: 'Erreur serveur' }
+      parsed = dataText ? JSON.parse(dataText) : { message: 'Erreur serveur' }
     } catch {
-      error = { message: text || 'Erreur serveur' }
+      parsed = { message: dataText || 'Erreur serveur' }
     }
-    throw error
+    const err = new Error(parsed?.message || 'Erreur serveur')
+    err.status = status
+    throw err
   }
-  // Si la réponse est vide, retourner un objet vide
-  return text ? JSON.parse(text) : {}
 }
 
 export async function updateProcessus(id, data) {
-  const res = await fetch(`${API_URL}/Processus/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...data, id }),
-  })
-  const text = await res.text()
-  if (!res.ok) {
-    let error
+  try {
+    const res = await axiosInstance.put(`/Processus/${id}`, { ...data, id })
+    return res.data || {}
+  } catch (error) {
+    const status = error?.response?.status || 500
+    const dataText = error?.response?.data ? (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) : (error.message || '')
+    let parsed
     try {
-      error = text ? JSON.parse(text) : { message: 'Erreur serveur' }
+      parsed = dataText ? JSON.parse(dataText) : { message: 'Erreur serveur' }
     } catch {
-      error = { message: text || 'Erreur serveur' }
+      parsed = { message: dataText || 'Erreur serveur' }
     }
-    throw error
+    const err = new Error(parsed?.message || 'Erreur serveur')
+    err.status = status
+    throw err
   }
-  // Si la réponse est vide, retourner un objet vide
-  return text ? JSON.parse(text) : {}
 }
 
 // Charger les collaborateurs et retourner l'option pour un matricule donné
 export async function getCollaborateurOptionByMatricule(matricule) {
-  const res = await fetch(`${API_URL}/Collaborateur`)
-  if (!res.ok) return null
-  const collabs = await res.json()
+  const res = await axiosInstance.get('/Collaborateur')
+  const collabs = res && res.data ? res.data : []
   const option = collabs
     .map(col => ({
       value: col.matricule,
@@ -55,7 +53,11 @@ export async function getCollaborateurOptionByMatricule(matricule) {
 }
 
 export async function getProcessusById(id) {
-  const res = await fetch(`${API_URL}/Processus/${id}`)
-  if (!res.ok) throw new Error('Erreur serveur')
-  return await res.json()
+  const res = await axiosInstance.get(`/Processus/${id}`)
+  return res && res.data ? res.data : null
+}
+
+export async function getTypeResponsableProcessus() {
+  const res = await axiosInstance.get('/TypeResponsableProcessus')
+  return res && res.data ? res.data : []
 }

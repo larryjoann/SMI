@@ -12,5 +12,8 @@ namespace api_SMI.Models
 
         [Column("nom")]
         public string? Nom { get; set; }
+
+        [Column("est_automatique")]
+        public bool? EstAutomatique { get; set; }
     }
 }

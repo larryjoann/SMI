@@ -1,11 +1,14 @@
 using api_SMI.Models;
 using api_SMI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using api_SMI.Extensions;
 
 namespace api_SMI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class CommentaireNcController : ControllerBase
     {
         private readonly ICommentaireNcService _service;
@@ -34,23 +37,13 @@ namespace api_SMI.Controllers
         [HttpPost]
         public IActionResult Create(CommentaireNc entity)
         {
-            // Diagnostic: log session id and cookies to verify the session cookie is sent with this POST
-            try
+            // Diagnostic: log request cookies for debugging
+            foreach (var c in HttpContext.Request.Cookies)
             {
-                Console.WriteLine($"Session.Id in commentaire Create: {HttpContext.Session.Id}");
-                foreach (var c in HttpContext.Request.Cookies)
-                {
-                    Console.WriteLine($"Request cookie in commentaire Create: {c.Key} = {c.Value}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Erreur lors du logging des cookies/session dans Create: " + ex.Message);
+                Console.WriteLine($"Request cookie in commentaire Create: {c.Key} = {c.Value}");
             }
 
-            var matricule = HttpContext.Session.GetString("matricule");
-
-            Console.WriteLine($"Matricule enregistré en session commentaire: {matricule}");
+            var matricule = User.GetMatricule();
 
             if (string.IsNullOrEmpty(matricule))
                 return Unauthorized(new { message = "Utilisateur non authentifié (matricule en session manquant)." });
@@ -64,9 +57,9 @@ namespace api_SMI.Controllers
         public IActionResult Update(int id, CommentaireNc entity)
         {
             if (id != entity.Id) return BadRequest();
-            var matricule = HttpContext.Session.GetString("matricule");
+            var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
-                return Unauthorized(new { message = "Utilisateur non authentifié (matricule en session manquant)." });
+                return Unauthorized(new { message = "Utilisateur non authentifié (matricule manquant)." });
 
             entity.MatriculeCollaborateur = matricule;
             _service.Update(entity);

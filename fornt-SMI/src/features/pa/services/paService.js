@@ -1,122 +1,125 @@
 import API_URL from '../../../api/API_URL'
+import axiosInstance from '../../../api/axiosInstance'
 
 const apiBase = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL
 
 export async function getPA(id) {
   if (!id) throw new Error('id is required')
-  const res = await fetch(`${apiBase}/PlanAction/${id}`, { credentials: 'include' })
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '')
-    const err = new Error(`Failed to fetch PA: ${res.status} ${txt}`)
-    err.status = res.status
+  try {
+    const res = await axiosInstance.get(`/PlanAction/${id}`)
+    return res.data
+  } catch (error) {
+    const status = error?.response?.status || 500
+    const txt = error?.response?.data ? (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) : (error.message || '')
+    const err = new Error(`Failed to fetch PA: ${status} ${txt}`)
+    err.status = status
     throw err
   }
-  return res.json().catch(() => null)
 }
 
 export async function createSourcePA(descr) {
-  const res = await fetch(`${apiBase}/SourcePA`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ descr })
-  })
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '')
-    const err = new Error(`Failed to create Source_PA: ${res.status} ${txt}`)
-    err.status = res.status
+  try {
+    const res = await axiosInstance.post('/SourcePA', { descr })
+    return res.data
+  } catch (error) {
+    const status = error?.response?.status || 500
+    const txt = error?.response?.data ? (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) : (error.message || '')
+    const err = new Error(`Failed to create Source_PA: ${status} ${txt}`)
+    err.status = status
     throw err
   }
-  return res.json().catch(() => null)
 }
 
 export async function updateSourcePA(id, descr) {
-  const res = await fetch(`${apiBase}/SourcePA/${id}`, {
-    method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ descr })
-  })
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '')
-    const err = new Error(`Failed to update Source_PA: ${res.status} ${txt}`)
-    err.status = res.status
+  try {
+    const res = await axiosInstance.put(`/SourcePA/${id}`, { descr })
+    return res.status >= 200 && res.status < 300
+  } catch (error) {
+    const status = error?.response?.status || 500
+    const txt = error?.response?.data ? (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) : (error.message || '')
+    const err = new Error(`Failed to update Source_PA: ${status} ${txt}`)
+    err.status = status
     throw err
   }
-  return true
 }
 
 export async function createPlanAction(payload) {
     console.log('Creating Plan_action with payload:', payload);
-  const res = await fetch(`${apiBase}/PlanAction`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload)
-  })
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '')
-    const err = new Error(`Failed to create Plan_action: ${res.status} ${txt}`)
-    err.status = res.status
+  try {
+    const res = await axiosInstance.post('/PlanAction', payload)
+    return res.data
+  } catch (error) {
+    const status = error?.response?.status || 500
+    const txt = error?.response?.data ? (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) : (error.message || '')
+    const err = new Error(`Failed to create Plan_action: ${status} ${txt}`)
+    err.status = status
     throw err
   }
-  return res.json().catch(() => null)
 }
 
 export async function updatePlanAction(id, payload) {
-  const res = await fetch(`${apiBase}/PlanAction/${id}`, {
-    method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload)
-  })
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '')
-    const err = new Error(`Failed to update Plan_action: ${res.status} ${txt}`)
-    err.status = res.status
+  try {
+    const res = await axiosInstance.put(`/PlanAction/${id}`, payload)
+    return res.status >= 200 && res.status < 300
+  } catch (error) {
+    const status = error?.response?.status || 500
+    const txt = error?.response?.data ? (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) : (error.message || '')
+    const err = new Error(`Failed to update Plan_action: ${status} ${txt}`)
+    err.status = status
     throw err
   }
-  return true
 }
 
 export async function deleteProcessusConcerneByPa(paId) {
   // best-effort: backend may expose a dedicated endpoint; fallback if not available
   try {
-    const res = await fetch(`${apiBase}/ProcessusConcernePA/${paId}`, { method: 'DELETE', credentials: 'include' })
-    if (!res.ok) {
-      // ignore non-ok for idempotency
-      return false
-    }
-    return true
+    const res = await axiosInstance.delete(`/ProcessusConcernePA/${paId}`)
+    return res.status >= 200 && res.status < 400
   } catch (err) {
     return false
   }
 }
 
 export async function getSources() {
-  const res = await fetch(`${apiBase}/SourcePA`, { credentials: 'include' })
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '')
-    const err = new Error(`Failed to fetch sources: ${res.status} ${txt}`)
-    err.status = res.status
+  try {
+    const res = await axiosInstance.get('/SourcePA')
+    const json = res.data
+    return Array.isArray(json) ? json : (json?.data || json?.items || [])
+  } catch (error) {
+    const status = error?.response?.status || 500
+    const txt = error?.response?.data ? (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) : (error.message || '')
+    const err = new Error(`Failed to fetch sources: ${status} ${txt}`)
+    err.status = status
     throw err
   }
-  const json = await res.json().catch(() => null)
-  return Array.isArray(json) ? json : (json?.data || json?.items || [])
 }
 
 export async function getPlanActions() {
-  const res = await fetch(`${apiBase}/PlanAction`, { credentials: 'include' })
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '')
-    const err = new Error(`Failed to fetch Plan actions: ${res.status} ${txt}`)
-    err.status = res.status
+  try {
+    const res = await axiosInstance.get('/PlanAction')
+    const json = res.data
+    return Array.isArray(json) ? json : (json?.data || json?.items || [])
+  } catch (error) {
+    const status = error?.response?.status || 500
+    const txt = error?.response?.data ? (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) : (error.message || '')
+    const err = new Error(`Failed to fetch Plan actions: ${status} ${txt}`)
+    err.status = status
     throw err
   }
-  const json = await res.json().catch(() => null)
-  return Array.isArray(json) ? json : (json?.data || json?.items || [])
 }
 
 export async function createProcessusConcerne(mapping) {
     console.log('Creating Processus_concerne_PA with mapping:', mapping);
-  const res = await fetch(`${apiBase}/ProcessusConcernePA`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(mapping)
-  })
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '')
-    const err = new Error(`Failed to create Processus_concerne_PA: ${res.status} ${txt}`)
-    err.status = res.status
+  try {
+    const res = await axiosInstance.post('/ProcessusConcernePA', mapping)
+    return res.data
+  } catch (error) {
+    const status = error?.response?.status || 500
+    const txt = error?.response?.data ? (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) : (error.message || '')
+    const err = new Error(`Failed to create Processus_concerne_PA: ${status} ${txt}`)
+    err.status = status
     throw err
   }
-  return res.json().catch(() => null)
 }
 
 export default {
@@ -125,7 +128,7 @@ export default {
   updateSourcePA,
   createPlanAction,
   updatePlanAction,
-  deleteProcessusConcerneByPa,
+  // deleteProcessusConcerneByPa,
   createProcessusConcerne,
   getPlanActions,
 }

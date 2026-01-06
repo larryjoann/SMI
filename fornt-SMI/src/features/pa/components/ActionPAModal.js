@@ -11,6 +11,7 @@ import { cilCheck, cilPlus, cilX } from '@coreui/icons'
 import CollaborateurMultiSelect from '../../../components/champs/CollaborateurMultiSelect'
 import * as paService from '../services/paService'
 import API_URL from '../../../api/API_URL'
+import axiosInstance from '../../../api/axiosInstance'
 
 export default function ActionPAModal({ visible, onClose, pa, onSuccess }) {
   const [title, setTitle] = useState('')
@@ -77,14 +78,10 @@ export default function ActionPAModal({ visible, onClose, pa, onSuccess }) {
       try {
         const form = new FormData()
         form.append('ActionDetails', JSON.stringify(sanitizedAction))
-        const url = `${API_URL}/ActionDetails`
-        const res = await fetch(url, {
-          method: 'POST',
-          credentials: 'include',
-          body: form,
-        })
-        const bodyText = await res.text()
-        if (res.ok) {
+        const url = '/ActionDetails'
+        const res = await axiosInstance.post(url, form)
+        const bodyText = res.data
+        if (res && res.status >= 200 && res.status < 300) {
           console.log('Action created on server:', bodyText)
           onSuccess && onSuccess(action)
           onClose && onClose()
@@ -106,16 +103,9 @@ export default function ActionPAModal({ visible, onClose, pa, onSuccess }) {
   const fetchExistingActions = async () => {
     setLoadingExisting(true)
     try {
-      const apiBase = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL
-      const url = `${apiBase}/Action`
-      const res = await fetch(url, { credentials: 'include' })
-      if (!res.ok) {
-        const txt = await res.text().catch(() => '')
-        console.error('Failed to fetch existing actions', res.status, txt)
-        setExistingActions([])
-        return
-      }
-      const json = await res.json().catch(() => null)
+      const url = '/Action'
+      const res = await axiosInstance.get(url)
+      const json = res.data
       // assume API returns an array or an object with array
       const list = Array.isArray(json) ? json : (json?.data || json?.items || [])
       setExistingActions(list || [])
@@ -147,17 +137,11 @@ export default function ActionPAModal({ visible, onClose, pa, onSuccess }) {
     }
     setLoading(true)
     try {
-      const apiBase = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL
-      const url = `${apiBase}/SourceAction/range`
+      const url = `/SourceAction/range`
       const payload = selectedExisting.map(idAction => ({ idAction, idEntite: 3, idObjet: pa.id }))
-      const res = await fetch(url, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      const txt = await res.text().catch(() => '')
-      if (!res.ok) {
+      const res = await axiosInstance.post(url, payload)
+      const txt = (res && res.data) ? JSON.stringify(res.data) : ''
+      if (!res || (res.status && res.status >= 400)) {
         console.error('Failed to link actions', res.status, txt)
         window.alert(`Echec liaison (${res.status}) : ${txt}`)
         return

@@ -1,12 +1,14 @@
 using api_SMI.Models;
 using api_SMI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using api_SMI.Extensions;
 
 namespace api_SMI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    // [Authorize]
+    [Authorize]
     public class CollaborateurController : ControllerBase
     {
         private readonly CollaborateurService _service;
@@ -25,7 +27,6 @@ namespace api_SMI.Controllers
         [HttpPost("import")]
         public IActionResult ImportFromAD()
         {
-            Console.WriteLine("POST /api/Collaborateur/import appelé");
             try
             {
                 _service.ImportAllADCollaborateurs();
@@ -55,19 +56,11 @@ namespace api_SMI.Controllers
         [HttpGet("collaborateur_connecte")]
         public IActionResult GetCollaborateurConnecte()
         {            
-            var matricule = HttpContext.Session.GetString("matricule");
+            var matricule = User.GetMatricule();
             Console.WriteLine($"Matricule enregistré en session get collab connecté: {matricule}");
-            try
+            foreach (var c in HttpContext.Request.Cookies)
             {
-                Console.WriteLine($"Session.Id en get session collab connecte: {HttpContext.Session.Id}");
-                foreach (var c in HttpContext.Request.Cookies)
-                {
-                    Console.WriteLine($"Request cookie after login: {c.Key} = {c.Value}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Erreur lors du logging des cookies/session après get collab: " + ex.Message);
+                Console.WriteLine($"Request cookie in get collab connecté: {c.Key} = {c.Value}");
             }
 
             if (string.IsNullOrEmpty(matricule))

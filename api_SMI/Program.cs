@@ -1,59 +1,22 @@
+using System.Text;
 using Microsoft.EntityFrameworkCore;
-using api_SMI.Data; // Remplace par ton namespace réel
-using api_SMI.Services;
-using api_SMI.Models;
-using api_SMI.Repositories; 
-using api_SMI.Ldap;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.Reflection;
-using System.IO;
-using Microsoft.AspNetCore.HttpOverrides;
+using api_SMI.Data;
+using api_SMI.Services;
+using api_SMI.Repositories;
+using api_SMI.Ldap;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    // Basic OpenAPI info
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "api_SMI", Version = "v1" });
-
-    // JWT Bearer support in Swagger UI
-    var securityScheme = new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Enter 'Bearer' [space] and then your token. Example: \"Bearer {token}\""
-    };
-    c.AddSecurityDefinition("Bearer", securityScheme);
-    var securityRequirement = new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        { securityScheme, new string[] { } }
-    };
-    c.AddSecurityRequirement(securityRequirement);
-
-    // Include XML comments if available (requires GenerateDocumentationFile in csproj)
-    try
-    {
-        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-        if (File.Exists(xmlPath)) c.IncludeXmlComments(xmlPath);
-    }
-    catch
-    {
-        // ignore if reflection/path fails in some environments
-    }
-});
 builder.Services.AddControllers();
 
-// Ajout de l'authentification JWT
-var jwtSecret = "votre_cle_secrete_super_longue_et_complexe"; // Doit être identique à celle utilisée pour générer le token
+var configuration = new ConfigurationBuilder()
+    .SetBasePath(builder.Environment.ContentRootPath)
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .Build();
+
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -67,73 +30,35 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = "api_SMI",
-        ValidAudience = "api_SMI_client",
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("votre_cle_secrete_super_longue_et_complexe"))
+        ValidIssuer = configuration["JwtSettings:Issuer"],
+        ValidAudience = configuration["JwtSettings:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:SecretKey"]))
     };
 });
 
-// Ajout de la gestion de session
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-    // Pour que la session fonctionne depuis un front sur une autre origine (ex: http://localhost:3000)
-    // il faut autoriser les cookies cross-site et permettre les credentials côté CORS.
-    // SameSite=None permet l'envoi du cookie pour les requêtes cross-site (POST via fetch/axios).
-    // Configure cookie options depending on environment to avoid modern browsers rejecting cookies
-    // that set SameSite=None without Secure=true. In development (HTTP) we use Lax to ensure
-    // the cookie is accepted by browsers when running on localhost. In production, allow
-    // cross-site cookies but require Secure so SameSite=None is valid.
-    if (builder.Environment.IsDevelopment())
-    {
-        options.Cookie.SameSite = SameSiteMode.Lax;
-        // On HTTP local dev, do not force Secure; leave as None so cookie can be used by the dev server.
-        options.Cookie.SecurePolicy = CookieSecurePolicy.None;
-    }
-    else
-    {
-        // In production require secure cookies and allow cross-site usage when needed
-        options.Cookie.SameSite = SameSiteMode.None;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    }
-});
-
-// Ajoutez cette ligne pour configurer CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReact",
-        builder =>
-        {
-            builder
-                .WithOrigins("http://localhost:3000") // adapte selon ton front
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
-        });
+    options.AddDefaultPolicy(
+        builder => builder.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod());
+    options.AddPolicy("AllowAll",
+    builder => builder
+        .AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod());
 });
 
-// Cookie policy: explicit SameSite and Secure handling so cookies are accepted cross-site in production
-builder.Services.Configure<CookiePolicyOptions>(options =>
-{
-    // Keep unspecified for dev; set explicit handling below
-    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
-    options.HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always;
-    // In production we'll require Secure cookies (browsers require Secure when SameSite=None)
-    options.Secure = CookieSecurePolicy.SameAsRequest;
-});
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-// Ajoute cette ligne pour configurer le DbContext avec la chaîne de connexion
-// et activer la résilience aux erreurs transitoires (EnableRetryOnFailure)
+
+// DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlOptions => sqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 5,
-            maxRetryDelay: TimeSpan.FromSeconds(10),
-            errorNumbersToAdd: null)));
+    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)));
 
+//Repositories & services (kept as previous, compact list)
 builder.Services.AddScoped<CollaborateurRepository>();
 builder.Services.AddScoped<CollaborateurService>();
 builder.Services.AddScoped<ILdapService, LdapService>();
@@ -149,19 +74,24 @@ builder.Services.AddScoped<PermissionService>();
 builder.Services.AddScoped<RoleRepository>();
 builder.Services.AddScoped<RoleService>();
 builder.Services.AddScoped<RolePermissionRepository>();
-builder.Services.AddScoped<RolePermissionService>();    
+builder.Services.AddScoped<RolePermissionService>();
 builder.Services.AddScoped<RoleCollaborateurRepository>();
-builder.Services.AddScoped<RoleCollaborateurService>(); 
+builder.Services.AddScoped<RoleCollaborateurService>();
+builder.Services.AddScoped<api_SMI.Services.Authorization.IAuthorizationService, api_SMI.Services.Authorization.AuthorizationService>();
 builder.Services.AddScoped<PiloteRepository>();
-builder.Services.AddScoped<PiloteService>();            
+builder.Services.AddScoped<PiloteService>();
 builder.Services.AddScoped<CopiloteRepository>();
 builder.Services.AddScoped<CopiloteService>();
+builder.Services.AddScoped<TypeResponsableProcessusRepository>();
+builder.Services.AddScoped<ITypeResponsableProcessusService, TypeResponsableProcessusService>();
+builder.Services.AddScoped<ResponsableProcessusRepository>();
+builder.Services.AddScoped<IResponsableProcessusService, ResponsableProcessusService>();
 builder.Services.AddScoped<ILieuService, LieuService>();
-builder.Services.AddScoped<LieuRepository>();   
+builder.Services.AddScoped<LieuRepository>();
 builder.Services.AddScoped<ITypeNcService, TypeNcService>();
 builder.Services.AddScoped<TypeNcRepository>();
 builder.Services.AddScoped<INonConformiteService, NonConformiteService>();
-builder.Services.AddScoped<NonConformiteRepository>();        
+builder.Services.AddScoped<NonConformiteRepository>();
 builder.Services.AddScoped<IProcessusConcerneNcService, ProcessusConcerneNcService>();
 builder.Services.AddScoped<ProcessusConcerneNcRepository>();
 builder.Services.AddScoped<IStatusNcService, StatusNcService>();
@@ -179,7 +109,6 @@ builder.Services.AddScoped<CauseNcRepository>();
 builder.Services.AddScoped<ICauseNcService, CauseNcService>();
 builder.Services.AddScoped<CommentaireNcRepository>();
 builder.Services.AddScoped<ICommentaireNcService, CommentaireNcService>();
-builder.Services.AddScoped<INCDetailsService, NCDetailsService>();
 builder.Services.AddScoped<IHistoriqueService, HistoriqueService>();
 builder.Services.AddScoped<HistoriqueRepository>();
 builder.Services.AddScoped<ValiditeProcessusRepository>();
@@ -203,66 +132,45 @@ builder.Services.AddScoped<PlanActionRepository>();
 builder.Services.AddScoped<IPlanActionService, PlanActionService>();
 builder.Services.AddScoped<ProcessusConcernePARepository>();
 builder.Services.AddScoped<IProcessusConcernePAService, ProcessusConcernePAService>();
+builder.Services.AddScoped<NotificationRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
+// Repositories & services for new process resources
+builder.Services.AddScoped<IntercationRepository>();
+builder.Services.AddScoped<IIntercationService, IntercationService>();
+
+builder.Services.AddScoped<CategorieRessourcesRepository>();
+builder.Services.AddScoped<ICategorieRessourcesService, CategorieRessourcesService>();
+
+builder.Services.AddScoped<RessourceProcessusRepository>();
+builder.Services.AddScoped<IRessourceProcessusService, RessourceProcessusService>();
+
+builder.Services.AddScoped<PartieInteresseAttenteRepository>();
+builder.Services.AddScoped<IPartieInteresseAttenteService, PartieInteresseAttenteService>();
+
+builder.Services.AddScoped<ActiviteRepository>();
+builder.Services.AddScoped<IActiviteService, ActiviteService>();
 
 var app = builder.Build();
 
-// Test de connexion à la base de données au démarrage
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    api_SMI.DbConnectionTest.Test(services);
-}
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+// if (app.Environment.IsDevelopment())
+// {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
-
-// If the app is deployed behind a reverse proxy (NGINX, IIS, Azure LB...),
-// enable forwarded headers so the app can see the original scheme (https) and client IP.
-// This is important so cookies marked Secure and redirects work correctly when TLS is terminated upstream.
-app.UseForwardedHeaders(new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-    // For increased security, configure KnownProxies or KnownNetworks in production
-});
+// }
 
 app.UseHttpsRedirection();
-app.UseRouting();
-app.UseCors("AllowReact");
-app.UseCookiePolicy();
-app.UseSession();
+
+app.UseCors();
+app.UseCors("AllowAll");
+
 app.UseAuthentication();
+
+app.UseMiddleware<api_SMI.Middleware.AuthorizationMiddleware>();
+
 app.UseAuthorization();
+
 app.MapControllers();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
-
-Console.WriteLine("API démarrée");
-app.MapControllers();
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

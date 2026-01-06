@@ -18,8 +18,8 @@ namespace api_SMI.Data
         public DbSet<Role> Role { get; set; }
         public DbSet<RolePermission> RolePermission { get; set; }
         public DbSet<RoleCollaborateur> RoleCollaborateur { get; set; }
-        public DbSet<Pilote> Pilotes { get; set; }
-        public DbSet<Copilote> Copilotes { get; set; }
+        public DbSet<TypeResponsableProcessus> TypeResponsableProcessus { get; set; }
+        public DbSet<ResponsableProcessus> ResponsableProcessus { get; set; }
         public DbSet<Lieu> Lieux { get; set; }
         public DbSet<TypeNc> TypeNcs { get; set; }
         public DbSet<NonConformite> NonConformites { get; set; }
@@ -43,7 +43,18 @@ namespace api_SMI.Data
         public DbSet<SourcePA> SourcePAs { get; set; }
         public DbSet<PlanAction> PlanActions { get; set; }
         public DbSet<ProcessusConcernePA> ProcessusConcernePAs { get; set; }
-    public DbSet<StatusPA> StatusPAs { get; set; }
+        public DbSet<StatusPA> StatusPAs { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+
+        // New tables
+        public DbSet<Intercation> Intercations { get; set; }
+        public DbSet<CategorieRessources> CategorieRessources { get; set; }
+        public DbSet<RessourceProcessus> RessourceProcessus { get; set; }
+        public DbSet<PartieInteresseAttente> PartieInteresseAttentes { get; set; }
+        public DbSet<Activite> Activites { get; set; }
+    
+
+
     
         
     }

@@ -6,6 +6,12 @@ namespace api_SMI.Services
 {
     public class LoginService
     {
+        private readonly Microsoft.Extensions.Configuration.IConfiguration _config;
+
+        public LoginService(Microsoft.Extensions.Configuration.IConfiguration config)
+        {
+            _config = config;
+        }
         public void Validate(Login login)
         {
             if (string.IsNullOrWhiteSpace(login.matricule) && string.IsNullOrWhiteSpace(login.password))
@@ -37,7 +43,9 @@ namespace api_SMI.Services
         }
         public string GenerateJwt(string matricule)
         {
-            var secretKey = "votre_cle_secrete_super_longue_et_complexe"; // À remplacer par une clé sécurisée
+            var secretKey = _config["Jwt:Key"] ?? "votre_cle_secrete_super_longue_et_complexe";
+            var issuer = _config["Jwt:Issuer"] ?? "api_SMI";
+            var audience = _config["Jwt:Audience"] ?? "api_SMI_client";
             var key = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(secretKey));
             var creds = new Microsoft.IdentityModel.Tokens.SigningCredentials(key, Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256);
 
@@ -48,8 +56,8 @@ namespace api_SMI.Services
             };
 
             var token = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
-                issuer: "api_SMI",
-                audience: "api_SMI_client",
+                issuer: issuer,
+                audience: audience,
                 claims: claims,
                 expires: DateTime.Now.AddMinutes(15), // Durée de vie courte
                 signingCredentials: creds

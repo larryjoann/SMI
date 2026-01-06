@@ -16,7 +16,10 @@ namespace api_SMI.Models
         [Column("id_role")]
         public int IdRole { get; set; }
 
-        [Column("etat")]
-        public int Etat { get; set; }
+        [ForeignKey("IdRole")]
+        public Role? Role { get; set; }
+
+        [ForeignKey("MatriculeCollaborateur")]
+        public Collaborateur? Collaborateur { get; set; }       
     }
 }

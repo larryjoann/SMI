@@ -99,7 +99,11 @@ const FormPA = () => {
         await paService.updatePlanAction(id, payload)
       } else {
         const json = await paService.createPlanAction(payload)
-        paId = json?.id
+        // Support different response shapes from the service:
+        // - { id: 123 }
+        // - { data: { id: 123 } }
+        // - 123
+        paId = json?.id ?? json?.data?.id ?? (typeof json === 'number' ? json : null)
       }
 
       // 3) save processus_concerne_PA mappings
@@ -116,7 +120,12 @@ const FormPA = () => {
       setPopMessage('Plan d\'action enregistré')
       setShowToast(true)
       // navigate to fiche
-      if (paId) navigate(`/pa/fiche/${paId}`)
+      if (paId) {
+        navigate(`/pa/list/fiche/${paId}`)
+        return
+      }
+      // If we don't have an id, show an error to the user
+      alert('Enregistrement réussi mais impossible de récupérer l\'identifiant du Plan d\'action')
     } catch (err) {
       console.error('Erreur sauvegarde PA', err)
       alert(err.message || 'Erreur lors de la sauvegarde')
@@ -134,33 +143,33 @@ const FormPA = () => {
           </CButton>
         </CCol>
         <CCol xs={6} className="d-flex justify-content-center">
-          <h3>{id ? 'Modifier Plan d\'action' : 'Créer Plan d\'action'}</h3>
+          <h3>{id ? 'Modifier le Plan d\'action' : 'Créer un Plan d\'action'}</h3>
         </CCol>
       </CRow>
       <CCard className='mb-3'>
-        <CCardHeader className="text-center"><span className="h6">Identité du Plan d'action</span></CCardHeader>
+        <CCardHeader className="text-center"><span className="h6">IDENTITÉ DU PLAN D'ACTION</span></CCardHeader>
         <CCardBody>
           <CForm onSubmit={handleSubmit(onSubmit)}>
             <CRow>
               <CCol md={12} className='mb-3'>
-                <CFormLabel>Source</CFormLabel>
+                <CFormLabel>Source <span className="text-danger">*</span> :</CFormLabel>
                 <CFormSelect {...register('sourceId')} aria-label="Source select">
-                  <option value="">-- Sélectionner une source --</option>
+                  <option value="">Sélectionner une source</option>
                   {sources.map((s) => (
                     <option key={s.id} value={s.id}>{s.descr}</option>
                   ))}
                 </CFormSelect>
               </CCol>
               <CCol md={4} className='mb-3'>
-                <CFormLabel>Date constat</CFormLabel>
-                <CFormInput type="date" {...register('dateConstat')} />
+                <CFormLabel>Date et heure du constat <span className="text-danger">*</span> :</CFormLabel>
+                <CFormInput type="datetime-local" {...register('dateConstat')} />
               </CCol>
               <CCol md={12} className='mb-3'>
                 <CFormLabel>Constat</CFormLabel>
                 <CFormTextarea {...register('constat')} rows={4} />
               </CCol>
               <CCol md={12} className='mb-3'>
-                <CFormLabel>Processus concerné(s)</CFormLabel>
+                <CFormLabel>Processus concerné(s) <span className="text-danger">*</span> :</CFormLabel>
                 <Controller
                   control={control}
                   name="processus"

@@ -14,11 +14,19 @@ namespace api_SMI.Repositories
         }
 
         public List<RolePermission> GetAll()
-            => _context.Set<RolePermission>().ToList();
+            => _context.Set<RolePermission>()
+            .Include(rp => rp.Role)
+            .Include(rp => rp.Permission)
+            .ThenInclude(p => p.Entite)
+            .ToList();
 
         public RolePermission? GetById(int id)
         {
-            return _context.Set<RolePermission>().FirstOrDefault(rp => rp.Id == id);
+            return _context.Set<RolePermission>()
+            .Include(rp => rp.Role)
+            .Include(rp => rp.Permission)
+            .ThenInclude(p => p.Entite)
+            .FirstOrDefault(rp => rp.Id == id);
         }
 
         public void Add(RolePermission rolePermission)

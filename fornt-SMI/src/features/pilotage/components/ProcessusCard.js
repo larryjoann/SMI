@@ -37,7 +37,7 @@ const ProcessusCard = ({
             <CDropdownItem
               onClick={e => {
                 e.stopPropagation()
-                onDelete()
+                if (typeof onDelete === 'function') onDelete()
               }}
             >
               <CIcon icon={cilTrash} className="text-danger me-3" />
@@ -47,7 +47,7 @@ const ProcessusCard = ({
             <CDropdownItem
               onClick={e => {
                 e.stopPropagation()
-                onEdit()
+                if (typeof onEdit === 'function') onEdit()
               }}
             >
               <CIcon icon={cilPen} className="text-warning me-3" />
@@ -58,7 +58,14 @@ const ProcessusCard = ({
       </div>
     </CCardHeader>
     <CCardBody className="d-flex flex-column align-items-center text-center">
-      <p>{responsable}</p>
+      <div style={{ whiteSpace: 'pre-line' }}>
+        {Array.isArray(responsable)
+          ? responsable.map((r, i) => (
+              <div className='mb-3' key={i}>{r}</div>
+            ))
+          : <div className='mb-3'>{responsable}</div>
+        }
+      </div>
       <a>{collaborateur}</a>
     </CCardBody>
   </CCard>

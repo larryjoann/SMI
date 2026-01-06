@@ -14,11 +14,17 @@ namespace api_SMI.Repositories
         }
 
         public List<RoleCollaborateur> GetAll()
-            => _context.Set<RoleCollaborateur>().ToList();
+            => _context.Set<RoleCollaborateur>()
+            .Include(rc => rc.Role)
+            .Include(rc => rc.Collaborateur)
+            .ToList();
 
         public RoleCollaborateur? GetById(int id)
         {
-            return _context.Set<RoleCollaborateur>().FirstOrDefault(r => r.Id == id);
+            return _context.Set<RoleCollaborateur>()
+            .Include(rc => rc.Role)
+            .Include(rc => rc.Collaborateur)
+            .FirstOrDefault(r => r.Id == id);
         }
 
         public void Add(RoleCollaborateur roleCollaborateur)

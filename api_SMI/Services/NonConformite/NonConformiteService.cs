@@ -7,11 +7,13 @@ namespace api_SMI.Services
     {
         private readonly NonConformiteRepository _repository;
         private readonly IProcessusConcerneNcService _processusConcerneNcService;
+        private readonly INotificationService _notificationService;
 
-        public NonConformiteService(NonConformiteRepository repository, IProcessusConcerneNcService processusConcerneNcService)
+        public NonConformiteService(NonConformiteRepository repository, IProcessusConcerneNcService processusConcerneNcService, INotificationService notificationService)
         {
             _repository = repository;
             _processusConcerneNcService = processusConcerneNcService;
+            _notificationService = notificationService;
         }
 
         public List<NonConformite> GetAll() => _repository.GetAll();
@@ -26,6 +28,29 @@ namespace api_SMI.Services
             nonConformite.IdStatusNc = 1; 
             nonConformite.IdPrioriteNc = null;
             _repository.Add(nonConformite);
+
+            nonConformite = _repository.GetById(nonConformite.Id)!;
+
+            // Send notification to A001 about the new declared non-conformity
+            try
+            {
+                var notif = new Notification
+                {
+                    MatriculeCollaborateur = "00005",
+                    Titre = "Nouvelle non-conformité déclarée",
+                    Contenu = $"Une nouvelle non-conformité a été déclarée par {nonConformite.Emetteur?.NomAffichage ?? nonConformite.MatriculeEmetteur ?? "utilisateur"}.",
+                    Lue = false,
+                    IdEntite = 2, // Entite 'Non-conformité' as per schema
+                    IdObject = nonConformite.Id
+                };
+                _notificationService.Add(notif);
+            }
+            catch
+            {
+                // Swallow notification errors to avoid impacting NC creation
+            }
+
+            // Email sending was removed; notifications are still created.
         }
 
         public void Draft(NonConformite nonConformite)
@@ -42,6 +67,23 @@ namespace api_SMI.Services
         {
             nonConformite.DateTimeDeclare = DateTime.Now;
             _repository.Update(nonConformite);
+            try
+            {
+                var notif = new Notification
+                {
+                    MatriculeCollaborateur = "00005",
+                    Titre = "Nouvelle non-conformité déclarée",
+                    Contenu = $"Une non-conformité a été déclarée par {nonConformite.Emetteur?.NomAffichage ?? nonConformite.MatriculeEmetteur ?? "utilisateur"}.",
+                    Lue = false,
+                    IdEntite = 2,
+                    IdObject = nonConformite.Id
+                };
+                _notificationService.Add(notif);
+            }
+            catch
+            {
+                // ignore notification failures
+            }
         }
 
         public void AddRange(List<NonConformite> nonConformiteList) => _repository.AddRange(nonConformiteList);
@@ -61,7 +103,7 @@ namespace api_SMI.Services
         public List<NonConformite> GetAllByMatricule(string matricule_emetteur)
         {
             // NC declared by this matricule (as emitter)
-            List<NonConformite> NC_declare = _repository.GetDeclare(matricule_emetteur);
+            //<NonConformite> NC_declare = _repository.GetDeclare(matricule_emetteur);
 
             // Processus concerned where this matricule is pilot or copilote
             List<ProcessusConcerneNc> PCNC_list = _processusConcerneNcService.GetByMatricule(matricule_emetteur);
@@ -80,30 +122,60 @@ namespace api_SMI.Services
                 }
             }
 
-            // Merge declared NCs and NCs found via processus (avoid duplicates by Id)
-            var result = NC_declare.Concat(NC_from_processus)
-                .GroupBy(n => n.Id)
-                .Select(g => g.First())
-                .OrderByDescending(nc => nc.DateTimeDeclare)
-                .ToList();
+            var result = NC_from_processus;
+                // .GroupBy(n => n.Id)
+                // .Select(g => g.First())
+                // .OrderByDescending(nc => nc.DateTimeDeclare)
+                // .ToList();
+
+            if (matricule_emetteur == "00005")
+                result = _repository.GetAll();
 
             return result;
         }
+
         public void Archiver(int id)
         {
             _repository.Archiver(id);
+        }
+
+        public void Supprimer(int id)
+        {
+            _repository.Supprimer(id);
         }
 
         public void Restorer(int id)
         {
             _repository.Restorer(id);
         }
-        
+       
         public void Qualifier(NonConformite nonConformite , int idStatusNc)
         {
             nonConformite.IdStatusNc = idStatusNc;
             _repository.Update(nonConformite);
+            // Notify the emitter that their NC has been qualified
+            try
+            {
+                var recipient = nonConformite.MatriculeEmetteur ?? nonConformite.Emetteur?.Matricule;
+                if (!string.IsNullOrWhiteSpace(recipient))
+                {
+                    var emitterName = nonConformite.Emetteur?.NomAffichage ?? recipient;
+                    var notif = new Notification
+                    {
+                        MatriculeCollaborateur = recipient,
+                        Titre = "Votre non-conformité a été qualifiée",
+                        Contenu = $"La non-conformité déclarée a été qualifiée.",
+                        Lue = false,
+                        IdEntite = 2,
+                        IdObject = nonConformite.Id
+                    };
+                    _notificationService.Add(notif);
+                }
+            }
+            catch
+            {
+                // ignore notification failures
+            }
         }
-        
     }
 }

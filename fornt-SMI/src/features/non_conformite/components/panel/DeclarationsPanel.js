@@ -171,8 +171,8 @@ const DeclarationsPanel = ({ ncData = [], loading = false, error = null, onReloa
                         if (typeof onReload === 'function') onReload();
                         }}
                     >
-                      <CIcon icon={cilStorage} className="text-danger me-3" />
-                      <span className="text-danger">Archiver</span>
+                      <CIcon icon={cilStorage} className="text-secondary me-3" />
+                      <span className="text-secondary">Archiver</span>
                     </CDropdownItem>
                     <CDropdownDivider />
                     <CDropdownItem

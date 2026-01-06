@@ -1,13 +1,16 @@
 import {
   CRow, CCol, CButton, CCard, CCardHeader, CCardBody,
-  CFormLabel, CFormInput, CFormTextarea, CForm, CFormFeedback
+  CFormLabel, CFormInput, CFormTextarea, CForm, CFormFeedback,
+  CTable, CTableHead, CTableHeaderCell, CTableBody, CTableRow, CTableDataCell
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilArrowLeft } from '@coreui/icons'
+import { cilArrowLeft, cilTrash, cilPlus } from '@coreui/icons'
 import CategorieProcessusSelect from '../../../components/champs/CategorieProcessusSelect'
 import CollaborateurMultiSelect from '../../../components/champs/CollaborateurMultiSelect'
+import ProcessusSelect from '../../../components/champs/ProcessusSelect' 
+import CategorieRessourcesSelect from '../../../components/champs/CategorieRessourcesSelect'
 import { Pop_up } from '../../../components/notification/Pop_up'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, useFieldArray } from 'react-hook-form'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useProcessusForm } from '../hooks/useProcessusForm'
 
@@ -23,6 +26,11 @@ const FormProcessus = () => {
       matriculeCopilote: '',
       finalite: '',
       contexte: '',
+      // new arrays for additional data
+      intercations: [],
+      ressourcesProcessus: [],
+      partieInteresseAttentes: [],
+      activites: [],
     }
   })
 
@@ -32,7 +40,14 @@ const FormProcessus = () => {
     popType,
     popMessage,
     onSubmit,
+    responsablesMeta,
   } = useProcessusForm(id, reset, setError, navigate)
+
+  // Dynamic arrays for new sections
+  const { fields: intercationsFields, append: appendInteraction, remove: removeInteraction } = useFieldArray({ control, name: 'intercations' })
+  const { fields: ressourcesFields, append: appendRessource, remove: removeRessource } = useFieldArray({ control, name: 'ressourcesProcessus' })
+  const { fields: partiesFields, append: appendPartie, remove: removePartie } = useFieldArray({ control, name: 'partieInteresseAttentes' })
+  const { fields: activitesFields, append: appendActivite, remove: removeActivite } = useFieldArray({ control, name: 'activites' })
 
   return (
     <>
@@ -47,7 +62,7 @@ const FormProcessus = () => {
           <CButton
             color='secondary'
             className="mb-3"
-            href='#/pilotage/cartographie'
+            href='/cartographie'
           >
             <CIcon icon={cilArrowLeft} className="me-2" />
             Retour
@@ -104,60 +119,92 @@ const FormProcessus = () => {
               </CCol>
             </CRow>
             <CRow>
-              <CCol xs={12} sm={6} md={6} className='mb-3'>
-                <CFormLabel>Pilote(s) <span className="text-danger">*</span> :</CFormLabel>
-                <Controller
-                  control={control}
-                  name="matriculePilote"
-                  rules={{ 
-                    required: 'Au moins un pilote est requis',
-                    validate: value => Array.isArray(value) && value.length > 0 || 'Au moins un pilote est requis'
-                  }}
-                  render={({ field: { onChange, value, ref } }) => (
-                    <CollaborateurMultiSelect
-                      value={value}
-                      onChange={onChange}
-                      placeholder="Sélectionner les pilotes"
-                      invalid={!!errors.matriculePilote}
-                      inputRef={ref}
+                {Array.isArray(responsablesMeta) && responsablesMeta.length > 0 ? (
+                responsablesMeta.map(r => (
+                  <CCol key={r.fieldName} xs={12} sm={6} md={6} className='mb-3'>
+                    <CFormLabel>{r.label} <span className="text-danger">*</span> :</CFormLabel>
+                    <Controller
+                      control={control}
+                      name={r.fieldName}
+                      rules={{
+                        required: `Au moins un ${r.label.toLowerCase()} est requis`,
+                        validate: value => Array.isArray(value) && value.length > 0 || `Au moins un ${r.label.toLowerCase()} est requis`
+                      }}
+                      render={({ field: { onChange, value, ref } }) => (
+                        <CollaborateurMultiSelect
+                          value={value}
+                          onChange={onChange}
+                          placeholder={`Sélectionner les ${r.label.toLowerCase()}`}
+                          invalid={!!errors[r.fieldName]}
+                          inputRef={ref}
+                        />
+                      )}
                     />
-                  )}
-                />
-                {errors.matriculePilote && (
-                  <CFormFeedback invalid>
-                    {errors.matriculePilote.message}
-                  </CFormFeedback>
-                )}
-              </CCol>
-              <CCol xs={12} sm={6} md={6} className='mb-3'>
-                <CFormLabel>Copilote(s) <span className="text-danger">*</span> :</CFormLabel>
-                <Controller
-                  control={control}
-                  name="matriculeCopilote"
-                  rules={{ 
-                    required: 'Au moins un copilote est requis',
-                    validate: value => Array.isArray(value) && value.length > 0 || 'Au moins un copilote est requis'
-                  }}
-                  render={({ field: { onChange, value, ref } }) => (
-                    <CollaborateurMultiSelect
-                      value={value}
-                      onChange={onChange}
-                      placeholder="Sélectionner les copilotes"
-                      invalid={!!errors.matriculeCopilote}
-                      inputRef={ref}
+                    {errors[r.fieldName] && (
+                      <CFormFeedback invalid>
+                        {errors[r.fieldName].message}
+                      </CFormFeedback>
+                    )}
+                  </CCol>
+                ))
+              ) : (
+                <>
+                  <CCol xs={12} sm={6} md={6} className='mb-3'>
+                    <CFormLabel>Pilote(s) <span className="text-danger">*</span> :</CFormLabel>
+                    <Controller
+                      control={control}
+                      name="matriculePilote"
+                      rules={{ 
+                        required: 'Au moins un pilote est requis',
+                        validate: value => Array.isArray(value) && value.length > 0 || 'Au moins un pilote est requis'
+                      }}
+                      render={({ field: { onChange, value, ref } }) => (
+                        <CollaborateurMultiSelect
+                          value={value}
+                          onChange={onChange}
+                          placeholder="Sélectionner les pilotes"
+                          invalid={!!errors.matriculePilote}
+                          inputRef={ref}
+                        />
+                      )}
                     />
-                  )}
-                />
-                {errors.matriculeCopilote && (
-                  <CFormFeedback invalid>
-                    {errors.matriculeCopilote.message}
-                  </CFormFeedback>
-                )}
-              </CCol>
+                    {errors.matriculePilote && (
+                      <CFormFeedback invalid>
+                        {errors.matriculePilote.message}
+                      </CFormFeedback>
+                    )}
+                  </CCol>
+                  <CCol xs={12} sm={6} md={6} className='mb-3'>
+                    <CFormLabel>Copilote(s) <span className="text-danger">*</span> :</CFormLabel>
+                    <Controller
+                      control={control}
+                      name="matriculeCopilote"
+                      rules={{ 
+                        required: 'Au moins un copilote est requis',
+                        validate: value => Array.isArray(value) && value.length > 0 || 'Au moins un copilote est requis'
+                      }}
+                      render={({ field: { onChange, value, ref } }) => (
+                        <CollaborateurMultiSelect
+                          value={value}
+                          onChange={onChange}
+                          placeholder="Sélectionner les copilotes"
+                          invalid={!!errors.matriculeCopilote}
+                          inputRef={ref}
+                        />
+                      )}
+                    />
+                    {errors.matriculeCopilote && (
+                      <CFormFeedback invalid>
+                        {errors.matriculeCopilote.message}
+                      </CFormFeedback>
+                    )}
+                  </CCol>
+                </>
+              )}
             </CRow>
             <CRow>
               <CCol xs={12} className='mb-3'>
-                <CFormLabel htmlFor="finalite">Finalité :</CFormLabel>
+                <CFormLabel htmlFor="finalite">Finalité <span className="text-danger">*</span> :</CFormLabel>
                 <CFormTextarea
                   {...register('finalite')}
                   id="finalite"
@@ -171,7 +218,7 @@ const FormProcessus = () => {
             </CRow>
             <CRow>
               <CCol xs={12} className='mb-3'>
-                <CFormLabel htmlFor="contexte">Contexte :</CFormLabel>
+                <CFormLabel htmlFor="contexte">Contexte <span className="text-danger">*</span> :</CFormLabel>
                 <CFormTextarea
                   {...register('contexte')}
                   id="contexte"
@@ -183,6 +230,159 @@ const FormProcessus = () => {
                 </CFormFeedback>
               </CCol>
             </CRow>
+
+            {/* --- Interactions (table) --- */}
+            <CRow className='mb-3'>
+              <CCol xs={12} className='mb-2 d-flex justify-content-between align-items-center'>
+                <CFormLabel htmlFor="contexte">Interactions <span className="text-danger">*</span> :</CFormLabel>
+                <CButton color='secondary' size='sm' onClick={() => appendInteraction({ descr: '', idProcessusInteragi: '' })}><CIcon icon={cilPlus} className="me-2" size='sm' />Ajouter</CButton>
+              </CCol>
+              <CCol xs={12}>
+                {intercationsFields.length === 0 ? (
+                  <div className='text-muted'>Aucune interaction</div>
+                ) : (
+                  <CTable hover responsive bordered>
+                    <CTableHead>
+                      <CTableRow>
+                        <CTableHeaderCell>Processus</CTableHeaderCell>
+                        <CTableHeaderCell>Interactions</CTableHeaderCell>                    
+                        <CTableHeaderCell style={{ width: '90px' }}></CTableHeaderCell>
+                      </CTableRow>
+                    </CTableHead>
+                    <CTableBody>
+                      {intercationsFields.map((f, idx) => (
+                        <CTableRow key={f.id}>            
+                          <CTableDataCell>
+                            <Controller
+                              control={control}
+                              name={`intercations.${idx}.idProcessusInteragi`}
+                              render={({ field }) => (
+                                <ProcessusSelect {...field} />
+                              )}
+                            />
+                          </CTableDataCell>
+                          <CTableDataCell><CFormInput {...register(`intercations.${idx}.descr`)} placeholder='Description' /></CTableDataCell>
+                          <CTableDataCell className='text-center align-middle'><CIcon icon={cilTrash} className="text-danger" size="md" style={{ cursor: 'pointer' }} title="Supprimer" onClick={() => removeInteraction(idx)} /></CTableDataCell>
+                        </CTableRow>
+                      ))}
+                    </CTableBody>
+                  </CTable>
+                )}
+              </CCol>
+            </CRow>
+
+            {/* --- Ressources (table) --- */}
+            <CRow className='mb-3'>
+              <CCol xs={12} className='mb-2 d-flex justify-content-between align-items-center'>
+                <CFormLabel htmlFor="contexte">Ressources <span className="text-danger">*</span> :</CFormLabel>
+                <CButton color='secondary' size='sm' onClick={() => appendRessource({ categorieRessources_nom: '', descr: '' })}><CIcon icon={cilPlus} className="me-2" size='sm' />Ajouter</CButton>
+              </CCol>
+              <CCol xs={12}>
+                {ressourcesFields.length === 0 ? (
+                  <div className='text-muted'>Aucune ressource</div>
+                ) : (
+                  <CTable hover responsive bordered>
+                    <CTableHead>
+                      <CTableRow>
+                        <CTableHeaderCell>Catégorie</CTableHeaderCell>
+                        <CTableHeaderCell>Description</CTableHeaderCell>
+                        <CTableHeaderCell style={{ width: '90px' }}></CTableHeaderCell>
+                      </CTableRow>
+                    </CTableHead>
+                    <CTableBody>
+                      {ressourcesFields.map((f, idx) => (
+                        <CTableRow key={f.id}>
+                          <CTableDataCell>
+                            <Controller
+                              control={control}
+                              name={`ressourcesProcessus.${idx}.categorieRessources_nom`}
+                              render={({ field }) => (
+                                <CategorieRessourcesSelect {...field} />
+                              )}
+                            />
+                          </CTableDataCell>
+                          <CTableDataCell><CFormInput {...register(`ressourcesProcessus.${idx}.descr`)} placeholder='Description' /></CTableDataCell>
+                          <CTableDataCell className='text-center align-middle'><CIcon icon={cilTrash} className="text-danger" size="md" style={{ cursor: 'pointer' }} title="Supprimer" onClick={() => removeRessource(idx)} /></CTableDataCell>
+                        </CTableRow>
+                      ))}
+                    </CTableBody>
+                  </CTable>
+                )}
+              </CCol>
+            </CRow>
+
+            {/* --- Parties intéressées & attentes (table) --- */}
+            <CRow className='mb-3'>
+              <CCol xs={12} className='mb-2 d-flex justify-content-between align-items-center'>
+                <CFormLabel htmlFor="contexte">Parties intéressées & attentes <span className="text-danger">*</span> :</CFormLabel>
+                <CButton color='secondary' size='sm' onClick={() => appendPartie({ partieInteresse: '', groupe: '', attente: '' })}><CIcon icon={cilPlus} className="me-2" size='sm' />Ajouter</CButton>
+              </CCol>
+              <CCol xs={12}>
+                {partiesFields.length === 0 ? (
+                  <div className='text-muted'>Aucune partie intéressée</div>
+                ) : (
+                  <CTable hover responsive bordered>
+                    <CTableHead>
+                      <CTableRow>
+                        <CTableHeaderCell>Partie</CTableHeaderCell>
+                        <CTableHeaderCell>Groupe</CTableHeaderCell>
+                        <CTableHeaderCell>Attente</CTableHeaderCell>
+                        <CTableHeaderCell style={{ width: '90px' }}></CTableHeaderCell>
+                      </CTableRow>
+                    </CTableHead>
+                    <CTableBody>
+                      {partiesFields.map((f, idx) => (
+                        <CTableRow key={f.id}>
+                          <CTableDataCell><CFormInput {...register(`partieInteresseAttentes.${idx}.partieInteresse`)} placeholder='Partie intéressée' /></CTableDataCell>
+                          <CTableDataCell><CFormInput {...register(`partieInteresseAttentes.${idx}.groupe`)} placeholder='Groupe' type='number' /></CTableDataCell>
+                          <CTableDataCell><CFormInput {...register(`partieInteresseAttentes.${idx}.attente`)} placeholder='Attente' /></CTableDataCell>
+                          <CTableDataCell className='text-center align-middle'><CIcon icon={cilTrash} className="text-danger" size="md" style={{ cursor: 'pointer' }} title="Supprimer" onClick={() => removePartie(idx)} /></CTableDataCell>
+                        </CTableRow>
+                      ))}
+                    </CTableBody>
+                  </CTable>
+                )}
+              </CCol>
+            </CRow>
+
+            {/* --- Activités (table) --- */}
+            <CRow className='mb-3'>
+              <CCol xs={12} className='mb-2 d-flex justify-content-between align-items-center'>
+                <CFormLabel htmlFor="contexte">Activités <span className="text-danger">*</span> :</CFormLabel>
+                <CButton color='secondary' size='sm' onClick={() => appendActivite({ processusFournisseur: '', elementEntrante: '', processusClient: '', elementSortante: '', descr: '' })}><CIcon icon={cilPlus} className="me-2" size='sm' />Ajouter</CButton>
+              </CCol>
+              <CCol xs={12}>
+                {activitesFields.length === 0 ? (
+                  <div className='text-muted'>Aucune activité</div>
+                ) : (
+                  <CTable hover responsive bordered>
+                    <CTableHead>
+                      <CTableRow>
+                        <CTableHeaderCell>Fournisseur</CTableHeaderCell>
+                        <CTableHeaderCell>Entrée</CTableHeaderCell>
+                        <CTableHeaderCell>Client</CTableHeaderCell>
+                        <CTableHeaderCell>Sortie</CTableHeaderCell>
+                        <CTableHeaderCell>Description</CTableHeaderCell>
+                        <CTableHeaderCell style={{ width: '90px' }}></CTableHeaderCell>
+                      </CTableRow>
+                    </CTableHead>
+                    <CTableBody>
+                      {activitesFields.map((f, idx) => (
+                        <CTableRow key={f.id}>
+                          <CTableDataCell><CFormInput {...register(`activites.${idx}.processusFournisseur`)} placeholder='Processus fournisseur' /></CTableDataCell>
+                          <CTableDataCell><CFormInput {...register(`activites.${idx}.elementEntrante`)} placeholder='Entrée' /></CTableDataCell>
+                          <CTableDataCell><CFormInput {...register(`activites.${idx}.processusClient`)} placeholder='Processus client' /></CTableDataCell>
+                          <CTableDataCell><CFormInput {...register(`activites.${idx}.elementSortante`)} placeholder='Sortie' /></CTableDataCell>
+                          <CTableDataCell><CFormInput {...register(`activites.${idx}.descr`)} placeholder='Description' /></CTableDataCell>
+                          <CTableDataCell className='text-center align-middle'><CIcon icon={cilTrash} className="text-danger" size="md" style={{ cursor: 'pointer' }} title="Supprimer" onClick={() => removeActivite(idx)} /></CTableDataCell>
+                        </CTableRow>
+                      ))}
+                    </CTableBody>
+                  </CTable>
+                )}
+              </CCol>
+            </CRow>
+
             <CRow>
             <CCol xs={12} className="d-flex justify-content-end">
               <CButton color="primary" type="submit" disabled={isSubmitting}>

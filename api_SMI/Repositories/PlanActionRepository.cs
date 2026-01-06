@@ -20,6 +20,7 @@ namespace api_SMI.Repositories
                 .Include(pa => pa.ProcessusConcernes)
                     .ThenInclude(pc => pc.Processus)
                 .Where(pa => pa.Status == true)
+                .OrderByDescending(pa => pa.Id)
                 .ToList();
 
         public PlanAction? GetById(int id)

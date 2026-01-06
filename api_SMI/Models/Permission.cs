@@ -16,7 +16,10 @@ namespace api_SMI.Models
         [Column("reference")]
         public string? Reference { get; set; }
 
-        [Column("id_categorie_permission")]
-        public int IdCategoriePermission { get; set; }
+        [Column("id_entite")]
+        public int IdEntite { get; set; }
+
+        [ForeignKey("IdEntite")]
+        public Entite? Entite { get; set; }
     }
 }

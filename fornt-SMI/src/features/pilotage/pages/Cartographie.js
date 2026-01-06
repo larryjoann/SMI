@@ -12,6 +12,7 @@ import CIcon from '@coreui/icons-react'
 import { cilPlus, cilWarning, cilFilter , cilFilterX } from '@coreui/icons'
 import CategorieProcessusSection from '../components/CategorieProcessusSection'
 import API_URL from '../../../api/API_URL'
+import axiosInstance from '../../../api/axiosInstance'
 import CategorieProcessusSelect from '../../../components/champs/CategorieProcessusSelect'
 import { Pop_up } from '../../../components/notification/Pop_up' // Ajoute l'import
 
@@ -21,10 +22,11 @@ const Cartographie = () => {
   // Etats pour le filtre
   const [inputNom, setInputNom] = useState('')
   const [inputCategorie, setInputCategorie] = useState('')
-  const [inputYear, setInputYear] = useState('')
+  const currentYear = new Date().getFullYear()
+  const [inputYear, setInputYear] = useState(String(currentYear))
   const [filterNom, setFilterNom] = useState('')
   const [filterCategorie, setFilterCategorie] = useState('')
-  const [filterYear, setFilterYear] = useState('')
+  const [filterYear, setFilterYear] = useState(String(currentYear))
   const [availableYears, setAvailableYears] = useState([])
   // Pour le modal de suppression
   const [modalVisible, setModalVisible] = useState(false)
@@ -38,16 +40,14 @@ const Cartographie = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Récupérer les processus
-    fetch(`${API_URL}/Processus`)
-      .then(res => res.json())
-      .then(data => setProcessus(data))
+    // Récupérer les processus via la nouvelle route cartographie
+    axiosInstance.get('/Processus/cartographie')
+      .then(res => setProcessus(res.data || []))
       .catch(() => setProcessus([]))
 
     // Récupérer les catégories
-    fetch(`${API_URL}/CategorieProcessus`)
-      .then(res => res.json())
-      .then(data => setCategories(data))
+    axiosInstance.get('/CategorieProcessus')
+      .then(res => setCategories(res.data || []))
       .catch(() => setCategories([]))
   }, [])
 
@@ -56,16 +56,18 @@ const Cartographie = () => {
     const years = new Set()
     processus.forEach(p => {
       if (Array.isArray(p.validites)) {
-        p.validites.forEach(v => { if (v && v.annee) years.add(v.annee) })
+        p.validites.forEach(v => { if (v && v.annee) years.add(Number(v.annee)) })
       }
     })
     const sorted = Array.from(years).sort((a, b) => a - b)
+    const now = new Date().getFullYear()
+    let finalYears = []
     if (sorted.length === 0) {
-      const now = new Date().getFullYear()
-      setAvailableYears([now, now + 1, now + 2])
+      finalYears = [now, now + 1, now + 2]
     } else {
-      setAvailableYears(sorted)
+      finalYears = sorted.includes(now) ? sorted : [now, ...sorted]
     }
+    setAvailableYears(finalYears)
   }, [processus])
 
   const categorieColors = {
@@ -77,30 +79,45 @@ const Cartographie = () => {
 
   // Demande la confirmation avant suppression
   const askDeleteProcessus = (id) => {
+    console.debug('askDeleteProcessus called with id', id)
     setProcessusToDelete(id)
     setModalVisible(true)
+    // // quick visual feedback to confirm the click reached the handler
+    // setPopType('info')
+    // setPopMessage(`Suppression demandée pour le processus ${id}`)
+    // setShowToast(true)
   }
 
   // Supprime le processus après confirmation
   const confirmDeleteProcessus = async () => {
     if (!processusToDelete) return
     try {
-      const res = await fetch(`${API_URL}/Processus/${processusToDelete}`, {
-        method: 'DELETE',
-      })
-      if (res.ok) {
-        setProcessus(prev => prev.filter(p => p.id !== processusToDelete))
-        setPopType('success')
-        setPopMessage('Processus supprimé avec succès')
-        setShowToast(true)
-      } else {
+      console.debug('Deleting processus', processusToDelete)
+      const res = await axiosInstance.delete(`/Processus/${processusToDelete}`)
+      console.debug('Delete response', res)
+      if (!res || (res.status && res.status >= 400)) {
         setPopType('danger')
         setPopMessage('Erreur lors de la suppression')
         setShowToast(true)
+      } else {
+        // Re-fetch the processus list to keep state consistent with server
+        try {
+          const listRes = await axiosInstance.get('/Processus/cartographie')
+          setProcessus(listRes.data || [])
+        } catch (fetchErr) {
+          // Fallback to local removal if re-fetch fails
+          console.error('Erreur lors du rechargement des processus après suppression', fetchErr)
+          setProcessus(prev => prev.filter(p => p.id !== processusToDelete))
+        }
+        setPopType('success')
+        setPopMessage('Processus supprimé avec succès')
+        setShowToast(true)
       }
-    } catch {
+    } catch (err) {
+      console.error('Erreur lors de la suppression du processus', err)
+      const message = err?.response?.data?.message || err?.message || 'Erreur lors de la suppression'
       setPopType('danger')
-      setPopMessage('Erreur réseau')
+      setPopMessage(message)
       setShowToast(true)
     }
     setModalVisible(false)
@@ -127,16 +144,18 @@ const Cartographie = () => {
       .map(p => ({
         id: p.id,
         title: `${p.nom} (${p.sigle})`,
-        responsable: Array.isArray(p.pilotes)
-          ? p.pilotes.map(pi => pi.collaborateur?.poste).filter(Boolean).join(', ')
-          : "-",
-        collaborateur: Array.isArray(p.copilotes)
-          ? p.copilotes.map(co => co.collaborateur?.poste).filter(Boolean).join(', ')
-          : "-",
+        // Prefer dynamic responsablesProcessus: return an array of postes (no role labels)
+        responsable: (Array.isArray(p.responsablesProcessus) && p.responsablesProcessus.length > 0)
+          ? (p.responsablesProcessus || []).map(rp => rp.collaborateur?.poste).filter(Boolean)
+          // Fallback to old pilotes list as an array
+          : (Array.isArray(p.pilotes)
+            ? p.pilotes.map(pi => pi.collaborateur?.poste).filter(Boolean)
+            : ["-"]),
         onDelete: () => askDeleteProcessus(p.id),
-        onEdit: () => navigate(`/pilotage/cartographie/formprocessus/${p.id}`),
-        onClick: () => navigate(`/pilotage/cartographie/ficheprocessus/${p.id}`),
+        onEdit: () => navigate(`/cartographie/formprocessus/${p.id}`),
+        onClick: () => navigate(`/cartographie/ficheprocessus/${p.id}`),
       })),
+
   }));
 
   return (
@@ -182,7 +201,7 @@ const Cartographie = () => {
             color='primary'
             key='1'
             className="mb-3"
-            href='#/pilotage/cartographie/formprocessus'
+            href='/cartographie/formprocessus'
           >
             <CIcon icon={cilPlus} className="me-2" />
             Nouvelle processus

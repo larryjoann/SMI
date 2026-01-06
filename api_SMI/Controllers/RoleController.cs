@@ -21,6 +21,12 @@ namespace api_SMI.Controllers
             return Ok(_service.GetAll());
         }
 
+        [HttpGet("notauto")]
+        public IActionResult GetNotAuto()
+        {
+            return Ok(_service.GetAllNotAuto());
+        }
+
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {

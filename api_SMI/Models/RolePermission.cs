@@ -15,5 +15,11 @@ namespace api_SMI.Models
 
         [Column("id_permission")]
         public int IdPermission { get; set; }
+
+        [ForeignKey("IdRole")]
+        public Role? Role { get; set; }
+        
+        [ForeignKey("IdPermission")]
+        public Permission? Permission { get; set; }
     }
 }

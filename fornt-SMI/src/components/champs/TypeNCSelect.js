@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { CFormSelect } from '@coreui/react'
 import API_URL from '../../api/API_URL'
+import axiosInstance from '../../api/axiosInstance'
 
 const TypeNCSelect = (props) => {
   const [types, setTypes] = useState([])
 
   useEffect(() => {
-    fetch(`${API_URL}/TypeNC`)
-      .then(res => res.json())
-      .then(data => setTypes(data))
+    axiosInstance.get('/TypeNC')
+      .then(res => setTypes(res.data || []))
       .catch(() => setTypes([]))
   }, [])
 

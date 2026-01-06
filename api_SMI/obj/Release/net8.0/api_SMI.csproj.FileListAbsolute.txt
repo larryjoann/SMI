@@ -101,3 +101,5 @@ C:\Users\26132\Documents\SMI\api_SMI\obj\Release\net8.0\refint\api_SMI.dll
 C:\Users\26132\Documents\SMI\api_SMI\obj\Release\net8.0\api_SMI.pdb
 C:\Users\26132\Documents\SMI\api_SMI\obj\Release\net8.0\api_SMI.genruntimeconfig.cache
 C:\Users\26132\Documents\SMI\api_SMI\obj\Release\net8.0\ref\api_SMI.dll
+C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\Microsoft.Extensions.DependencyModel.dll
+C:\Users\26132\Documents\SMI\api_SMI\bin\Release\net8.0\Scrutor.dll

@@ -14,11 +14,15 @@ namespace api_SMI.Repositories
         }
 
         public List<Permission> GetAll()
-            => _context.Set<Permission>().ToList();
+            => _context.Set<Permission>()
+                .Include(p => p.Entite)
+                .ToList();
 
         public Permission? GetById(int id)
         {
-            return _context.Set<Permission>().FirstOrDefault(p => p.Id == id);
+            return _context.Set<Permission>()
+            .Include(p => p.Entite)
+            .FirstOrDefault(p => p.Id == id);
         }
 
         public void Add(Permission permission)

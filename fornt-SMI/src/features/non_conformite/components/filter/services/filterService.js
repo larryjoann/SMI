@@ -1,8 +1,9 @@
 import API_URL from "../../../../../api/API_URL"
+import axiosInstance from '../../../../../api/axiosInstance'
 
 export async function fetchProcessOptions() {
-  const res = await fetch(`${API_URL}/Processus`)
-  const data = await res.json()
+  const res = await axiosInstance.get('/Processus')
+  const data = res.data
   return Array.isArray(data)
     ? [
         { id: 'all', label: 'Tous' },
@@ -12,8 +13,8 @@ export async function fetchProcessOptions() {
 }
 
 export async function fetchTypeOptions() {
-  const res = await fetch(`${API_URL}/typeNC`)
-  const data = await res.json()
+  const res = await axiosInstance.get('/typeNC')
+  const data = res.data
   return Array.isArray(data)
     ? [
         { id: 'all', label: 'Tous' },
@@ -23,8 +24,8 @@ export async function fetchTypeOptions() {
 }
 
 export async function fetchStatusOptions() {
-  const res = await fetch(`${API_URL}/statusNC`)
-  const data = await res.json()
+  const res = await axiosInstance.get('/statusNC')
+  const data = res.data
   return Array.isArray(data)
     ? [
         // { id: 'all', label: 'Tous' },
@@ -34,8 +35,8 @@ export async function fetchStatusOptions() {
 }
 
 export async function fetchLieuOptions() {
-  const res = await fetch(`${API_URL}/lieu`)
-  const data = await res.json()
+  const res = await axiosInstance.get('/lieu')
+  const data = res.data
   return Array.isArray(data)
     ? [
         { id: 'all', label: 'Tous' },
@@ -45,8 +46,8 @@ export async function fetchLieuOptions() {
 }
 
 export async function fetchSourcePA() {
-  const res = await fetch(`${API_URL}/SourcePA`)
-  const data = await res.json()
+  const res = await axiosInstance.get('/SourcePA')
+  const data = res.data
   return Array.isArray(data)
     ? [
         { id: 'all', label: 'Tous' },
@@ -56,8 +57,8 @@ export async function fetchSourcePA() {
 }
 
 export async function fetchStatusPA() {
-  const res = await fetch(`${API_URL}/StatusPA`)
-  const data = await res.json()
+  const res = await axiosInstance.get('/StatusPA')
+  const data = res.data
   return Array.isArray(data)
     ? [
         { id: 'all', label: 'Tous' },

@@ -23,7 +23,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    await login(matricule, password, () => navigate('/pilotage/cartographie'))
+    await login(matricule, password, () => navigate('/dashboard'))
   }
 
   return (
@@ -43,9 +43,9 @@ const Login = () => {
                   )}
                   <CForm onSubmit={handleSubmit}>
                     <CFormInput
-                      placeholder="Matricule"
+                      placeholder="00000"
                       autoComplete="Matricule"
-                      label="Matricule"
+                      label="Matricule :"
                       className='mb-4'
                       value={matricule}
                       onChange={e => setMatricule(e.target.value)}
@@ -54,7 +54,7 @@ const Login = () => {
                       type="password"
                       placeholder="******"
                       autoComplete="current-password"
-                      label="Mot de passe"
+                      label="Mot de passe :"
                       className='mb-4'
                       value={password}
                       onChange={e => setPassword(e.target.value)}

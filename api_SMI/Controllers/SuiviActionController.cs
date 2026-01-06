@@ -1,6 +1,7 @@
 using api_SMI.Models;
 using api_SMI.Services;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Text.Json;
 
 namespace api_SMI.Controllers
@@ -10,10 +11,12 @@ namespace api_SMI.Controllers
     public class SuiviActionController : ControllerBase
     {
         private readonly ISuiviActionService _service;
+        private readonly IActionService _actionService;
 
-        public SuiviActionController(ISuiviActionService service)
+        public SuiviActionController(ISuiviActionService service, IActionService actionService)
         {
             _service = service;
+            _actionService = actionService;
         }
 
         [HttpGet]
@@ -37,6 +40,26 @@ namespace api_SMI.Controllers
             Console.WriteLine(JsonSerializer.Serialize(suivi));
             if (suivi == null) return BadRequest("Body is empty or invalid JSON.");
             if (suivi.IdAction <= 0) return BadRequest("IdAction must be provided and greater than 0.");
+
+            var action = _actionService.GetById(suivi.IdAction);
+            if (suivi.Avancement == 100 && action != null)
+            {
+                action.IdStatusAction = 3;
+                _actionService.Update(action);
+            }
+
+            if (suivi.Avancement > 0 && suivi.Avancement < 100 && action != null)
+            {
+                action.IdStatusAction = 2;
+                _actionService.Update(action);
+            }
+
+            if (suivi.Avancement == 0 && action != null)
+            {
+                action.IdStatusAction = 1;
+                _actionService.Update(action);
+            }
+
 
             _service.Add(suivi);
             return CreatedAtAction(nameof(GetById), new { id = suivi.Id }, suivi);

@@ -6,30 +6,30 @@ import {
   cilSpeedometer,
   cilTask,
   cilSettings,
-  cilClipboard
+  cilClipboard,
+  cilChart,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
 const _nav = [
   {
-    component: CNavGroup,
-    name: 'Pilotage',
-    to: '#',
+    component: CNavItem,
+    name: 'Tableau de bord',
+    to: '/#',
+    icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Cartographie',
+    to: '/cartographie',
     icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
-    items: [
-      {
-        component: CNavItem,
-        name: 'Cartographie',
-        to: '/pilotage/cartographie',
-      },
-    ],
   },
 
   {
     component: CNavGroup,
     name: 'Indicateur',
     to: '#',
-    icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
     items: [
       {
         component: CNavItem,
@@ -46,7 +46,7 @@ const _nav = [
   },
   {
     component: CNavGroup,
-    name: 'Non conformité',
+    name: 'Non conformité (NC)',
     to: '#',
     icon: <CIcon icon={cilBan} customClassName="nav-icon" />,
     items: [
@@ -57,7 +57,7 @@ const _nav = [
       },
       {
         component: CNavItem,
-        name: 'Suivie des NC',
+        name: 'Suivi des NC',
         to: '/nc/list',
       },
       
@@ -65,18 +65,18 @@ const _nav = [
   },
   {
     component: CNavGroup,
-    name: 'Plan d\'action',
+    name: 'Plan d\'action (PA)',
     to: '/#',
     icon: <CIcon icon={cilClipboard} customClassName="nav-icon" />,
     items: [
       {
         component: CNavItem,
-        name: 'Inserer une PA',
+        name: 'Insérer un PA',
         to: '/pa/form',
       },
       {
         component: CNavItem,
-        name: 'Suivie des PA',
+        name: 'Suivi des PA',
         to: '/pa/list',
       },
       
@@ -96,15 +96,19 @@ const _nav = [
     items: [
       {
         component: CNavItem,
-        name: 'Roles',
-        to: '/administration/roles',
+        name: 'Utilisateurs',
+        to: '/administration/utilisateurs',
+      },
+      {
+        component: CNavItem,
+        name: 'Autorisation',
+        to: '/administration/autorisation',
       },
       {
         component: CNavItem,
         name: 'Logs',
         to: '/administration/logs',
       },
-      
     ],
   }
 ]

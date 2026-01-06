@@ -24,6 +24,17 @@ namespace api_SMI.Repositories
             }
         }
 
+        public void Supprimer(int id)
+        {
+            var entity = GetById(id);
+            if (entity != null)
+            {
+                entity.Status = null;
+                _context.Set<NonConformite>().Update(entity);
+                _context.SaveChanges();
+            }
+        }
+
         public void Restorer(int id)
         {
             var entity = GetById(id);

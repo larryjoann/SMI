@@ -3,7 +3,8 @@ import {
   CRow, CCol, CButton,
   CFormInput,
   CCard, CCardBody, CBadge,
-  CDropdown, CDropdownToggle, CDropdownMenu, CDropdownItem, CDropdownDivider
+  CDropdown, CDropdownToggle, CDropdownMenu, CDropdownItem, CDropdownDivider,
+  CPagination, CPaginationItem,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilSend, cilOptions, cilPen, cilStorage } from '@coreui/icons'
@@ -149,7 +150,7 @@ const PAListPanel = ({ onReload } = {}) => {
           className="mb-2 card-list-hover"
           key={item.id || item.id_pa || Math.random()}
           style={{ cursor: 'pointer', opacity: 1 }}
-          onClick={() => { if (item.id || item.id_pa) window.location = `#/pa/fiche/${item.id || item.id_pa}` }}
+          onClick={() => { if (item.id || item.id_pa) window.location = `/pa/list/fiche/${item.id || item.id_pa}` }}
         >
           <CCardBody>
             <CRow>
@@ -188,16 +189,16 @@ const PAListPanel = ({ onReload } = {}) => {
         </CCard>
       ))}
 
-      {/* pagination inside panel */}
+      {/* pagination inside panel (use CoreUI CPagination like NC panels) */}
       <CRow>
         <CCol className="d-flex justify-content-end">
-          <nav aria-label="Page navigation example">
-            <ul className="pagination pagination-sm">
-              {[...Array(pageCount)].map((_, idx) => (
-                <li key={idx} className={`page-item ${page === idx + 1 ? 'active' : ''}`}><button className="page-link" onClick={() => setPage(idx + 1)}>{idx + 1}</button></li>
-              ))}
-            </ul>
-          </nav>
+          <CPagination size='sm' align="end" className='mt-3' aria-label="Page navigation example">
+            <CPaginationItem aria-label="Previous" disabled={page === 1} onClick={() => setPage(page - 1)}>&laquo;</CPaginationItem>
+            {[...Array(pageCount)].map((_, idx) => (
+              <CPaginationItem key={idx + 1} active={page === idx + 1} onClick={() => setPage(idx + 1)}>{idx + 1}</CPaginationItem>
+            ))}
+            <CPaginationItem aria-label="Next" disabled={page === pageCount || pageCount === 0} onClick={() => setPage(page + 1)}>&raquo;</CPaginationItem>
+          </CPagination>
         </CCol>
       </CRow>
     </>

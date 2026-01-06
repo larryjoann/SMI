@@ -33,6 +33,7 @@ namespace api_SMI.Controllers
         [HttpPost]
         public IActionResult Create(ActionModel action)
         {
+            Console.WriteLine("Données reçues dans Action fom PA:");
             _service.Add(action);
             return CreatedAtAction(nameof(GetById), new { id = action.Id }, action);
         }

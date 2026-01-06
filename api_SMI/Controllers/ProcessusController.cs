@@ -1,3 +1,4 @@
+using api_SMI.Attributes;
 using api_SMI.Models;
 using api_SMI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,13 @@ namespace api_SMI.Controllers
 
         [HttpGet]
         public IActionResult GetAll()
+        {
+            return Ok(_service.GetAll());
+        }
+
+        //[RequirePermission("READ_CARTO")]
+        [HttpGet("cartographie")]
+        public IActionResult GetAllforCartographie()
         {
             return Ok(_service.GetAll());
         }

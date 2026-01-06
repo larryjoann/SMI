@@ -1,0 +1,48 @@
+Page 1 :
+Système de management interne
+Par larry joann RANDRIANIRINA
+
+Page 2 :
+a propos de IT University
+
+Page 3 :
+a propos de Ravinala airports
+
+Page 4 :
+le SMI chez ravinala airports 
+
+Page 5 : 
+analyse de l'existant chez ravinala
+
+Page 6 :
+Planning de réalisation (module developpé)
+
+Page 7 :
+Architecture
+
+Page 8 : 
+techno  
+
+Page 9 :
+Conception : 
+	- nbr tables
+	- nbr ecran
+	- nbr classe 
+
+Page 10 : 
+démosntration (vidéo)
+
+Page 11 : 
+Situation de l'appli actuelle
+
+Page 12 : 
+Evolution
+
+Page 13 :
+Conclusion
+
+
+
+
+
+

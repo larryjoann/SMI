@@ -38,12 +38,8 @@ namespace api_SMI.Services
             }
             if (source.IdEntite == 3 && source.IdObjet.HasValue) // Entite 3 corresponds to PlanAction
             {
-                PlanAction? pa = _planActionService.GetById(source.IdObjet.Value);
-                if (pa != null)
-                {
-                    pa.IdStatusPA = 2; // Activate the plan action
-                    _planActionService.Update(pa);
-                }
+                // Update only the status of the PlanAction to avoid modifying related ProcessusConcernes
+                _planActionService.UpdateStatus(source.IdObjet.Value, 2);
             }
         }
 

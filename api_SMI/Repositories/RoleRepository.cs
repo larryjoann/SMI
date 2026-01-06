@@ -16,6 +16,9 @@ namespace api_SMI.Repositories
         public List<Role> GetAll()
             => _context.Set<Role>().ToList();
 
+        public List<Role> GetAllNotAuto()
+            => _context.Set<Role>().Where(r => r.EstAutomatique == false).ToList();
+
         public Role? GetById(int id)
         {
             return _context.Set<Role>().FirstOrDefault(r => r.Id == id);

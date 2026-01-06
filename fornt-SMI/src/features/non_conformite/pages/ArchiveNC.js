@@ -36,14 +36,14 @@ const ArchiveNC = () => {
                    <CButton
                         color='secondary'
                         className="mb-3"
-                        href='#/nc/list'
+                        href='/nc/list'
                         >
                         <CIcon icon={cilArrowLeft} className="me-2" />
                         Retour
                     </CButton> 
                 </CCol>
                 <CCol xs={6}>
-                    <h3 className="text-center">Non-conformités archivés</h3>
+                    <h3 className="text-center">Non-conformités archivées</h3>
                 </CCol>
                 <CCol xs={3} className="d-flex justify-content-end">
                 </CCol>

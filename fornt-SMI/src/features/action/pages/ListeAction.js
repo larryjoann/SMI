@@ -28,6 +28,7 @@ import {
 import CIcon from '@coreui/icons-react'
 import { cilOptions, cilTrash, cilPen ,cilFilter,cilFilterX } from '@coreui/icons'
 import useActions from '../hooks/useActions'
+import  ProcessusMultiSelectFloating from '../../../components/champs/ProcessusMultiSelectFloating'
 
 const columnStyle = {
   // Fill most of the viewport; subtract space for header/top controls.
@@ -46,13 +47,19 @@ const ListeAction = () => {
   // filter inputs
   const [inputTitle, setInputTitle] = useState('')
   const [inputSource, setInputSource] = useState('')
-  const [inputDateStart, setInputDateStart] = useState('')
-  const [inputDateEnd, setInputDateEnd] = useState('')
+  // default dates: start of current year -> today
+  const _today = new Date()
+  const _year = _today.getFullYear()
+  const _todayStr = `${_today.getFullYear()}-${String(_today.getMonth() + 1).padStart(2, '0')}-${String(_today.getDate()).padStart(2, '0')}`
+  const _startOfYearStr = `${_year}-01-01`
+  const [inputDateStart, setInputDateStart] = useState()
+  const [inputDateEnd, setInputDateEnd] = useState()
   // active filters (applied on submit)
   const [filterTitle, setFilterTitle] = useState('')
   const [filterSource, setFilterSource] = useState('')
-  const [filterDateStart, setFilterDateStart] = useState('')
-  const [filterDateEnd, setFilterDateEnd] = useState('')
+  // initialize active filters with same defaults so filtering applies on initial render
+  const [filterDateStart, setFilterDateStart] = useState()
+  const [filterDateEnd, setFilterDateEnd] = useState()
   const [availableSources, setAvailableSources] = useState([])
 
   useEffect(() => {
@@ -273,7 +280,16 @@ const ListeAction = () => {
             setFilterDateStart(inputDateStart)
             setFilterDateEnd(inputDateEnd)
           }}>
-            <CCol xs={3}>
+            <CCol xs={2}>
+              <ProcessusMultiSelectFloating
+                  floatingClassName="mb-0"
+                  floatingLabel="Processus"
+                  placeholder="Sélectionner des processus"
+                  //value={processus}
+                  //onChange={(val) => setProcessus(val)}
+              />
+            </CCol>
+            <CCol xs={2}>
               <CFormInput
                 type="text"
                 id="filterTitle"
@@ -283,14 +299,14 @@ const ListeAction = () => {
                 onChange={(e) => setInputTitle(e.target.value)}
               />
             </CCol>
-            <CCol xs={3}>
+            <CCol xs={2}>
               <CFormSelect
                 floatingLabel="Source"
                 value={inputSource}
                 onChange={(e) => setInputSource(e.target.value)}
                 className="mb-0"
               >
-                <option value="">Toutes les entités</option>
+                <option value="">Toutes</option>
                 {availableSources.map((s) => (
                   <option key={s.id} value={String(s.id)}>{s.nom}</option>
                 ))}

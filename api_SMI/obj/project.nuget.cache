@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "V1QW2vRsVxZcE+PT/eEO3dHtqzwHO5//25ubfFbcRQPJqgI/2l+wnC7qALbFzxRXYIcw2Thm1jhGKSOoeAsIFA==",
+  "dgSpecHash": "dMtWUzQ+Xk+dn7B8+DNjLL5dXBhSUAWsGj6wbrshcjnMzxWygo6OksJg44dlW21wC0suwKFBtgZn5kacDuTUdw==",
   "success": true,
   "projectFilePath": "C:\\Users\\26132\\Documents\\SMI\\api_SMI\\api_SMI.csproj",
   "expectedPackageFiles": [
@@ -22,7 +22,8 @@
     "C:\\Users\\26132\\.nuget\\packages\\microsoft.extensions.caching.memory\\9.0.8\\microsoft.extensions.caching.memory.9.0.8.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\9.0.8\\microsoft.extensions.configuration.abstractions.9.0.8.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\9.0.8\\microsoft.extensions.dependencyinjection.9.0.8.nupkg.sha512",
-    "C:\\Users\\26132\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\9.0.8\\microsoft.extensions.dependencyinjection.abstractions.9.0.8.nupkg.sha512",
+    "C:\\Users\\26132\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.0\\microsoft.extensions.dependencyinjection.abstractions.10.0.0.nupkg.sha512",
+    "C:\\Users\\26132\\.nuget\\packages\\microsoft.extensions.dependencymodel\\10.0.0\\microsoft.extensions.dependencymodel.10.0.0.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\microsoft.extensions.logging\\9.0.8\\microsoft.extensions.logging.9.0.8.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\9.0.8\\microsoft.extensions.logging.abstractions.9.0.8.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\microsoft.extensions.options\\9.0.8\\microsoft.extensions.options.9.0.8.nupkg.sha512",
@@ -41,6 +42,7 @@
     "C:\\Users\\26132\\.nuget\\packages\\runtime.win-arm64.runtime.native.system.data.sqlclient.sni\\4.4.0\\runtime.win-arm64.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\runtime.win-x64.runtime.native.system.data.sqlclient.sni\\4.4.0\\runtime.win-x64.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\runtime.win-x86.runtime.native.system.data.sqlclient.sni\\4.4.0\\runtime.win-x86.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
+    "C:\\Users\\26132\\.nuget\\packages\\scrutor\\7.0.0\\scrutor.7.0.0.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\swashbuckle.aspnetcore\\6.4.0\\swashbuckle.aspnetcore.6.4.0.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.4.0\\swashbuckle.aspnetcore.swagger.6.4.0.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.4.0\\swashbuckle.aspnetcore.swaggergen.6.4.0.nupkg.sha512",
@@ -53,13 +55,13 @@
     "C:\\Users\\26132\\.nuget\\packages\\system.directoryservices\\9.0.8\\system.directoryservices.9.0.8.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\system.formats.asn1\\9.0.8\\system.formats.asn1.9.0.8.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\system.identitymodel.tokens.jwt\\7.7.1\\system.identitymodel.tokens.jwt.7.7.1.nupkg.sha512",
-    "C:\\Users\\26132\\.nuget\\packages\\system.io.pipelines\\9.0.8\\system.io.pipelines.9.0.8.nupkg.sha512",
+    "C:\\Users\\26132\\.nuget\\packages\\system.io.pipelines\\10.0.0\\system.io.pipelines.10.0.0.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\system.memory\\4.5.5\\system.memory.4.5.5.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\system.memory.data\\8.0.1\\system.memory.data.8.0.1.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\system.security.cryptography.pkcs\\8.0.1\\system.security.cryptography.pkcs.8.0.1.nupkg.sha512",
     "C:\\Users\\26132\\.nuget\\packages\\system.security.cryptography.protecteddata\\8.0.0\\system.security.cryptography.protecteddata.8.0.0.nupkg.sha512",
-    "C:\\Users\\26132\\.nuget\\packages\\system.text.encodings.web\\9.0.8\\system.text.encodings.web.9.0.8.nupkg.sha512",
-    "C:\\Users\\26132\\.nuget\\packages\\system.text.json\\9.0.8\\system.text.json.9.0.8.nupkg.sha512"
+    "C:\\Users\\26132\\.nuget\\packages\\system.text.encodings.web\\10.0.0\\system.text.encodings.web.10.0.0.nupkg.sha512",
+    "C:\\Users\\26132\\.nuget\\packages\\system.text.json\\10.0.0\\system.text.json.10.0.0.nupkg.sha512"
   ],
   "logs": []
 }

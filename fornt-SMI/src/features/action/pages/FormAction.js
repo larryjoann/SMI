@@ -9,6 +9,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import useActionDetails from '../hooks/useActionDetails'
 import CollaborateurMultiSelect from '../../../components/champs/CollaborateurMultiSelect'
 import API_URL from '../../../api/API_URL'
+import axiosInstance from '../../../api/axiosInstance'
 import { fetchStatuses } from '../services/actionService'
 import { useForm, Controller } from 'react-hook-form'
 
@@ -108,15 +109,16 @@ const FormAction = () => {
   const sanitizedAction = JSON.parse(JSON.stringify(payload, (k, v) => (v === null ? undefined : v)))
   const form = new FormData()
   form.append('ActionDetails', JSON.stringify(sanitizedAction))
-  const apiBase = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL
-  // If we have an id -> call PUT /ActionDetails/{id} (update on ActionDetails controller). Otherwise fallback to POST /ActionDetails
-  const url = `${apiBase}/ActionDetails/${id}`
-  const method = id ? 'PUT' : 'POST'
-  const res = await fetch(url, { method, credentials: 'include', body: form })
-      const text = await res.text().catch(() => '')
-      if (!res.ok) {
-        throw new Error(`Echec enregistrement (${res.status}) : ${text}`)
-      }
+  try {
+    const url = id ? `/ActionDetails/${id}` : '/ActionDetails'
+    const res = id
+      ? await axiosInstance.put(url, form)
+      : await axiosInstance.post(url, form)
+    const text = res && res.data ? JSON.stringify(res.data) : ''
+    if (!res || (res.status && res.status >= 400)) throw new Error(`Echec enregistrement (${res?.status}) : ${text}`)
+  } catch (e) {
+    throw e
+  }
   await refetch?.()
   // After successful update/create navigate back to the action fiche (if id available)
   if (id) navigate(`/action/fiche/${id}`)

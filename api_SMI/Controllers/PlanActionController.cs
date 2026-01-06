@@ -44,6 +44,26 @@ namespace api_SMI.Controllers
             return NoContent();
         }
 
+        [HttpPost("verifier")]
+        public IActionResult Verifier(int id)
+        {
+            Console.WriteLine("Verifier called for ID: " + id);
+            var pa = _service.GetById(id);
+            if (pa == null) return NotFound();
+            // Update only the status to avoid modifying related ProcessusConcernes
+            _service.UpdateStatus(id, 3);
+            return NoContent();
+        }
+
+        [HttpPost("cloturer")]
+        public IActionResult Cloturer(int id)
+        {
+            var pa = _service.GetById(id);
+            if (pa == null) return NotFound();
+            _service.UpdateStatus(id, 4);
+            return NoContent();
+        }
+
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {

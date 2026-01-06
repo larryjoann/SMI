@@ -1,10 +1,13 @@
 import { exact } from 'prop-types'
 import React from 'react'
 
+
+const TDB = React.lazy(() => import('./features/dashboard/pages/TDB'))
+
 // Notifications
 const Notifications = React.lazy(() => import('./features/notifications/pages/Liste_notif'))
 
-// Pilotage
+// Cartographie
 const Cartographie = React.lazy(() => import('./features/pilotage/pages/Cartographie'))
 const FormProcessus = React.lazy(() => import('./features/pilotage/pages/FormProcessus'))
 const FicheProcessus = React.lazy(() => import('./features/pilotage/pages/FicheProcessus'))
@@ -25,6 +28,8 @@ const HistoActiviteNC = React.lazy(() => import('./features/non_conformite/pages
 const Liste_PA = React.lazy(() => import('./features/pa/pages/ListePA'))
 const Form_PA = React.lazy(() => import('./features/pa/pages/FormPA'))
 const Fiche_PA = React.lazy(() => import('./features/pa/pages/FichePA'))
+const Archive_PA = React.lazy(() => import('./features/pa/pages/ArchivePA'))
+const HistoActivitePA = React.lazy(() => import('./features/pa/pages/HistoriqueActivitePA'))
 
 // actions
 const Fiche_Action = React.lazy(() => import('./features/action/pages/FicheAction'))
@@ -34,18 +39,26 @@ const Form_Action = React.lazy(() => import('./features/action/pages/FormAction'
 //Administration
 // const Roles = React.lazy(() => import('./features/administration/pages/Roles'))
 const Logs = React.lazy(() => import('./features/admin/pages/Logs'))
-const Roles = React.lazy(() => import('./features/admin/pages/Roles'))
+const Autorisation = React.lazy(() => import('./features/admin/pages/Autorisation'))
+const FormAutorisation = React.lazy(() => import('./features/admin/pages/FormAutorisation'))
+const Utilisateurs = React.lazy(() => import('./features/admin/pages/Utilisateurs'))
+const FormUtilisateur = React.lazy(() => import('./features/admin/pages/FormUtilisateur'))
+
+// Error pages
+const Page403 = React.lazy(() => import('./views/pages/Page403'))
 
 const routes = [
-  { path: '/', exact: true, name: 'Home' },
+  { path: '/', exact: true, name: 'Tableau de bord', element: TDB },
+
+  { path: '/dashboard', name: 'Tableau de bord', element: TDB, exact: true },
 
   { path: '/notifications', name: 'Notifications', element: Notifications, exact: true },
 
-  { path: '/pilotage', name: 'Pilotage', element: Cartographie, exact: true },
-  { path: '/pilotage/cartographie', name: 'Cartographie des processus', element: Cartographie },
-  { path: '/pilotage/cartographie/formprocessus', name: 'Insertion', element: FormProcessus , exact: true},
-  { path: '/pilotage/cartographie/formprocessus/:id', name: 'Modification', element: FormProcessus},
-  { path: '/pilotage/cartographie/ficheprocessus/:id', name: 'Fiche processus', element: FicheProcessus },
+  { path: '/cartographie', name: 'Cartographie', element: Cartographie, exact: true },
+  { path: '/cartographie', name: 'Cartographie des processus', element: Cartographie },
+  { path: '/cartographie/formprocessus', name: 'Insertion', element: FormProcessus , exact: true},
+  { path: '/cartographie/formprocessus/:id', name: 'Modification', element: FormProcessus},
+  { path: '/cartographie/ficheprocessus/:id', name: 'Fiche processus', element: FicheProcessus },
 
   { path: '/indicateur', name: 'Indicateur', element: Liste_indicateur, exact: true },
   { path : '/indicateur/tdb', name: 'Tableau de bord des indicateurs', element: TDB_indicateur },
@@ -61,10 +74,13 @@ const routes = [
   { path: '/nc/list/form/:id', name: 'Modification', element: Form_NC },
 
   { path: '/pa', name: 'Plan d\'action', element: Liste_PA, exact: true },
-  { path: '/pa/list', name: 'Suivie des plans d\'action', element: Liste_PA },
+  { path: '/pa/list', name: 'Suivi des plans d\'action', element: Liste_PA },
+  { path: '/pa/list/archive', name: 'Archive des plans d\'action', element: Archive_PA },
   { path: '/pa/form', name: 'Nouveau plan d\'action', element: Form_PA },
   { path: '/pa/form/:id', name: 'Modification plan d\'action', element: Form_PA },
-  { path: '/pa/fiche/:id', name: 'Fiche plan d\'action', element: Fiche_PA },
+  { path: '/pa/list/fiche/:id', name: 'Fiche plan d\'action', element: Fiche_PA },
+  { path : '/pa/list/fiche/histoactivite/:id', name: 'Historique des activités', element: HistoActivitePA },
+
 
   { path: '/action', name: 'Action', element: Liste_Action, exact: true },
   { path: '/action/fiche/:id', name: 'Fiche', element: Fiche_Action },
@@ -72,10 +88,14 @@ const routes = [
   { path: '/action/form/:id', name: 'Modification action', element: Form_Action },
 
   { path: '/administration', name: 'Administration', element: Logs, exact: true },
-  { path : '/administration/roles', name: 'Gestion des rôles', element: Roles },
+  { path : '/administration/autorisation', name: 'Gestion des autorisations', element: Autorisation },
+  { path : '/administration/autorisation/form', name: 'Nouvelle autorisation', element: FormAutorisation },
   { path: '/administration/logs', name: 'Logs', element: Logs },
+  { path: '/administration/utilisateurs', name: 'Utilisateurs', element: Utilisateurs },
+  { path: '/administration/utilisateurs/form', name: 'Nouvel utilisateur', element: FormUtilisateur },
 
-  
+  // Error pages
+  { path: '/403', name: 'Accès refusé', element: Page403 },
 ]
 
 export default routes

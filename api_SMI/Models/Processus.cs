@@ -37,13 +37,18 @@ namespace api_SMI.Models
         [Column("status")]
         public bool? Status { get; set; }
 
-    // Navigation vers plusieurs pilotes
-    public ICollection<Pilote> Pilotes { get; set; } = new List<Pilote>();
+        // Navigation vers les responsables du processus
+        public ICollection<ResponsableProcessus> ResponsablesProcessus { get; set; } = new List<ResponsableProcessus>();
 
-    // Navigation vers plusieurs copilotes
-    public ICollection<Copilote> Copilotes { get; set; } = new List<Copilote>();
+        // Navigation vers les années de validité
+        public ICollection<ValiditeProcessus> Validites { get; set; } = new List<ValiditeProcessus>();
 
-    // Navigation vers les années de validité
-    public ICollection<ValiditeProcessus> Validites { get; set; } = new List<ValiditeProcessus>();
+        // Navigation vers les nouvelles entités liées au processus
+        [InverseProperty("Processus")]
+        public ICollection<Intercation> Intercations { get; set; } = new List<Intercation>();
+       // public ICollection<Intercation> IntercationsInteragi { get; set; } = new List<Intercation>();
+        public ICollection<RessourceProcessus> RessourcesProcessus { get; set; } = new List<RessourceProcessus>();
+        public ICollection<PartieInteresseAttente> PartieInteresseAttentes { get; set; } = new List<PartieInteresseAttente>();
+        public ICollection<Activite> Activites { get; set; } = new List<Activite>();
     }
-}
+} 

@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 import { CRow, CCol, CButton, CCard, CCardHeader
-    , CCardBody, CBadge, CProgress, CAvatar, CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter, CFormInput
+    , CCardBody, CBadge, CProgress, CAvatar, CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter, CFormInput, CInputGroup, CSpinner
  } from '@coreui/react'
 import { useNavigate, useParams } from 'react-router-dom'
 import useActionDetails from '../hooks/useActionDetails'
 import { createSuivi } from '../services/suiviService'
 import CIcon from '@coreui/icons-react'
-import { cilArrowLeft, cilHistory } from '@coreui/icons'
+import { cilArrowLeft, cilHistory, cilSend } from '@coreui/icons'
 const FicheAction = () => {
     const navigate = useNavigate()
 
@@ -35,18 +35,35 @@ const FicheAction = () => {
     // we will use current time for dateSuivi by default
     const [submittingSuivi, setSubmittingSuivi] = useState(false)
     const [suiviError, setSuiviError] = useState(null)
+    // comment input state
+    const [newComment, setNewComment] = useState('')
+    const [commentLoading, setCommentLoading] = useState(false)
+
+    const handleSubmitComment = async () => {
+        if (!newComment || !newComment.trim()) return
+        setCommentLoading(true)
+        try {
+            console.log('Submit Action comment (demo):', newComment)
+            if (typeof refetch === 'function') await refetch()
+            setNewComment('')
+        } catch (err) {
+            console.error('Error submitting comment', err)
+        } finally {
+            setCommentLoading(false)
+        }
+    }
 
     if (loading) return <div>Chargement...</div>
     if (error) return <div className="text-danger">Erreur: {error.message || String(error)}</div>
 
     return (
-    <>
+    <div style={{ position: 'relative', minHeight: 'calc(100vh - 80px)', paddingBottom: 140 }}>
         <CRow className='mb-2'>   
             <CCol xs={3} className="d-flex justify-content-start">
                 <CButton
                 color='secondary'
                 className="mb-3"
-                                onClick={() => navigate('/action')}
+                                onClick={() => { if (window.history.length > 1) navigate(-1); else navigate('/action') }}
                 >
                 <CIcon icon={cilArrowLeft} className="me-2" />
                 Retour
@@ -72,54 +89,60 @@ const FicheAction = () => {
                 <CCardBody>
                     <CRow>
                         <CCol md={6} className="mb-3">
-                                <h6 className="mb-2">Titre de l'action :</h6>
-                                <p>{action?.titre}</p>
+                                <span className='h6'>Titre : </span>
+                                <a>{action?.titre}</a>
                         </CCol>
                         <CCol md={12} className="mb-3">
-                                <h6 className="mb-2">Description :</h6>
-                                <p>{action?.descr}</p>
+                                <span className="h6">Description :</span>
+                                <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: 8, whiteSpace: 'pre-wrap' }}>{action?.descr}</div>
                         </CCol>
-                        <CCol md={6} className="mb-3">
+                        <CCol md={12} className="mb-3">
                                 <h6 className="mb-2">Responsable :</h6>
                                 {action?.responsables && action.responsables.length > 0 ? (
-                                    action.responsables.map((r) => (
-                                        <div key={r.id} className="d-flex align-items-center">
-                                            <CAvatar size='md' className="me-3 bg-secondary text-white">{(r.responsable?.nomAffichage || r.responsable?.nomComplet || '').split(' ').map(n => n?.[0]).slice(0,2).join('').toUpperCase()}</CAvatar>
-                                            <div>
-                                                <div style={{ fontWeight: 700 }}>{r.responsable?.nomAffichage || r.responsable?.nomComplet}</div>
-                                                <div className="text-muted">{r.responsable?.poste || r.responsable?.departement || ''}</div>
-                                                <div style={{ fontSize: 13 }}>{r.responsable?.courriel}</div>
-                                                <div style={{ fontSize: 13 }}>{r.responsable?.telephone}</div>
-                                            </div>
-                                        </div>
-                                    ))
+                                    <CRow>
+                                        {action.responsables.map((r) => (
+                                            <CCol key={r.id} md={6} className="mb-2">
+                                                <div className="d-flex align-items-center">
+                                                    <CAvatar size='md' className="me-3 bg-secondary text-white">{(r.responsable?.nomAffichage || r.responsable?.nomComplet || '').split(' ').map(n => n?.[0]).slice(0,2).join('').toUpperCase()}</CAvatar>
+                                                    <div>
+                                                        <div style={{ fontWeight: 700 }}>{r.responsable?.nomAffichage || r.responsable?.nomComplet}</div>
+                                                        <div className="text-muted">{r.responsable?.poste || r.responsable?.departement || ''}</div>
+                                                    </div>
+                                                </div>
+                                            </CCol>
+                                        ))}
+                                    </CRow>
                                 ) : (
                                     <p>-</p>
                                 )}
                         </CCol>
-                        <CCol md={6} className="mb-3">
+                        <CCol md={12} className="mb-3">
                             <h6 className="mb-2">Statut :</h6>
                             <p><CBadge color={action?.statusAction?.color}>{action?.statusAction?.nom}</CBadge></p>
-                        </CCol>
-                        <CCol md={6} className="mb-3">
-                            <h6 className="mb-2">Date de début :</h6>
-                            <p>{formatDate(action?.dateDebut)}</p>
-                        </CCol>
-                        <CCol md={6} className="mb-3">
-                            <h6 className="mb-2">Date de fin prévue :</h6>
-                            <p>{formatDate(action?.dateFinPrevue)}</p>
                         </CCol>
                         <CCol md={12} className="mb-3">
                             <h6 className="mb-2">Progression :</h6>
                             <div style={{ cursor: action?.id ? 'pointer' : 'default' }} onClick={() => action?.id && setShowSuiviModal(true)}>
                                 <CProgress value={progress}  variant="striped" animated>{progress}%</CProgress>
                             </div>
+                            <div className="d-flex justify-content-between mt-2">
+                                <small className="text-muted">{formatDate(action?.dateDebut)}</small>
+                                <small className="text-muted">{formatDate(action?.dateFinPrevue)}</small>
+                            </div>
                         </CCol>
                         <CCol md={12} className="mb-3">
                             <h6 className="mb-2">Sources / Liens :</h6>
                             {action?.sources && action.sources.length > 0 ? (
                                 action.sources.map((s) => (
-                                    <div key={s.id}>Type: {s.entite?.nom} — Objet: {s.idObjet} (source id: {s.id})</div>
+                                    <div key={s.id} className="d-flex align-items-center mb-1">
+                                        <div>
+                                            <a>{s.entite?.nom || 'Source'}</a>
+                                            <span className="text-muted"> # {s.idObjet}</span>
+                                            {/* <span className="text-muted"> (id: {s.id})</span> */}
+                                        </div>
+                                        {/* 'Voir' link placed next to the source text (small left margin) */}
+                                        <CButton size="sm" color="secondary" className="ms-2" onClick={() => { window.location = `#/source/${s.id}` }}>Voir</CButton>
+                                    </div>
                                 ))
                             ) : (
                                 <div>-</div>
@@ -129,7 +152,7 @@ const FicheAction = () => {
                             <h6 className="mb-2">Historique des suivis :</h6>
                             {action?.suivis && action.suivis.length > 0 ? (
                                 action.suivis.map((s) => (
-                                    <div key={s.id} className="mb-2">{new Date(s.dateSuivi).toLocaleString()} — Avancement: {s.avancement}%</div>
+                                    <div key={s.id} className="mb-2"> . {new Date(s.dateSuivi).toLocaleString()} — Avancement: {s.avancement}%</div>
                                 ))
                             ) : (
                                 <div>Aucun suivi</div>
@@ -178,7 +201,32 @@ const FicheAction = () => {
                     }}>Enregistrer</CButton>
                 </CModalFooter>
             </CModal>
-    </>
+
+            {/* Comment input anchored to bottom of fiche page */}
+            <div style={{ position: 'absolute', bottom: 20, left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 1500 }}>
+                <div className="fixed-page-inner" style={{ width: '75%', padding: '0px 8px' }}>
+                    <CInputGroup className="rounded-pill overflow-hidden" style={{ border: '1px solid #c7c5c5ff', boxShadow: '0 6px 14px rgba(0,0,0,0.12)', background: '#fff' }}>
+                        <CFormInput
+                            placeholder="Ajouter un commentaire..."
+                            aria-label="Ajouter un commentaire"
+                            className="border-0"
+                            style={{ boxShadow: 'none' }}
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            onKeyDown={async (e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault()
+                                    await handleSubmitComment()
+                                }
+                            }}
+                        />
+                        <CButton type="button" className="rounded-pill" color='primary' style={{ boxShadow: '0 6px 14px rgba(0,0,0,0.12)', borderRadius: 20 }} onClick={handleSubmitComment} disabled={commentLoading || !newComment.trim()}>
+                            {commentLoading ? <CSpinner size="sm" /> : <CIcon icon={cilSend} />}
+                        </CButton>
+                    </CInputGroup>
+                </div>
+            </div>
+    </div>
   )
 }
 

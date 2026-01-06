@@ -1,25 +1,15 @@
-import axios from 'axios'
-import API_URL from '../../../api/API_URL'
+import axiosInstance from '../../../api/axiosInstance'
 
-const AUTH_URL = `${API_URL}/Auth`
-
+// Use shared axios instance so interceptors, baseURL and auth header handling are applied
 export const login = async (matricule, password) => {
   try {
-    const response = await axios.post(
-      `${AUTH_URL}/login`,
-      { matricule, password },
-      { 
-        timeout: 0,
-        withCredentials: true
-      } // Pas de timeout, attend la réponse aussi longtemps que nécessaire
-    )
-    if (response.data.token) {
+    const response = await axiosInstance.post('/Auth/login', { matricule, password }, { timeout: 0 })
+    if (response?.data?.token) {
       sessionStorage.setItem('jwt', response.data.token)
     }
     return response.data
   } catch (error) {
-    const message =
-      error.response?.data?.message || 'Erreur lors de la connexion'
+    const message = error.response?.data?.message || 'Erreur lors de la connexion'
     throw new Error(message)
   }
 }

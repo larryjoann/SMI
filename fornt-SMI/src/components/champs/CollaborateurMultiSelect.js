@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import Select from 'react-select'
 import API_URL from '../../api/API_URL'
+import axiosInstance from '../../api/axiosInstance'
 
 function CollaborateurMultiSelect({ placeholder = 'Sélectionner des collaborateurs', onChange, value, invalid }) {
   const [options, setOptions] = useState([])
 
   useEffect(() => {
     let mounted = true
-    fetch(`${API_URL}/Collaborateur`)
-      .then(res => res.json())
-      .then(data => {
+    axiosInstance.get('/Collaborateur')
+      .then(res => {
+        const data = res && res.data ? res.data : []
         if (!mounted) return
         const list = Array.isArray(data) ? data : (data?.data || data?.items || [])
         const opts = (list || []).map((col, idx) => {

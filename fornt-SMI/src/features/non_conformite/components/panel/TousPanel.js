@@ -8,8 +8,7 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilTrash, cilOptions, cilPen, cilStorage } from '@coreui/icons'
-import axios from 'axios'
-import API_URL from '../../../../api/API_URL'
+import axiosInstance, { getMatriculeFromJwt } from '../../../../api/axiosInstance'
 
 import FilterDropdown from '../filter/FilterDropdown'
 import DateFilterDropdown from '../filter/DateFilterDropdown'
@@ -29,7 +28,19 @@ const TousPanel = ({ ncData = [], loading = false, error = null, onReload }) => 
 
   useEffect(() => {
     let mounted = true
-    axios.get(`${API_URL}/Collaborateur/collaborateur_connecte`, { withCredentials: true })
+    // Try to read matricule from session (JWT payload) first to avoid an extra network call
+    try {
+      const mFromJwt = getMatriculeFromJwt()
+      if (mFromJwt) {
+        if (mounted) setCurrentUserMatricule(mFromJwt)
+        return () => { mounted = false }
+      }
+    } catch (e) {
+      // fallthrough to API call
+    }
+
+    // Fallback: request collaborator from server if not available in session
+    axiosInstance.get('/Collaborateur/collaborateur_connecte')
       .then(res => {
         if (!mounted) return
         // try common field names for matricule
@@ -197,8 +208,8 @@ const TousPanel = ({ ncData = [], loading = false, error = null, onReload }) => 
                                 if (typeof onReload === 'function') onReload();
                                 }}
                             >
-                              <CIcon icon={cilStorage} className="text-danger me-3" />
-                              <span className="text-danger">Archiver</span>
+                              <CIcon icon={cilStorage} className="text-secondary me-3" />
+                              <span className="text-secondary">Archiver</span>
                             </CDropdownItem>
                             <CDropdownDivider />
                             <CDropdownItem

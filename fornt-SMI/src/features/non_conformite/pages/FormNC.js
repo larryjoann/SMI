@@ -3,10 +3,12 @@ import {
   CRow, CCol,
   CCard, CCardBody, CCardHeader, 
   CForm, CFormInput, CFormLabel, CFormTextarea,
-  CButton , CFormFeedback
+  CButton , CFormFeedback,
+  CModal, CModalHeader, CModalTitle, CModalBody, CModalFooter
 } from '@coreui/react'
 import { Pop_up } from '../../../components/notification/Pop_up'
 import { useFormNC } from '../hooks/useFormNC'
+import { useDraftToDeclareNC } from '../hooks/useNCDetails'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import ProcessusMultiSelect from '../../../components/champs/ProcessusMultiSelect'
 import TypeNCSelect from '../../../components/champs/TypeNCSelect'
@@ -40,8 +42,74 @@ const FormNC = () => {
     showToast, setShowToast,
     popType, setPopType,
     popMessage, setPopMessage,
+    idStatusNc,
     loadNCForEdit
   } = useFormNC(id)
+  const { declare, loading: declaring, popType: declarePopType, popMessage: declarePopMessage } = useDraftToDeclareNC()
+
+  const handleDeclareClick = async (e) => {
+    e.preventDefault()
+    if (!id) return
+    try {
+      await declare(id)
+      // show the message from the declare hook in this page's popup
+      setPopType(declarePopType || 'success')
+      setPopMessage(declarePopMessage || 'Non-conformité déclarée avec succès !')
+      setShowToast(true)
+      // refresh current NC data
+      if (typeof loadNCForEdit === 'function') {
+        await loadNCForEdit(id)
+      }
+      // redirect to list (declaration panel)
+      navigate('/nc/list', { state: { defaultPanel: 'declaration' } })
+    } catch (err) {
+      setPopType('danger')
+      setPopMessage(err?.message || 'Erreur lors de la déclaration')
+      setShowToast(true)
+    }
+  }
+
+  // Confirmation modal state
+  const [confirmVisible, setConfirmVisible] = React.useState(false)
+  const [confirmAction, setConfirmAction] = React.useState('')
+  const [actionLoading, setActionLoading] = React.useState(false)
+
+  const openConfirm = (action) => {
+    setConfirmAction(action)
+    setConfirmVisible(true)
+  }
+
+  const closeConfirm = () => {
+    setConfirmVisible(false)
+    setConfirmAction('')
+  }
+
+  const onConfirmAction = async () => {
+    setActionLoading(true)
+    try {
+      // Use small fake event with preventDefault to satisfy handlers
+      const fakeEvent = { preventDefault: () => {} }
+      if (confirmAction === 'draft') {
+        await handleDraft(fakeEvent)
+      } else if (confirmAction === 'declare_create') {
+        await handleSubmit(fakeEvent)
+      } else if (confirmAction === 'update') {
+        await handleUpdate(fakeEvent)
+      } else if (confirmAction === 'declare_edit') {
+        // 1. Enregistrer les modifications du formulaire
+        await handleUpdate(fakeEvent)
+        // 2. Déclarer la NC
+        await handleDeclareClick(fakeEvent)
+      }
+      closeConfirm()
+    } catch (err) {
+      // handlers already set toasts; just ensure modal closes
+      console.error('Action confirm error', err)
+      closeConfirm()
+    } finally {
+      setActionLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (id) {
@@ -205,21 +273,45 @@ const FormNC = () => {
         <CRow className='mb-4'>
           <CCol xs={12} className="d-flex justify-content-end">
             {id ? (
-              <CButton color="primary" type="button" onClick={handleUpdate}>
-                Enregistrer
-              </CButton>
+              <>
+                <CButton color="primary" type="button" onClick={() => openConfirm('update')} className="me-2">
+                  Enregistrer
+                </CButton>
+                {(dateTimeDeclare === null ) && (
+                  <CButton color="primary" type="button" onClick={() => openConfirm('declare_edit')}>
+                    Déclarer
+                  </CButton>
+                )}
+              </>
             ) : (
               <>
-                <CButton color="secondary" type="button" className='me-2' onClick={handleDraft}>
+                <CButton color="secondary" type="button" className='me-2' onClick={() => openConfirm('draft')}>
                   Brouillon
                 </CButton>
-                <CButton color="primary" onClick={handleSubmit}>
+                <CButton color="primary" onClick={() => openConfirm('declare_create')}>
                   Déclarer
                 </CButton>
               </>
             )}
           </CCol>
         </CRow>
+      
+      {/* Confirmation modal used for Draft / Declare / Update */}
+      <CModal alignment="center" visible={confirmVisible} onClose={closeConfirm}>
+        <CModalHeader>
+          <CModalTitle>Confirmer l'action</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          {confirmAction === 'draft' && <div>Voulez-vous enregistrer ce brouillon ?</div>}
+          {confirmAction === 'declare_create' && <div>Voulez-vous déclarer cette non-conformité ?</div>}
+          {confirmAction === 'declare_edit' && <div>Voulez-vous déclarer cette non-conformité (édition) ?</div>}
+          {confirmAction === 'update' && <div>Voulez-vous enregistrer les modifications ?</div>}
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={closeConfirm} disabled={actionLoading}>Non</CButton>
+          <CButton color="primary" onClick={onConfirmAction} disabled={actionLoading}>{actionLoading ? 'Traitement...' : 'Oui'}</CButton>
+        </CModalFooter>
+      </CModal>
       </CForm>
     </>
   )

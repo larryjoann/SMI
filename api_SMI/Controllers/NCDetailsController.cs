@@ -2,6 +2,8 @@ using api_SMI.Models;
 using api_SMI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
+using api_SMI.Extensions;
 using System.Text.Json;
 using System.IO;
 using System;
@@ -10,6 +12,7 @@ namespace api_SMI.Controllers
 {
     //[ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class NCDetailsController : ControllerBase
     {
         private readonly INCDetailsService _service;
@@ -30,7 +33,7 @@ namespace api_SMI.Controllers
         [HttpGet("by-matricule")]
         public IActionResult GetAllByMatricule()
         {
-            var matricule = HttpContext.Session.GetString("matricule");
+            var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
@@ -43,7 +46,7 @@ namespace api_SMI.Controllers
         [HttpGet("drafts")]
         public IActionResult GetDrafts()
         {
-            var matricule = HttpContext.Session.GetString("matricule");
+            var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
@@ -55,7 +58,7 @@ namespace api_SMI.Controllers
         [HttpGet("declare")]
         public IActionResult GetDeclare()
         {
-            var matricule = HttpContext.Session.GetString("matricule");
+            var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
@@ -67,7 +70,7 @@ namespace api_SMI.Controllers
         [HttpGet("archived")]
         public IActionResult GetArchived()
         {
-            var matricule = HttpContext.Session.GetString("matricule");
+            var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
@@ -87,9 +90,9 @@ namespace api_SMI.Controllers
         }
 
         [HttpPut("archiver/{id}")]
-        public IActionResult Archive(int id)
+           public IActionResult Archive(int id)
         {
-             var matricule = HttpContext.Session.GetString("matricule");
+               var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
@@ -101,7 +104,7 @@ namespace api_SMI.Controllers
         [HttpPut("restorer/{id}")]
         public IActionResult Restorer(int id)
         {
-            var matricule = HttpContext.Session.GetString("matricule");
+            var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
@@ -123,7 +126,7 @@ namespace api_SMI.Controllers
             if (detailsObj == null || detailsObj.NC == null)
                 return BadRequest("Invalid NCDetails data.");
 
-            var matricule = HttpContext.Session.GetString("matricule");
+            var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
@@ -174,7 +177,7 @@ namespace api_SMI.Controllers
             if (detailsObj == null || detailsObj.NC == null)
                 return BadRequest("Invalid NCDetails data.");
 
-            var matricule = HttpContext.Session.GetString("matricule");
+            var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
@@ -240,7 +243,7 @@ namespace api_SMI.Controllers
             if (!TryValidateModel(detailsObj))
                 return BadRequest(ModelState);
 
-             var matricule = HttpContext.Session.GetString("matricule");
+             var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
@@ -266,7 +269,7 @@ namespace api_SMI.Controllers
             if (id != detailsObj.NC.Id)
                 return BadRequest("L'ID dans l'URL ne correspond pas à l'ID du corps.");
 
-            var matricule = HttpContext.Session.GetString("matricule");
+            var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
@@ -293,6 +296,7 @@ namespace api_SMI.Controllers
                     detailsObj.PiecesJointes.Add(piece);
                 }
             }
+            detailsObj.NC.IdStatusNc = null; // Reset status for draft
 
             _service.Update(detailsObj, matricule);
 
@@ -340,7 +344,7 @@ namespace api_SMI.Controllers
             if (!TryValidateModel(detailsObj))
                 return BadRequest(ModelState);
 
-             var matricule = HttpContext.Session.GetString("matricule");
+             var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });
@@ -360,7 +364,7 @@ namespace api_SMI.Controllers
             if (id != details.NC.Id)
                 return BadRequest("L'ID dans l'URL ne correspond pas à l'ID du corps.");
 
-             var matricule = HttpContext.Session.GetString("matricule");
+             var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });

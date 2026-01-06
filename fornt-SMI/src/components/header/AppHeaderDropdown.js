@@ -5,17 +5,20 @@ import {
   CDropdownItem,
   CDropdownMenu,
   CDropdownToggle,
+  CModal,
+  CModalHeader,
+  CModalTitle,
+  CModalBody,
+  CModalFooter,
+  CButton,
 } from '@coreui/react'
 import { cilLockLocked } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 // import avatar8 from './../../assets/images/avatars/8.jpg'
-import axios from 'axios'
-import API_URL from '../../api/API_URL'
+import axiosInstance from '../../api/axiosInstance'
 
 function getCollaborateurConnecte() {
-  return axios.get(`${API_URL}/Collaborateur/collaborateur_connecte`, {
-    withCredentials: true
-  })
+  return axiosInstance.get('/Collaborateur/collaborateur_connecte')
 }
 
 const AppHeaderDropdown = () => {
@@ -29,15 +32,17 @@ const AppHeaderDropdown = () => {
       .catch(() => setUserName(''))
   }, [])
 
-  const handleLogout = () => {
-    axios.get(`${API_URL}/Auth/logout`, { withCredentials: true })
-      .then(() => {
-        window.location.href = '#/login'
-      })
-      .catch(() => {
-        window.location.href = '#/login'
-      })
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.get('/Auth/logout')
+    } catch (e) {
+      // ignore; we will still clear the token and redirect
+    }
+    try { sessionStorage.removeItem('jwt') } catch (e) { }
+    window.location.href = '/login'
   }
+
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   // Fonction pour obtenir les initiales
   // Optimisé : retourne les initiales du premier et du deuxième mot
@@ -60,11 +65,24 @@ const AppHeaderDropdown = () => {
         </span>
       </CDropdownToggle>
       <CDropdownMenu className="p-0 dropdown-menu-end" placement="bottom-end">
-        <CDropdownItem className='end' onClick={handleLogout}>
+        <CDropdownItem className='end' onClick={() => setShowLogoutModal(true)}>
           <CIcon icon={cilLockLocked} className="me-2" />
           Se déconnecter
         </CDropdownItem>
       </CDropdownMenu>
+
+      <CModal visible={showLogoutModal} onClose={() => setShowLogoutModal(false)} alignment="center">
+        <CModalHeader>
+          <CModalTitle>Confirmer la déconnexion</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          Voulez-vous vraiment vous déconnecter ?
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setShowLogoutModal(false)}>Annuler</CButton>
+          <CButton color="danger" onClick={() => { setShowLogoutModal(false); handleLogout(); }}>Se déconnecter</CButton>
+        </CModalFooter>
+      </CModal>
     </CDropdown>
   )
 }

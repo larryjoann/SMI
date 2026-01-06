@@ -8,6 +8,7 @@ namespace api_SMI.Services
         PlanAction? GetById(int id);
         void Add(PlanAction planAction);
         void Update(PlanAction planAction);
+        void UpdateStatus(int id, int? idStatusPA);
         void Delete(int id);
     }
 }

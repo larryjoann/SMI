@@ -1,11 +1,14 @@
 using api_SMI.Models;
 using api_SMI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using api_SMI.Extensions;
 
 namespace api_SMI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class CauseNcController : ControllerBase
     {
         private readonly ICauseNcService _service;
@@ -52,9 +55,9 @@ namespace api_SMI.Controllers
         }
 
         [HttpPost("updateByNc/{idNc}")]
-        public IActionResult UpdateByNc(int idNc, List<CauseNc> entities)
+           public IActionResult UpdateByNc(int idNc, List<CauseNc> entities)
         {
-             var matricule = HttpContext.Session.GetString("matricule");
+               var matricule = User.GetMatricule();
             if (string.IsNullOrEmpty(matricule))
             {
                 return Unauthorized(new { message = "Aucune session active ou matricule absent." });

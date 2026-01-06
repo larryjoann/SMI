@@ -14,6 +14,8 @@ namespace api_SMI.Services
 
         public IEnumerable<Role> GetAll() => _repository.GetAll();
 
+        public IEnumerable<Role> GetAllNotAuto() => _repository.GetAllNotAuto();
+
         public Role? GetById(int id) => _repository.GetById(id);
 
         public void Add(Role role) => _repository.Add(role);

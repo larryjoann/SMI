@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   CRow, CCol,
   CCard, CCardBody, CCardHeader, 
@@ -22,10 +22,12 @@ import { cilArrowLeft ,
   cilX,
   cilPlus,
   cilTask,
-  cilCheckAlt
+  cilCheckAlt,
+  cilCheckCircle
 } from '@coreui/icons'
 import { useParams, useNavigate } from 'react-router-dom'
 import API_URL from '../../../api/API_URL'
+import axiosInstance, { getMatriculeFromJwt } from '../../../api/axiosInstance'
 import { Pop_up } from '../../../components/notification/Pop_up'
 import { useNCDetails } from '../hooks/useNCDetails'
 import QualificationModal from '../components/QualificationModal'
@@ -35,7 +37,6 @@ import VerifierEfficaciteModal from '../components/VerifierEfficaciteModal'
 import { createCommentaire } from '../services/nonConformiteService'
 import { CSpinner } from '@coreui/react'
 
-
 const FicheNC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -43,6 +44,9 @@ const FicheNC = () => {
   const [showAnalyseModal, setShowAnalyseModal] = useState(false)
   const [showActionModal, setShowActionModal] = useState(false)
   const [showVerifyModal, setShowVerifyModal] = useState(false)
+  const [currentMatricule, setCurrentMatricule] = useState(null)
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false)
+  const [closingNc, setClosingNc] = useState(false)
   const [selectedProcessus, setSelectedProcessus] = useState([])
   const [selectedCategorieCause, setSelectedCategorieCause] = useState([])
   const [hoveredFileIndex, setHoveredFileIndex] = useState(null)
@@ -61,7 +65,7 @@ const FicheNC = () => {
       let res
       if (pjId) {
         const downloadUrl = `${apiBase}/PieceJointeNc/download/${pjId}`
-        res = await fetch(downloadUrl, { credentials: 'include' })
+        res = await axiosInstance.get(downloadUrl, { responseType: 'blob' })
       } else {
         let fileUrl = pj.cheminFichier || pj.chemin || pj.url || ''
         if (!fileUrl) return
@@ -69,13 +73,13 @@ const FicheNC = () => {
         if (!/^https?:\/\//i.test(fileUrl) && !fileUrl.startsWith('//')) {
           fileUrl = fileUrl.startsWith('/') ? `${apiBase}${fileUrl}` : `${apiBase}/${fileUrl}`
         }
-        res = await fetch(fileUrl, { credentials: 'include' })
+        res = await axiosInstance.get(fileUrl, { responseType: 'blob' })
       }
-      if (!res.ok) throw new Error(`Erreur téléchargement (${res.status})`)
-      const blob = await res.blob()
+      if (!res || (res.status && res.status >= 400)) throw new Error(`Erreur téléchargement (${res?.status || '??'})`)
+      const blob = res.data
       // try to derive filename from content-disposition header
       let filename = pj.nomFichier || 'download'
-      const cd = res.headers.get('content-disposition')
+      const cd = res.headers && (res.headers['content-disposition'] || res.headers['Content-Disposition'])
       if (cd) {
         const m = cd.match(/filename\*=UTF-8''([^;\n]+)/i) || cd.match(/filename="?([^";\n]+)"?/i)
         if (m && m[1]) {
@@ -105,6 +109,34 @@ const FicheNC = () => {
       setDownloadingIndex(null)
     }
   }
+  // Récupère le collaborateur connecté pour vérifier le matricule
+  useEffect(() => {
+    let mounted = true
+    // Try to get matricule from JWT in session first to avoid extra network call
+    try {
+      const matFromJwt = getMatriculeFromJwt()
+      if (matFromJwt) {
+        if (mounted) setCurrentMatricule(matFromJwt)
+        return () => { mounted = false }
+      }
+    } catch (e) {
+      // ignore and fallback to API
+    }
+
+    const fetchCollaborateur = async () => {
+      try {
+        const res = await axiosInstance.get('/Collaborateur/collaborateur_connecte')
+        if (!mounted) return
+        const mat = res?.data?.matricule || res?.data?.matriculeCollaborateur || res?.data?.matricule || null
+        setCurrentMatricule(mat)
+      } catch (err) {
+        console.warn('Impossible de récupérer le collaborateur connecté', err)
+        if (mounted) setCurrentMatricule(null)
+      }
+    }
+    fetchCollaborateur()
+    return () => { mounted = false }
+  }, [])
   const { data, loading, error, refetch } = useNCDetails(id);
   const [newComment, setNewComment] = useState('')
   const [commentLoading, setCommentLoading] = useState(false)
@@ -130,9 +162,9 @@ const FicheNC = () => {
     console.log('Attempting delete - id:', idToDelete, 'for action', action.id, 'nc', nc.id)
     try {
       const deleteUrl = `${API_URL}/SourceAction/${idToDelete}`
-      const res = await fetch(deleteUrl, { method: 'DELETE', credentials: 'include' })
-      if (!res.ok) {
-        const body = await res.text().catch(() => '')
+      const res = await axiosInstance.delete(deleteUrl)
+      if (!res || (res.status && res.status >= 400)) {
+        const body = (res && res.data) ? JSON.stringify(res.data) : ''
         console.error('Delete failed', res.status, body)
         // minimal feedback for now
         window.alert(`Suppression échouée (${res.status})`)
@@ -182,19 +214,104 @@ const FicheNC = () => {
     }
   }
 
+  // Verify efficacy: call backend to set NC status to 'verified'
+  const verifyEfficacite = async (payload) => {
+    // payload may contain modal form data; the controller needs only the NC id
+    if (!nc || !nc.id) {
+      setDownloadPopType('danger')
+      setDownloadPopMessage('Identifiant de non-conformité manquant')
+      setShowDownloadToast(true)
+      return
+    }
+    try {
+      const url = `${API_URL}/NonConformite/verifier?id=${encodeURIComponent(nc.id)}`
+      await axiosInstance.post(url)
+      setShowVerifyModal(false)
+      setDownloadPopType('success')
+      setDownloadPopMessage('Vérification enregistrée')
+      setShowDownloadToast(true)
+      if (typeof refetch === 'function') await refetch()
+    } catch (err) {
+      console.error('verifyEfficacite error', err)
+      setDownloadPopType('danger')
+      setDownloadPopMessage(err?.message || 'Erreur lors de la vérification')
+      setShowDownloadToast(true)
+    }
+  }
+
+  // Close (clôturer) NC: call backend to set NC status to 'clotured' (idStatusNc = 9)
+  const cloturerNc = async () => {
+    if (!nc || !nc.id) {
+      setDownloadPopType('danger')
+      setDownloadPopMessage('Identifiant de non-conformité manquant')
+      setShowDownloadToast(true)
+      return
+    }
+    try {
+      const url = `${API_URL}/NonConformite/cloture?id=${encodeURIComponent(nc.id)}`
+      await axiosInstance.post(url)
+      setDownloadPopType('success')
+      setDownloadPopMessage('Non-conformité clôturée')
+      setShowDownloadToast(true)
+      if (typeof refetch === 'function') await refetch()
+    } catch (err) {
+      console.error('cloturerNc error', err)
+      setDownloadPopType('danger')
+      setDownloadPopMessage(err?.message || 'Erreur lors de la clôture')
+      setShowDownloadToast(true)
+    }
+  }
+
+  const handleConfirmClose = async () => {
+    // Close the confirmation modal immediately and run the close action
+    setShowCloseConfirm(false)
+    setClosingNc(true)
+    try {
+      await cloturerNc()
+    } catch (err) {
+      // cloturerNc already handles errors and toasts
+      console.error('handleConfirmClose error', err)
+    } finally {
+      setClosingNc(false)
+    }
+  }
+
   if (loading) return <CAlert color="info" className="text-center rounded-pill">Chargement...</CAlert>;
   if (error) return <CAlert color="danger" className="text-center rounded-pill">{error}</CAlert>;
   if (!data) return null;
 
   const { nc, piecesJointes, processusConcerne , causes, commentaires, actions } = data;
+  // Determine whether all corrective actions have 100% progress (latest suivi.avancement === 100)
+  const allActionsComplete = Array.isArray(actions) && actions.length > 0 && actions.every((action) => {
+    const lastSuivi = (Array.isArray(action.suivis) && action.suivis.length > 0)
+      ? action.suivis.reduce((latest, s) => {
+          if (!latest) return s
+          const ds = s.dateSuivi ? new Date(s.dateSuivi) : null
+          const dl = latest.dateSuivi ? new Date(latest.dateSuivi) : null
+          if (!ds) return latest
+          if (!dl) return s
+          return ds > dl ? s : latest
+        }, null)
+      : null
+    const progress = lastSuivi && typeof lastSuivi.avancement === 'number' ? lastSuivi.avancement : 0
+    return progress === 100
+  })
   // Causes may come from top-level `data.causes` or inside `nc.causes` depending on API
 
-  // Format date/heure
+  // Static sample verifications for UI (description + attachment)
+  const sampleVerifications = [
+    {
+      id: 'sv1',
+      result : 'éfficace',
+      descr: 'Vérification initiale réalisée: contrôles documentaires et relevés conforme.',
+      piece: { nomFichier: 'Non(1).odt', cheminFichier: '#' },
+    },
+  ];
+
   const dateFait = nc?.dateTimeFait ? new Date(nc.dateTimeFait) : null;
   const dateStr = dateFait ? dateFait.toLocaleDateString() : '';
   const heureStr = dateFait ? dateFait.toLocaleTimeString() : '';
 
-  // Determine which panel to show on return
   const getDefaultPanel = () => {
     if (nc?.dateTimeDeclare) return 'declaration';
     return 'brouillon';
@@ -207,7 +324,7 @@ const FicheNC = () => {
             <CButton
             color='secondary'
             className="mb-3"
-            onClick={() => navigate('/nc/list', { state: { defaultPanel: getDefaultPanel() } })}
+            onClick={() => { if (window.history.length > 1) navigate(-1); else navigate('/nc/list') }}
             >
             <CIcon icon={cilArrowLeft} className="me-2" />
             Retour
@@ -233,11 +350,21 @@ const FicheNC = () => {
         type={downloadPopType}
         message={downloadPopMessage}
       />
-      {/* Status moved into identification card below */}
-      <CForm >
+
+      {/* Wrapper to scope the sticky comment input to this page (not full screen) */}
+      <div className="fiche-nc-wrapper" style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+      }}>
+        {/* Status moved into identification card below */}
+        <CCard >
+          <CCardBody>
+        <CForm >
         <CRow>
           <CCol xs={12} sm={12} md={6}>
-            <CCard className='mb-4'>
+            <CCard className='mb-3'>
               <CCardHeader className="text-center">
                 <span className="h6">IDENTIFICATION DE LA NON-CONFORMITE</span>
               </CCardHeader>
@@ -273,7 +400,7 @@ const FicheNC = () => {
             </CCard>
           </CCol>
           <CCol xs={12} sm={12} md={6}>
-            <CCard className='mb-4'>
+            <CCard className='mb-3'>
               <CCardHeader className="text-center">
                 <span className="h6">EMETTEUR</span>
               </CCardHeader>
@@ -329,7 +456,7 @@ const FicheNC = () => {
           </CCol>
         </CRow>
 
-        <CCard className='mb-4'>
+        <CCard className='mb-3'>
           <CCardHeader className="text-center">
             <span className="h6">DESCRIPTION</span>
           </CCardHeader>
@@ -398,21 +525,23 @@ const FicheNC = () => {
             </CRow>
           </CCardBody>
         </CCard>
-        {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 2&&(
-        <CCard className='mb-4 '>
+        {nc.idStatusNc != null && nc.statusNc?.idPhaseNc >= 2&&(
+        <CCard className='mb-3 '>
           <CCardHeader className="position-relative text-center">
                 <span className="h6 mb-0 d-block">ANALYSE DES CAUSES </span>
                 <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
-                  <CButton
-                    size="md"
-                    onClick={() => {
-                      const init = (causes || []).map(c => ({ value: c.idCategorieCauseNc, label: c.categorieCauseNc?.nom }))
-                      setSelectedCategorieCause(init)
-                      setShowAnalyseModal(true)
-                    }}
-                  >
-                    <CIcon icon={cilPen} className="text-dark" />
-                  </CButton>
+                  {currentMatricule === '00005' && (
+                    <CButton
+                      size="md"
+                      onClick={() => {
+                        const init = (causes || []).map(c => ({ value: c.idCategorieCauseNc, label: c.categorieCauseNc?.nom }))
+                        setSelectedCategorieCause(init)
+                        setShowAnalyseModal(true)
+                      }}
+                    >
+                      <CIcon icon={cilPen} className="text-dark" />
+                    </CButton>
+                  )}
                 </div>
               </CCardHeader>
           <CCardBody>
@@ -422,8 +551,8 @@ const FicheNC = () => {
                     <div>
                       {causes.map((c) => (
                         <div key={c.id} className="mb-2">     
-                            <span className='h6'>{c.categorieCauseNc.nom} </span>                      
-                          <div>{c.descr}</div>
+                            <span className='h6'>{c.categorieCauseNc.nom} : </span>                      
+                          <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: 8, whiteSpace: 'pre-wrap' }} >{c.descr}</div>
                         </div>
                       ))}
                     </div>
@@ -440,15 +569,17 @@ const FicheNC = () => {
           <CCardHeader className="position-relative text-center">
             <span className="h6 mb-0 d-block">ACTION CORRECTIVES</span>
                 <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
-                  <CButton
-                    size="md"
-                    onClick={() => {
-                      // open action curative modal
-                      setShowActionModal(true)
-                    }}
-                  >
-                    <CIcon icon={cilPlus} className="text-primary" />
-                  </CButton>
+                  {currentMatricule === '00005' && (
+                    <CButton
+                      size="md"
+                      onClick={() => {
+                        // open action curative modal
+                        setShowActionModal(true)
+                      }}
+                    >
+                      <CIcon icon={cilPlus} className="text-primary" />
+                    </CButton>
+                  )}
                 </div>
           </CCardHeader>
           <CCardBody>
@@ -549,6 +680,72 @@ const FicheNC = () => {
         </CCard>
         )}
 
+       {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 3&&(
+        <CCard className='mb-4'>
+          <CCardHeader className="position-relative text-center">
+            <span className="h6 mb-0 d-block">VÉRIFICATION EFFICACITÉ</span>
+            <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
+              {currentMatricule === '00005' && (
+                <CButton size="md" onClick={() => setShowVerifyModal(true)}>
+                  <CIcon icon={cilCheckAlt} className="text-primary" />
+                </CButton>
+              )}
+            </div>
+          </CCardHeader>
+          <CCardBody>
+            <div className="d-flex flex-wrap">
+              {sampleVerifications.map((v, idx) => (
+                <div
+                  key={v.id}
+                  className="verif-card d-flex flex-column p-3 border rounded"
+                  style={{ width: "100%" }}
+                >
+                  <div style={{ fontWeight: 700, marginBottom: 4 }}>Vérification #{idx + 1}</div>
+                  <span className="text-success mb-3">{v.result}</span>
+                  <div style={{ padding: 10, borderRadius: 6, minHeight: 70, whiteSpace: 'pre-wrap', background: '#f8f9fa' }}>{v.descr}</div>
+                  <div className="d-flex justify-content-start align-items-center mt-3">
+                    <div
+                      className="file-card d-flex flex-column align-items-center p-2 m-1 border rounded"
+                      style={{ width: '140px', position: 'relative', background: '#f8f9fa' }}
+                      onMouseEnter={() => setHoveredFileIndex(idx)}
+                      onMouseLeave={() => setHoveredFileIndex(null)}
+                    >
+                      <CIcon icon={cilFile} size="xl" />
+                      <a
+                        href={v.piece.cheminFichier || '#'}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          const pj = { nomFichier: v.piece.nomFichier, cheminFichier: v.piece.cheminFichier }
+                          downloadAttachment(pj, idx)
+                        }}
+                        style={{ marginTop: 6, textDecoration: 'none', color: '#000', fontSize: 12, textAlign: 'center' }}
+                      >
+                        <small className="text-truncate" style={{ maxWidth: '120px', display: 'block' }}>{v.piece.nomFichier}</small>
+                      </a>
+                      <CButton
+                        color="primary"
+                        size="sm"
+                        className="mt-2"
+                        style={{ fontSize: 12 }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          const pj = { nomFichier: v.piece.nomFichier, cheminFichier: v.piece.cheminFichier }
+                          downloadAttachment(pj, idx)
+                        }}
+                      >
+                        {downloadingIndex === idx ? <CSpinner size="sm" /> : 'Télécharger'}
+                      </CButton>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CCardBody>
+        </CCard>
+       )}
         {Array.isArray(commentaires) && commentaires.length > 0 && (
           <CCard className='mb-4'>
             <CCardHeader className="text-center">
@@ -588,67 +785,77 @@ const FicheNC = () => {
           </CCard>
         )}
       </CForm>
-      {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 1 && (nc.statusNc.id === 1 || nc.statusNc.id === 2) &&(
-        <CCol xs={12} className="d-flex justify-content-center">
-          <CButton
-            color='primary'
-            className="mb-3"
-            onClick={() => {
-              const init = (processusConcerne || []).map(p => ({ value: p.processus?.id, label: p.processus?.nom }))
-              setSelectedProcessus(init)
-              setShowQualifModal(true)
-            }}
-          >
-            <CIcon icon={cilStar} className="me-2" />
-            Qualifier la non-conformité
-          </CButton>
-        </CCol>
-      )}
-      {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 2 && (nc.statusNc.id === 5 || nc.statusNc.id === 5) &&(
-        <CCol xs={12} className="d-flex justify-content-center">
-          <CButton
-            color='primary'
-            className="mb-3"
-            onClick={() => {
-            
-                      setShowActionModal(true)
-                    }}
-          >
-            <CIcon icon={cilTask} className="me-2" />
-            Assigner action curative
-          </CButton>
-        </CCol>
-      )}
-      {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 2 && (nc.statusNc.id === 6 || nc.statusNc.id === 6) &&(
-        <CCol xs={12} className="d-flex justify-content-center">
-          <CButton
-            color='primary'
-            className="mb-3"
-            onClick={() => {
-                      setShowVerifyModal(true)
-                    }}
-          >
-            <CIcon icon={cilCheckAlt} className="me-2" />
-            Vérifier efficaciter
-          </CButton>
-        </CCol>
-      )}
-      {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 1 && nc.statusNc.id === 3 &&(
-        <CCol xs={12} className="d-flex justify-content-center">
-          <CButton
-            color='primary'
-            className="mb-3"
-            onClick={() => {
-              const init = (causes || []).map(c => ({ value: c.categorieCauseNc.id, label: c.categorieCauseNc?.nom }))
-              setSelectedCategorieCause(init)
-              setShowAnalyseModal(true)
-            }}
-          >
-            <CIcon icon={cilMagnifyingGlass} className="me-2" />
-            Analyser les causes
-          </CButton>
-        </CCol>
-      )}
+          </CCardBody>
+      </CCard>
+      {/* Sticky action buttons bar placed slightly above the comment input (keeps existing logic) */}
+      <div style={{ marginTop: 'auto', position: 'sticky', bottom: 3, display: 'flex', justifyContent: 'center', zIndex: 1030, background: '#fff' }}>
+        <div style={{ width: '100%', padding: '0px', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: 8 }}>
+            {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 1 && (nc.statusNc.id === 1 || nc.statusNc.id === 2) && currentMatricule === '00005' && (
+              <CButton
+                color='primary'
+                style={{ boxShadow: '0 6px 14px rgba(0,0,0,0.12)'}}
+                onClick={() => {
+                  const init = (processusConcerne || []).map(p => ({ value: p.processus?.id, label: p.processus?.nom }))
+                  setSelectedProcessus(init)
+                  setShowQualifModal(true)
+                }}
+              >
+                <CIcon icon={cilStar} className="me-2" />
+                Qualifier la non-conformité
+              </CButton>
+            )}
+
+            {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 1 && nc.statusNc.id === 3 && currentMatricule === '00005' && (
+              <CButton
+                color='primary'
+                style={{ boxShadow: '0 6px 14px rgba(0,0,0,0.12)' }}
+                onClick={() => {
+                  const init = (causes || []).map(c => ({ value: c.categorieCauseNc.id, label: c.categorieCauseNc?.nom }))
+                  setSelectedCategorieCause(init)
+                  setShowAnalyseModal(true)
+                }}
+              >
+                <CIcon icon={cilMagnifyingGlass} className="me-2" />
+                Analyser les causes
+              </CButton>
+            )}
+
+            {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 2 && (nc.statusNc.id === 5) && currentMatricule === '00005' && (
+              <CButton
+                color='primary'
+                style={{ boxShadow: '0 6px 14px rgba(0,0,0,0.12)'}}
+                onClick={() => setShowActionModal(true)}
+              >
+                <CIcon icon={cilTask} className="me-2" />
+                Assigner action corrective
+              </CButton>
+            )}
+
+            {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 2 && (nc.statusNc.id === 6) && allActionsComplete && currentMatricule === '00005' && (
+              <CButton
+                color='primary'
+                style={{ boxShadow: '0 6px 14px rgba(0,0,0,0.12)' }}
+                onClick={() => setShowVerifyModal(true)}
+              >
+                <CIcon icon={cilCheckAlt} className="me-2" />
+                Vérifier l'efficacité
+              </CButton>
+            )}
+
+            {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 3 && (nc.statusNc.id === 8) && allActionsComplete && currentMatricule === '00005' && (
+              <CButton
+                color='primary'
+                style={{ boxShadow: '0 6px 14px rgba(0,0,0,0.12)' }}
+                onClick={() => setShowCloseConfirm(true)}
+              >
+                <CIcon icon={cilCheckCircle} className="me-2" />
+                Cloturer la non-conformité
+              </CButton>
+            )}
+          </div>
+        </div>
+      </div>
       <QualificationModal
         visible={showQualifModal}
         onClose={() => setShowQualifModal(false)}
@@ -683,39 +890,65 @@ const FicheNC = () => {
       <VerifierEfficaciteModal
         visible={showVerifyModal}
         onClose={() => setShowVerifyModal(false)}
-        onSubmitSuccess={(payload) => {
-          // Demo: just log and refresh details
-          console.log('VerifierEfficacite submitted (demo):', payload)
-          if (typeof refetch === 'function') refetch()
-        }}
+        onSubmitSuccess={verifyEfficacite}
       />
+      <CModal visible={showCloseConfirm} onClose={() => setShowCloseConfirm(false)} alignment="center">
+        <CModalHeader>
+          <CModalTitle>Confirmer la clôture</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+          Voulez-vous vraiment clôturer cette non-conformité ?
+        </CModalBody>
+        <CModalFooter>
+          <CButton color="secondary" onClick={() => setShowCloseConfirm(false)}>Annuler</CButton>
+          <CButton color="primary" onClick={handleConfirmClose} disabled={closingNc}>
+            {closingNc ? <CSpinner size="sm" /> : 'Confirmer'}
+          </CButton>
+        </CModalFooter>
+      </CModal>
       {commentError && <CAlert color="danger" className="py-1">{commentError}</CAlert>}
       {commentSuccess && <CAlert color="success" className="py-1">Commentaire ajouté</CAlert>}
-      <CInputGroup className="mb-3 rounded-pill overflow-hidden" style={{ border: '1px solid #c7c5c5ff' }}>
-        <CFormInput
-          placeholder="Ajouter un commentaire..."
-          aria-label="Ajouter un commentaire"
-          className="border-0"
-          style={{ boxShadow: 'none' }}
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          onKeyDown={async (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault()
-              await handleSubmitComment()
-            }
-          }}
-        />
-        <CButton
-          type="button"
-          className="rounded-pill"
-          color='primary'
-          onClick={handleSubmitComment}
-          disabled={commentLoading || !newComment.trim()}
-        >
-          {commentLoading ? <CSpinner size="sm" /> : <CIcon icon={cilSend} />}
-        </CButton>
-      </CInputGroup>
+
+      {/* Sticky input scoped to fiche page (not full-screen) */}
+      <div style={{ marginTop: 'auto', position: 'sticky', bottom: 3, display: 'flex', justifyContent: 'center', zIndex: 1030 }}>
+        <div style={{ width: '75%', padding: '0px 8px' }}>
+          <CInputGroup
+            className="rounded-pill overflow-hidden"
+            style={{
+              border: '1px solid #c7c5c5ff',
+              boxShadow: '0 6px 14px rgba(0,0,0,0.12)',
+              background: '#fff',
+            }}
+          >
+            <CFormInput
+              placeholder="Ajouter un commentaire..."
+              aria-label="Ajouter un commentaire"
+              className="border-0"
+              style={{ boxShadow: 'none' }}
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              onKeyDown={async (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  await handleSubmitComment()
+                }
+              }}
+            />
+            <CButton
+              type="button"
+              className="rounded-pill"
+              color='primary'
+              style={{ boxShadow: '0 6px 14px rgba(0,0,0,0.12)', borderRadius: 20 }}
+              onClick={handleSubmitComment}
+              disabled={commentLoading || !newComment.trim()}
+            >
+              {commentLoading ? <CSpinner size="sm" /> : <CIcon icon={cilSend} />}
+            </CButton>
+          </CInputGroup>
+        </div>
+      </div>
+
+      </div>
     </>
   )
 }

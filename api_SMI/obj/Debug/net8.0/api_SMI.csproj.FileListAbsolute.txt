@@ -99,6 +99,14 @@ C:\Users\26132\Documents\api_SMI\bin\Debug\net8.0\System.Formats.Asn1.dll
 C:\Users\26132\Documents\api_SMI\bin\Debug\net8.0\System.IO.Pipelines.dll
 C:\Users\26132\Documents\api_SMI\bin\Debug\net8.0\System.Text.Encodings.Web.dll
 C:\Users\26132\Documents\api_SMI\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
+C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.csproj.AssemblyReference.cache
+C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.AssemblyInfoInputs.cache
+C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.AssemblyInfo.cs
+C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.csproj.CoreCompileInputs.cache
+C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.sourcelink.json
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\appsettings.json
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\api_SMI.exe
@@ -122,6 +130,7 @@ C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Microsoft.Extensions.Cachi
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Microsoft.Extensions.Configuration.Abstractions.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Microsoft.Extensions.DependencyModel.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Microsoft.Extensions.Logging.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Microsoft.Extensions.Options.dll
@@ -136,6 +145,7 @@ C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Microsoft.IdentityModel.Pr
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Microsoft.OpenApi.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Microsoft.SqlServer.Server.dll
+C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Scrutor.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
@@ -180,14 +190,6 @@ C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\runtimes\win\lib\net8.0\Sy
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.DirectoryServices.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll
 C:\Users\26132\Documents\SMI\api_SMI\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
-C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.csproj.AssemblyReference.cache
-C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.AssemblyInfoInputs.cache
-C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.AssemblyInfo.cs
-C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.csproj.CoreCompileInputs.cache
-C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.MvcApplicationPartsAssemblyInfo.cache
-C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\api_SMI.sourcelink.json
 C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\26132\Documents\SMI\api_SMI\obj\Debug\net8.0\staticwebassets\msbuild.api_SMI.Microsoft.AspNetCore.StaticWebAssets.props

@@ -31,9 +31,9 @@ const VerifierEfficaciteModal = ({ visible, onClose, onSubmitSuccess }) => {
   }
 
   return (
-    <CModal alignment="center" visible={!!visible} onClose={onClose}>
+    <CModal alignment="center" size='lg' visible={!!visible} onClose={onClose}>
       <CModalHeader>
-        <CModalTitle>Vérifier l'efficacité</CModalTitle>
+        <CModalTitle>Vérifier l'efficacité :</CModalTitle>
       </CModalHeader>
       <CModalBody>
         {error && <CAlert color="danger">{error}</CAlert>}
@@ -46,13 +46,13 @@ const VerifierEfficaciteModal = ({ visible, onClose, onSubmitSuccess }) => {
           />
         </div>
         <div>
-          <label className="form-label">Pièces jointes (démo)</label>
+          <label className="form-label">Pièces jointes :</label>
           <CFormInput type="file" multiple onChange={handleFileChange} />
         </div>
       </CModalBody>
-      <CModalFooter>
-        <CButton color="secondary" onClick={onClose}>Annuler</CButton>
-        <CButton color="primary" onClick={handleSubmit}>Enregistrer (demo)</CButton>
+      <CModalFooter className="d-flex justify-content-center gap-3">
+        <CButton color="danger" onClick={onClose}>Non efficace</CButton>
+        <CButton color="primary" onClick={handleSubmit}>Efficace</CButton>
       </CModalFooter>
     </CModal>
   )

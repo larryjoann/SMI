@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
@@ -27,6 +27,8 @@ import {
 
 import { AppBreadcrumb } from './index'
 import { AppHeaderDropdown } from './header/index'
+import API_URL from '../api/API_URL'
+import axiosInstance from '../api/axiosInstance'
 
 const AppHeader = () => {
   const headerRef = useRef()
@@ -34,6 +36,21 @@ const AppHeader = () => {
 
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    const fetchUnread = async () => {
+      try {
+        const res = await axiosInstance.get('/Notification/unread-count')
+        const json = res && res.data ? res.data : null
+        if (json && typeof json.unread === 'number') setUnreadCount(json.unread)
+      } catch (err) {
+        // ignore silently
+        console.error('Failed to fetch unread notifications', err)
+      }
+    }
+    fetchUnread()
+  }, [])
 
   useEffect(() => {
     document.addEventListener('scroll', () => {
@@ -98,12 +115,14 @@ const AppHeader = () => {
             </CDropdownMenu>
           </CDropdown>
           <CNavItem>
-            <CNavLink href="#/notifications">
+            <CNavLink href="/notifications">
               <div className="position-relative">
                 <CIcon icon={cilBell} size="lg" />
-                <CBadge color="danger" position="top-end" shape="rounded-pill">
-                  6 <span className="visually-hidden">unread messages</span>
-                </CBadge>
+                {unreadCount > 0 && (
+                  <CBadge color="danger" position="top-end" shape="rounded-pill">
+                    {unreadCount} <span className="visually-hidden">unread messages</span>
+                  </CBadge>
+                )}
               </div>
             </CNavLink>
           </CNavItem>

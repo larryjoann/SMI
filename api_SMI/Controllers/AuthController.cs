@@ -28,25 +28,7 @@ namespace api_SMI.Controllers
                 _loginService.Validate(loginModel);
                 if (_loginService.IsValid(loginModel))
                 {
-                    // creation session avec le matricule
-                    HttpContext.Session.SetString("matricule", loginModel.matricule ?? "");
-                    var matriculeSession = HttpContext.Session.GetString("matricule");
-
-                    Console.WriteLine($"Matricule enregistré en session login: {matriculeSession}");
-                    // Diagnostic: log session id and request cookies to help debug missing session on subsequent requests
-                    try
-                    {
-                        Console.WriteLine($"Session.Id after login: {HttpContext.Session.Id}");
-                        foreach (var c in HttpContext.Request.Cookies)
-                        {
-                            Console.WriteLine($"Request cookie after login: {c.Key} = {c.Value}");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Erreur lors du logging des cookies/session après login: " + ex.Message);
-                    }
-
+                        // authentification basée sur JWT; pas de session côté serveur
                     // génération du JWT
                     var jwt = _loginService.GenerateJwt(loginModel.matricule ?? "");
                     return Ok(new { message = "Authentification réussie.", token = jwt });
@@ -65,17 +47,8 @@ namespace api_SMI.Controllers
         [HttpGet("logout")]
         public IActionResult Logout()
         {
-            try
-            {
-                HttpContext.Session.Clear(); // Détruit toute la session
-                 Console.WriteLine($"Session détruite, utilisateur déconnecté.");
-                return Ok(new { message = "Déconnexion réussie." });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Erreur lors de la déconnexion : " + ex.Message);
-                return BadRequest(new { message = ex.Message });
-            }
+            // Stateless JWT: logout is handled client-side by deleting the token; server-side revocation not implemented here.
+            return Ok(new { message = "Déconnexion : supprimer le token côté client." });
         }
     }
 }

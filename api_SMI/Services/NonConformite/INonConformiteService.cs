@@ -18,6 +18,7 @@ namespace api_SMI.Services
         List<NonConformite> GetArchived(string matricule_emetteur);
         List<NonConformite> GetAllByMatricule(string matricule_emetteur);
         void Archiver(int id);
+        void Supprimer(int id);
         void Restorer(int id);
         void Qualifier(NonConformite nonConformite, int idStatusNc);
     }

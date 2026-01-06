@@ -2,17 +2,13 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   CRow, CCol, CButton,
-  CFormInput,
-  CCard, CCardBody, CCardHeader, CBadge,
-  CPagination, CPaginationItem,
+  CCard, CCardBody, 
+
 } from '@coreui/react'
-import FilterDropdown from '../../non_conformite/components/filter/FilterDropdown'
-import DateFilterDropdown from '../../non_conformite/components/filter/DateFilterDropdown'
-import BadgeFilterDropdownWithPhase from '../../non_conformite/components/filter/BadgeFilterDropdownWithPhase'
+
 import { useProcessOptions, useTypeOptions, useLieuOptions, useStatusOptions } from '../../non_conformite/components/filter/hooks/useFilterOptions'
 import CIcon from '@coreui/icons-react'
-import { cilSend, cilOptions, cilPen, cilStorage } from '@coreui/icons'
-import { CDropdown, CDropdownToggle, CDropdownMenu, CDropdownItem, CDropdownDivider } from '@coreui/react'
+import {  cilStorage } from '@coreui/icons'
 import PAListPanel from '../components/panel/PAListPanel'
 import * as paService from '../services/paService'
 
@@ -125,9 +121,19 @@ const ListePA = () => {
       <CRow>
         <CCol xs={3}> </CCol>
         <CCol xs={6}>
-          <h3 className="text-center">Liste des Plans d'action</h3>
+          <h3 className="text-center">Liste des plans d'action</h3>
         </CCol>
         <CCol xs={3} className="d-flex justify-content-end">
+          <CButton
+                color='secondary'
+                key='1'
+                shape=""
+                className="mb-3"
+                href='/pa/list/archive'
+            >
+                <CIcon icon={cilStorage} className="me-2" />
+                Archives
+            </CButton>
         </CCol>
       </CRow>
       <CCard className='mb-4'>
@@ -135,14 +141,6 @@ const ListePA = () => {
           <PAListPanel />
         </CCardBody>
       </CCard>
-
-      <CPagination size='sm' align="end" className='mt-3'>
-        <CPaginationItem aria-label="Previous" disabled={page === 1} onClick={() => setPage(Math.max(1, page - 1))}>&laquo;</CPaginationItem>
-        {[...Array(pageCount)].map((_, idx) => (
-          <CPaginationItem key={idx + 1} active={page === idx + 1} onClick={() => setPage(idx + 1)}>{idx + 1}</CPaginationItem>
-        ))}
-        <CPaginationItem aria-label="Next" disabled={page === pageCount || pageCount === 0} onClick={() => setPage(Math.min(pageCount, page + 1))}>&raquo;</CPaginationItem>
-      </CPagination>
     </>
   )
 }

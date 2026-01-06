@@ -1,71 +1,78 @@
 import API_URL from '../../../api/API_URL'
+import axiosInstance from '../../../api/axiosInstance'
 
 const apiBase = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL
 
 export async function fetchActions() {
-  const res = await fetch(`${apiBase}/Action`, { credentials: 'include' })
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '')
-    const err = new Error(`Failed to fetch actions: ${res.status} ${txt}`)
-    err.status = res.status
+  try {
+    const res = await axiosInstance.get('/Action')
+    const json = res.data
+    return Array.isArray(json) ? json : (json?.data || json?.items || [])
+  } catch (error) {
+    const status = error?.response?.status || 500
+    const txt = error?.response?.data ? (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) : (error.message || '')
+    const err = new Error(`Failed to fetch actions: ${status} ${txt}`)
+    err.status = status
     throw err
   }
-  const json = await res.json().catch(() => null)
-  return Array.isArray(json) ? json : (json?.data || json?.items || [])
 }
 
 export async function fetchStatuses() {
-  const res = await fetch(`${apiBase}/StatusAction`, { credentials: 'include' })
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '')
-    const err = new Error(`Failed to fetch statuses: ${res.status} ${txt}`)
-    err.status = res.status
+  try {
+    const res = await axiosInstance.get('/StatusAction')
+    const json = res.data
+    return Array.isArray(json) ? json : (json?.data || json?.items || [])
+  } catch (error) {
+    const status = error?.response?.status || 500
+    const txt = error?.response?.data ? (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) : (error.message || '')
+    const err = new Error(`Failed to fetch statuses: ${status} ${txt}`)
+    err.status = status
     throw err
   }
-  const json = await res.json().catch(() => null)
-  return Array.isArray(json) ? json : (json?.data || json?.items || [])
 }
 
 export async function updateActionStatus(actionId, statusId) {
-  const res = await fetch(`${apiBase}/Action/${actionId}/status/${statusId}`, {
-    method: 'PATCH',
-    credentials: 'include',
-  })
-  if (!res.ok && res.status !== 204) {
-    const txt = await res.text().catch(() => '')
-    const err = new Error(`Failed to update action status: ${res.status} ${txt}`)
-    err.status = res.status
+  try {
+    const res = await axiosInstance.patch(`/Action/${actionId}/status/${statusId}`)
+    return res.status >= 200 && res.status < 300
+  } catch (error) {
+    const status = error?.response?.status || 500
+    const txt = error?.response?.data ? (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) : (error.message || '')
+    const err = new Error(`Failed to update action status: ${status} ${txt}`)
+    err.status = status
     throw err
   }
-  return true
 }
 
 export async function getActionById(id) {
   if (!id) throw new Error('id is required')
   const base = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL
   const url = `${base}/Action/${id}`
-  const res = await fetch(url, { credentials: 'include' })
-  if (!res.ok) {
-    const text = await res.text().catch(() => '')
-    const err = new Error(`Failed to fetch action (${res.status})`)
-    err.status = res.status
-    err.body = text
+  try {
+    const res = await axiosInstance.get(`/Action/${id}`)
+    return res.data
+  } catch (error) {
+    const status = error?.response?.status || 500
+    const txt = error?.response?.data ? (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) : (error.message || '')
+    const err = new Error(`Failed to fetch action (${status})`)
+    err.status = status
+    err.body = txt
     throw err
   }
-  const json = await res.json().catch(() => null)
-  return json
 }
 
 export default { getActionById }
 
 export async function deleteAction(id) {
   if (!id) throw new Error('id is required')
-  const res = await fetch(`${apiBase}/Action/${id}`, { method: 'DELETE', credentials: 'include' })
-  if (!res.ok && res.status !== 204) {
-    const txt = await res.text().catch(() => '')
-    const err = new Error(`Failed to delete action: ${res.status} ${txt}`)
-    err.status = res.status
+  try {
+    const res = await axiosInstance.delete(`/Action/${id}`)
+    return res.status >= 200 && res.status < 300
+  } catch (error) {
+    const status = error?.response?.status || 500
+    const txt = error?.response?.data ? (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) : (error.message || '')
+    const err = new Error(`Failed to delete action: ${status} ${txt}`)
+    err.status = status
     throw err
   }
-  return true
 }
