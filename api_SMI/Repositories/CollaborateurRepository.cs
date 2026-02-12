@@ -1,6 +1,7 @@
 using api_SMI.Data;
 using api_SMI.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace api_SMI.Repositories
 {
@@ -14,7 +15,7 @@ namespace api_SMI.Repositories
         }
 
         public List<Collaborateur> GetAll()
-            => _context.Set<Collaborateur>().ToList();
+            => _context.Set<Collaborateur>().Where(c => c.Etat == 1).ToList();
 
         public Collaborateur? GetByMatricule(string matricule)
         {

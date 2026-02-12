@@ -14,6 +14,7 @@ const ProcessusCard = ({
   onEdit,
   textBgColor,
   onClick,
+  showResponsableName,
 }) => (
   <CCard
     className="hover-card"
@@ -61,9 +62,11 @@ const ProcessusCard = ({
       <div style={{ whiteSpace: 'pre-line' }}>
         {Array.isArray(responsable)
           ? responsable.map((r, i) => (
-              <div className='mb-3' key={i}>{r}</div>
+              <div className='mb-3' key={i}>
+                {typeof r === 'object' ? (showResponsableName ? r.name : r.poste) : r}
+              </div>
             ))
-          : <div className='mb-3'>{responsable}</div>
+          : <div className='mb-3'>{typeof responsable === 'object' ? (showResponsableName ? responsable.name : responsable.poste) : responsable}</div>
         }
       </div>
       <a>{collaborateur}</a>

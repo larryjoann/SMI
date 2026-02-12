@@ -129,7 +129,7 @@ const ListePA = () => {
                 key='1'
                 shape=""
                 className="mb-3"
-                href='/pa/list/archive'
+                href='#/pa/list/archive'
             >
                 <CIcon icon={cilStorage} className="me-2" />
                 Archives

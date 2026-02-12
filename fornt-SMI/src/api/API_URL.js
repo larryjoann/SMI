@@ -1,3 +1,4 @@
 //const API_URL = 'https://smi.corp.ravinala:4433/api'
+//const API_URL = 'http://10.0.180.37:8091/api'
 const API_URL = 'http://localhost:5071/api'
 export default API_URL

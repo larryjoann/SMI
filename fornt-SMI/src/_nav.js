@@ -8,15 +8,16 @@ import {
   cilSettings,
   cilClipboard,
   cilChart,
+  cilHome
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
 const _nav = [
   {
     component: CNavItem,
-    name: 'Tableau de bord',
+    name: 'Accueil',
     to: '/#',
-    icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilHome} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,

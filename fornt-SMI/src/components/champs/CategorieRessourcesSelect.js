@@ -7,7 +7,7 @@ const CategorieRessourcesSelect = ({ allowEmpty = true, emptyLabel = 'Sélection
 
   useEffect(() => {
     axiosInstance.get('/CategorieRessources')
-      .then(res => setCats(Array.isArray(res.data) ? res.data : []))
+      .then(res => setCats(res.data || []))
       .catch(() => setCats([]))
   }, [])
 
@@ -15,7 +15,7 @@ const CategorieRessourcesSelect = ({ allowEmpty = true, emptyLabel = 'Sélection
     <CFormSelect {...props}>
       {allowEmpty && <option value="">{emptyLabel}</option>}
       {cats.map(c => (
-        <option key={c.id} value={c.nom}>{c.nom}</option>
+        <option key={c.id} value={c.id}>{c.nom}</option>
       ))}
     </CFormSelect>
   )

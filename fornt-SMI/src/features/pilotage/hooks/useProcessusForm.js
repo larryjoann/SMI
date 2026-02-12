@@ -22,19 +22,7 @@ export function useProcessusForm(id, reset, setError, navigate) {
 
         if (id) {
           const data = await getProcessusById(id)
-          const piloteOptions = Array.isArray(data.pilotes)
-            ? data.pilotes.map(pi => ({
-                value: pi.collaborateur?.matricule,
-                label: `${pi.collaborateur?.nomComplet} (${pi.collaborateur?.departement})`
-              }))
-            : []
-          const copiloteOptions = Array.isArray(data.copilotes)
-            ? data.copilotes.map(co => ({
-                value: co.collaborateur?.matricule,
-                label: `${co.collaborateur?.nomComplet} (${co.collaborateur?.departement})`
-              }))
-            : []
-
+          
           const rpList = Array.isArray(data.responsablesProcessus) ? data.responsablesProcessus : []
           const responsablesMetaArray = baseMeta.map(b => ({
             ...b,
@@ -49,8 +37,7 @@ export function useProcessusForm(id, reset, setError, navigate) {
             nom: data.nom || '',
             sigle: data.sigle || '',
             idCategorieProcessus: data.idCategorieProcessus || '',
-            matriculePilote: piloteOptions,
-            matriculeCopilote: copiloteOptions,
+
             // add dynamic responsables fields so form can render them if present
             ...responsablesMetaArray.reduce((acc, r) => ({ ...acc, [r.fieldName]: r.options }), {}),
             finalite: data.finalite || '',
@@ -58,7 +45,7 @@ export function useProcessusForm(id, reset, setError, navigate) {
             status : data.status,
             // initialize new arrays
             intercations: data.intercations || data.interactions || [],
-            ressourcesProcessus: Array.isArray(data.ressourcesProcessus) ? data.ressourcesProcessus.map(r => ({ categorieRessources_nom: r.categorieRessources?.nom || '', descr: r.descr || '' })) : [],
+            ressourcesProcessus: Array.isArray(data.ressourcesProcessus) ? data.ressourcesProcessus.map(r => ({ idCategorieRessources: r.idCategorieRessources ?? r.categorieRessources?.id ?? '', descr: r.descr || '' })) : [],
             partieInteresseAttentes: data.partieInteresseAttentes || [],
             activites: data.activites || [],
           })
@@ -69,8 +56,7 @@ export function useProcessusForm(id, reset, setError, navigate) {
             nom: '',
             sigle: '',
             idCategorieProcessus: '',
-            matriculePilote: '',
-            matriculeCopilote: '',
+  
             // create empty arrays for each dynamic responsable field
             ...baseMeta.reduce((acc, r) => ({ ...acc, [r.fieldName]: [] }), {}),
             finalite: '',
@@ -96,13 +82,6 @@ export function useProcessusForm(id, reset, setError, navigate) {
     setShowToast(false)
     const payload = {
       ...data,
-      // Keep backwards compatible pilotes / copilotes
-      pilotes: Array.isArray(data.matriculePilote)
-        ? data.matriculePilote.map(opt => ({ matriculeCollaborateur: opt.value }))
-        : [],
-      copilotes: Array.isArray(data.matriculeCopilote)
-        ? data.matriculeCopilote.map(opt => ({ matriculeCollaborateur: opt.value }))
-        : [],
       // Build dynamic responsablesProcessus from dynamic fields
       responsablesProcessus: Array.isArray(responsablesMeta) && responsablesMeta.length > 0
         ? responsablesMeta.flatMap(r => {
@@ -114,12 +93,13 @@ export function useProcessusForm(id, reset, setError, navigate) {
         : undefined,
       // New arrays transformation
       intercations: Array.isArray(data.intercations) ? data.intercations.map(it => ({ descr: it.descr || '', idProcessusInteragi: it.idProcessusInteragi ? Number(it.idProcessusInteragi) : undefined })) : [],
-      ressourcesProcessus: Array.isArray(data.ressourcesProcessus) ? data.ressourcesProcessus.map(r => ({ descr: r.descr || '', idCategorieRessources: r.idCategorieRessources ? Number(r.idCategorieRessources) : undefined, categorieRessources: r.categorieRessources_nom ? { nom: r.categorieRessources_nom } : undefined })) : [],
+      ressourcesProcessus: Array.isArray(data.ressourcesProcessus) ? data.ressourcesProcessus.map(r => {
+        const rawId = r.idCategorieRessources ?? r.categorieRessources?.id ?? (r.categorieRessources_nom ? Number(r.categorieRessources_nom) : undefined)
+        return { descr: r.descr || '', idCategorieRessources: rawId !== undefined && rawId !== '' ? Number(rawId) : undefined }
+      }) : [],
       partieInteresseAttentes: Array.isArray(data.partieInteresseAttentes) ? data.partieInteresseAttentes.map(p => ({ partieInteresse: p.partieInteresse || '', groupe: p.groupe ? Number(p.groupe) : undefined, attente: p.attente || '' })) : [],
       activites: Array.isArray(data.activites) ? data.activites.map(a => ({ processusFournisseur: a.processusFournisseur || '', elementEntrante: a.elementEntrante || '', processusClient: a.processusClient || '', elementSortante: a.elementSortante || '', descr: a.descr || '' })) : [],
       // remove form-only fields
-      matriculePilote: undefined,
-      matriculeCopilote: undefined,
       ...responsablesMeta.reduce((acc, r) => ({ ...acc, [r.fieldName]: undefined }), {}),
       id: id ? id : undefined,
     }
@@ -133,6 +113,7 @@ export function useProcessusForm(id, reset, setError, navigate) {
         setShowToast(true)
       } else {
         // Create and navigate to the created processus fiche when possible
+        console.log('Payload processus (création):', payload)
         const created = await createProcessus(payload)
         setPopType('success')
         setPopMessage('Valeur insérée avec succès')

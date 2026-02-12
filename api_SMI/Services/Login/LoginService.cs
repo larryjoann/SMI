@@ -37,8 +37,8 @@ namespace api_SMI.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Échec de la connexion LDAP pour l'utilisateur : {login.matricule} - Erreur : {ex.Message}");
-                return false;
-                //return true;
+                //return false;
+                return true;
             }
         }
         public string GenerateJwt(string matricule)

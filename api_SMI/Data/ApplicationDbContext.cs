@@ -13,7 +13,6 @@ namespace api_SMI.Data
         public DbSet<Collaborateur> Collaborateurs { get; set; }
         public DbSet<CategorieProcessus> CategorieProcessus { get; set; }
         public DbSet<Processus> Processus { get; set; }
-        public DbSet<CategoriePermission> CategoriePermission { get; set; }
         public DbSet<Permission> Permission { get; set; }
         public DbSet<Role> Role { get; set; }
         public DbSet<RolePermission> RolePermission { get; set; }
@@ -52,7 +51,16 @@ namespace api_SMI.Data
         public DbSet<RessourceProcessus> RessourceProcessus { get; set; }
         public DbSet<PartieInteresseAttente> PartieInteresseAttentes { get; set; }
         public DbSet<Activite> Activites { get; set; }
-    
+
+        // Indicateurs
+        public DbSet<ObjectifStrategique> ObjectifStrategiques { get; set; }
+        public DbSet<Objectif> Objectifs { get; set; }
+        public DbSet<UniteMesure> UnitesMesure { get; set; }
+        public DbSet<FrequenceMesure> FrequencesMesure { get; set; }
+        public DbSet<Indicateur> Indicateurs { get; set; }
+        public DbSet<CibleIndicateur> CiblesIndicateur { get; set; }
+        public DbSet<MesureIndicateur> MesuresIndicateur { get; set; }
+        public DbSet<ValiditeIndicateur> ValiditesIndicateur { get; set; }
 
 
     

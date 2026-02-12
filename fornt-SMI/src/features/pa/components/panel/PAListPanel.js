@@ -150,7 +150,7 @@ const PAListPanel = ({ onReload } = {}) => {
           className="mb-2 card-list-hover"
           key={item.id || item.id_pa || Math.random()}
           style={{ cursor: 'pointer', opacity: 1 }}
-          onClick={() => { if (item.id || item.id_pa) window.location = `/pa/list/fiche/${item.id || item.id_pa}` }}
+          onClick={() => { if (item.id || item.id_pa) window.location = `#/pa/list/fiche/${item.id || item.id_pa}` }}
         >
           <CCardBody>
             <CRow>

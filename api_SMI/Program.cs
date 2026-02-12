@@ -67,8 +67,6 @@ builder.Services.AddScoped<CategorieProcessusRepository>();
 builder.Services.AddScoped<CategorieProcessusService>();
 builder.Services.AddScoped<ProcessusRepository>();
 builder.Services.AddScoped<ProcessusService>();
-builder.Services.AddScoped<CategoriePermissionRepository>();
-builder.Services.AddScoped<CategoriePermissionService>();
 builder.Services.AddScoped<PermissionRepository>();
 builder.Services.AddScoped<PermissionService>();
 builder.Services.AddScoped<RoleRepository>();
@@ -139,6 +137,26 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IntercationRepository>();
 builder.Services.AddScoped<IIntercationService, IntercationService>();
 
+// Indicateurs (repositories & services)
+builder.Services.AddScoped<IndicateurRepository>();
+builder.Services.AddScoped<IIndicateurService, IndicateurService>();
+builder.Services.AddScoped<CibleIndicateurRepository>();
+builder.Services.AddScoped<ICibleIndicateurService, CibleIndicateurService>();
+builder.Services.AddScoped<MesureIndicateurRepository>();
+builder.Services.AddScoped<IMesureIndicateurService, MesureIndicateurService>();
+
+// Supporting repositories & services for indicateurs
+builder.Services.AddScoped<ObjectifStrategiqueRepository>();
+builder.Services.AddScoped<IObjectifStrategiqueService, ObjectifStrategiqueService>();
+builder.Services.AddScoped<ObjectifRepository>();
+builder.Services.AddScoped<IObjectifService, ObjectifService>();
+builder.Services.AddScoped<UniteMesureRepository>();
+builder.Services.AddScoped<IUniteMesureService, UniteMesureService>();
+builder.Services.AddScoped<FrequenceMesureRepository>();
+builder.Services.AddScoped<IFrequenceMesureService, FrequenceMesureService>();
+builder.Services.AddScoped<ValiditeIndicateurRepository>();
+builder.Services.AddScoped<IValiditeIndicateurService, ValiditeIndicateurService>();
+
 builder.Services.AddScoped<CategorieRessourcesRepository>();
 builder.Services.AddScoped<ICategorieRessourcesService, CategorieRessourcesService>();
 
@@ -150,6 +168,14 @@ builder.Services.AddScoped<IPartieInteresseAttenteService, PartieInteresseAttent
 
 builder.Services.AddScoped<ActiviteRepository>();
 builder.Services.AddScoped<IActiviteService, ActiviteService>();
+
+// Entite repository & service
+builder.Services.AddScoped<EntiteRepository>();
+builder.Services.AddScoped<IEntiteService, EntiteService>();
+
+// Operation repository & service
+builder.Services.AddScoped<OperationRepository>();
+builder.Services.AddScoped<IOperationService, OperationService>();
 
 var app = builder.Build();
 

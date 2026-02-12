@@ -115,7 +115,7 @@ const AppHeader = () => {
             </CDropdownMenu>
           </CDropdown>
           <CNavItem>
-            <CNavLink href="/notifications">
+            <CNavLink href="#/notifications">
               <div className="position-relative">
                 <CIcon icon={cilBell} size="lg" />
                 {unreadCount > 0 && (

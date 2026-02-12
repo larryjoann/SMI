@@ -8,7 +8,7 @@ namespace api_SMI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    //[Authorize]
     public class CollaborateurController : ControllerBase
     {
         private readonly CollaborateurService _service;

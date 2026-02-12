@@ -3,7 +3,7 @@ import {
   CCol,
   CRow,
   CCard, CCardBody, CCardHeader, 
-  CForm, CFormInput, CFormSelect, CButton,  
+  CForm, CFormInput, CFormSelect, CFormLabel, CButton,  
   CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle
 } from '@coreui/react'
 import { useNavigate } from 'react-router-dom'
@@ -36,6 +36,8 @@ const Cartographie = () => {
   const [showToast, setShowToast] = useState(false)
   const [popType, setPopType] = useState('success')
   const [popMessage, setPopMessage] = useState('')
+  // Pour afficher poste ou nom du responsable
+  const [showResponsableName, setShowResponsableName] = useState(false)
 
   const navigate = useNavigate()
 
@@ -144,13 +146,19 @@ const Cartographie = () => {
       .map(p => ({
         id: p.id,
         title: `${p.nom} (${p.sigle})`,
-        // Prefer dynamic responsablesProcessus: return an array of postes (no role labels)
+        // Prefer dynamic responsablesProcessus: return an array with poste and name
         responsable: (Array.isArray(p.responsablesProcessus) && p.responsablesProcessus.length > 0)
-          ? (p.responsablesProcessus || []).map(rp => rp.collaborateur?.poste).filter(Boolean)
+          ? (p.responsablesProcessus || []).map(rp => ({
+              poste: rp.collaborateur?.poste || '-',
+              name: rp.collaborateur?.nomAffichage || '-'
+            })).filter(r => r.poste !== '-' || r.name !== '-')
           // Fallback to old pilotes list as an array
           : (Array.isArray(p.pilotes)
-            ? p.pilotes.map(pi => pi.collaborateur?.poste).filter(Boolean)
-            : ["-"]),
+            ? p.pilotes.map(pi => ({
+                poste: pi.collaborateur?.poste || '-',
+                name: pi.collaborateur?.nom || '-'
+              })).filter(r => r.poste !== '-' || r.name !== '-')
+            : [{ poste: '-', name: '-' }]),
         onDelete: () => askDeleteProcessus(p.id),
         onEdit: () => navigate(`/cartographie/formprocessus/${p.id}`),
         onClick: () => navigate(`/cartographie/ficheprocessus/${p.id}`),
@@ -196,12 +204,12 @@ const Cartographie = () => {
         <CCol xs={6} className="d-flex justify-content-center">
           <h3>Cartographie des processus</h3>
         </CCol>
-        <CCol xs={3} className="d-flex justify-content-end">
+        <CCol xs={3} className="d-flex justify-content-end gap-2 align-items-center">
           <CButton
             color='primary'
             key='1'
             className="mb-3"
-            href='/cartographie/formprocessus'
+            href='#/cartographie/formprocessus'
           >
             <CIcon icon={cilPlus} className="me-2" />
             Nouvelle processus
@@ -285,14 +293,29 @@ const Cartographie = () => {
             </CCardBody>
           </CCard>
           {/* Legend for category colors */}
-          <div className="mb-3 d-flex align-items-center gap-3">
-            <span className='mb-0 h6'>Légende :</span>
-            {categories.map(cat => (
-              <div key={cat.id} className="d-flex align-items-center" title={cat.nom}>
-                <span style={{ width: 36, height: 18, display: 'inline-block', background: categorieColors[cat.id] || '#eee', borderRadius: 4, marginRight: 8, border: '1px solid rgba(0,0,0,0.08)' }} />
-                <span className="text-muted" style={{ fontSize: 14 }}>{cat.nom}</span>
-              </div>
-            ))}
+          <div className="mb-3 d-flex align-items-center justify-content-between">
+            <div className="d-flex align-items-center gap-3">
+              <span className='mb-0 h6'>Légende :</span>
+              {categories.map(cat => (
+                <div key={cat.id} className="d-flex align-items-center" title={cat.nom}>
+                  <span style={{ width: 36, height: 18, display: 'inline-block', background: categorieColors[cat.id] || '#eee', borderRadius: 4, marginRight: 8, border: '1px solid rgba(0,0,0,0.08)' }} />
+                  <span className="text-muted" style={{ fontSize: 14 }}>{cat.nom}</span>
+                </div>
+              ))}
+            </div>
+            <div className="d-flex align-items-center gap-2">
+              <CFormLabel htmlFor="responsableDisplay" className="mb-0">Affichage des Responsables :</CFormLabel>
+              <CFormSelect
+                id="responsableDisplay"
+                value={showResponsableName ? 'name' : 'poste'}
+                onChange={(e) => setShowResponsableName(e.target.value === 'name')}
+                className="mb-0"
+                style={{ width: 'auto' }}
+              >
+                <option value="poste">Poste</option>
+                <option value="name">Nom</option>
+              </CFormSelect>
+            </div>
           </div>
         </CCol>
       </CRow>
@@ -304,6 +327,7 @@ const Cartographie = () => {
               categorie={cat.categorie}
               processusList={cat.processusList}
               color={cat.color}
+              showResponsableName={showResponsableName}
             />
           )
         )}

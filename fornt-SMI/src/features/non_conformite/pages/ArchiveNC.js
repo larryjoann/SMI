@@ -36,7 +36,7 @@ const ArchiveNC = () => {
                    <CButton
                         color='secondary'
                         className="mb-3"
-                        href='/nc/list'
+                        href='#/nc/list'
                         >
                         <CIcon icon={cilArrowLeft} className="me-2" />
                         Retour

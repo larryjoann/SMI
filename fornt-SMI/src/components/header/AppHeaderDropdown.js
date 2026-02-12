@@ -39,7 +39,7 @@ const AppHeaderDropdown = () => {
       // ignore; we will still clear the token and redirect
     }
     try { sessionStorage.removeItem('jwt') } catch (e) { }
-    window.location.href = '/login'
+    window.location.href = '#/login'
   }
 
   const [showLogoutModal, setShowLogoutModal] = useState(false)

@@ -2,7 +2,7 @@ import { exact } from 'prop-types'
 import React from 'react'
 
 
-const TDB = React.lazy(() => import('./features/dashboard/pages/TDB'))
+const Home = React.lazy(() => import('./features/dashboard/pages/Home'))
 
 // Notifications
 const Notifications = React.lazy(() => import('./features/notifications/pages/Liste_notif'))
@@ -48,9 +48,9 @@ const FormUtilisateur = React.lazy(() => import('./features/admin/pages/FormUtil
 const Page403 = React.lazy(() => import('./views/pages/Page403'))
 
 const routes = [
-  { path: '/', exact: true, name: 'Tableau de bord', element: TDB },
+  { path: '/', exact: true, name: 'Accueil', element: Home },
 
-  { path: '/dashboard', name: 'Tableau de bord', element: TDB, exact: true },
+  { path: '/dashboard', name: 'Accueil', element: Home, exact: true },
 
   { path: '/notifications', name: 'Notifications', element: Notifications, exact: true },
 

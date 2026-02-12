@@ -25,7 +25,7 @@ const AppSidebar = () => {
     <CSidebar
       className="border-end"
       style={{backgroundColor: "#016172"}}
-      // style={{ backgroundColor: "#2E2F2F" }}
+       //style={{ backgroundColor: "#343535" }}
       colorScheme="dark"
       position="fixed"
       unfoldable={unfoldable}
@@ -48,11 +48,12 @@ const AppSidebar = () => {
         </CSidebarBrand>
       </CSidebarHeader>
       <AppSidebarNav items={navigation} />
-      {/* <CSidebarFooter className="border-top d-none d-lg-flex">
-        <CSidebarToggler
+      <CSidebarFooter className="border-top d-none d-lg-flex justify-content-center">
+        &copy; 2025 Ravinala Airports
+        {/* <CSidebarToggler
           onClick={() => dispatch({ type: 'set', sidebarUnfoldable: !unfoldable })}
-        />
-      </CSidebarFooter> */}
+        /> */}
+      </CSidebarFooter>
     </CSidebar>
   )
 }

@@ -52,7 +52,7 @@ const ArchivePA = () => {
                     <CButton
                         color='secondary'
                         className="mb-3"
-                        href='/pa/list'
+                        href='#/pa/list'
                     >
                         <CIcon icon={cilArrowLeft} className="me-2" />
                         Retour

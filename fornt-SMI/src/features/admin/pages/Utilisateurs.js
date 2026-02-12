@@ -150,7 +150,7 @@ const Utilisateurs = () => {
                         color='primary'
                         key='1'
                         className="mb-3"
-                        href='/administration/utilisateurs/form'
+                        href='#/administration/utilisateurs/form'
                     >
                         <CIcon icon={cilPlus} className="me-2" />
                         Nouvelle utilisateurs

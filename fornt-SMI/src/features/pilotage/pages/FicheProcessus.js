@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom'
 import { useProcessusDetails } from '../hooks/useProcessusDetails'
 import axiosInstance from '../../../api/axiosInstance'
 import { Pop_up } from '../../../components/notification/Pop_up'
+import myLogo from '../../../assets/images/logo.png'
 
 const FicheProcessus = () => {
   const { id } = useParams()
@@ -26,10 +27,40 @@ const FicheProcessus = () => {
   const [hoveredValiditeId, setHoveredValiditeId] = useState(null)
   const [showDeleteValiditeModal, setShowDeleteValiditeModal] = useState(false)
   const [validiteToDelete, setValiditeToDelete] = useState(null)
+  const [interactionsNames, setInteractionsNames] = useState({})
 
   useEffect(() => {
     setLocalProcessus(processus)
   }, [processus])
+
+  useEffect(() => {
+    const list = (localProcessus?.intercations || processus?.intercations || localProcessus?.interactions || processus?.interactions) || []
+    const ids = Array.from(new Set(list.map((it) => it?.idProcessusInteragi).filter(Boolean)))
+    if (!ids || ids.length === 0) return
+    let mounted = true
+    Promise.all(
+      ids.map((pid) =>
+        axiosInstance
+          .get(`/Processus/${pid}`)
+          .then((res) => ({ id: pid, name: res?.data?.nom || null }))
+          .catch(() => ({ id: pid, name: null })),
+      ),
+    )
+      .then((results) => {
+        if (!mounted) return
+        const map = {}
+        results.forEach((r) => {
+          if (r && typeof r.id !== 'undefined') map[String(r.id)] = r.name
+        })
+        setInteractionsNames(map)
+      })
+      .catch(() => {
+        /* ignore errors, keep names empty */
+      })
+    return () => {
+      mounted = false
+    }
+  }, [localProcessus, processus])
 
   const responsablesGroups = useMemo(() => {
     const list = (localProcessus && localProcessus.responsablesProcessus) || (processus && processus.responsablesProcessus) || []
@@ -120,14 +151,14 @@ const FicheProcessus = () => {
           <CButton
             color='secondary'
             className="mb-3"
-            href='/cartographie'
+            href='#/cartographie'
           >
             <CIcon icon={cilArrowLeft} className="me-2" />
             Retour
           </CButton>
         </CCol>
         <CCol xs={6} className="d-flex justify-content-center">
-          <h3>Fiche du processus</h3>
+          <h3>FIP</h3>
         </CCol>
         <CCol xs={3} className="d-flex justify-content-end">
           <CButton
@@ -141,8 +172,19 @@ const FicheProcessus = () => {
         </CCol>
       </CRow>
       <CCard>
-        <CCardHeader className="text-center">
-          <span className="h6">'IDENTITÉ DU PROCESSUS</span>
+        <CCardHeader>
+          <CRow>
+            <CCol xs={2} className="d-flex justify-content-center align-items-center">
+              <img src={myLogo} alt="Logo" height={80} />
+            </CCol>
+            <CCol xs={8} className="d-flex justify-content-center align-items-center">
+              <div className="text-center">
+                <div className="h5">FICHE D'IDENTITÉ PROCESSUS</div>
+                <div className="h5 mt-2">{(localProcessus?.nom || processus?.nom || '').toUpperCase()} { (localProcessus?.sigle || processus?.sigle) ? <span className="text-muted">({(localProcessus?.sigle || processus?.sigle).toUpperCase()})</span> : null }</div>
+              </div>
+            </CCol>
+            <CCol xs={2}></CCol>
+          </CRow>
         </CCardHeader>
         <CCardBody>
           {loading ? (
@@ -150,15 +192,57 @@ const FicheProcessus = () => {
               <span>Chargement des informations du processus...</span>
             </div>
           ) : processus ? (
-            <CRow>
-              <CCol md={6} className='mb-3'>
+            <>
+              <CRow className='mb-3'>
+                <CCol md={6} >
                 <h6 className="mb-1">Nom du processus :</h6>
                 <p>{localProcessus?.nom || processus.nom} <span className='text-muted'>( {localProcessus?.sigle || processus.sigle} )</span> </p>
-              </CCol>
-              <CCol md={6} className='mb-3'>
-                <h6 className="mb-1">Catégorie :</h6>
-                <p>{localProcessus?.categorieProcessus?.nom || processus.categorieProcessus?.nom || processus.idCategorieProcessus}</p>
-              </CCol>
+                </CCol>
+                <CCol md={6} >
+                  <h6 className="mb-1">Catégorie :</h6>
+                  <p>{localProcessus?.categorieProcessus?.nom || processus.categorieProcessus?.nom || processus.idCategorieProcessus}</p>
+                </CCol>
+              </CRow>
+              <CRow className='mb-3'>
+                <h6 className="mb-1">Années de validité :</h6>
+                <p>
+                  {Array.isArray((localProcessus?.validites || processus?.validites)) && (localProcessus?.validites || processus?.validites).length > 0 ? (
+                    (localProcessus?.validites || processus?.validites).map((v) => (
+                      <span
+                        key={v.id}
+                        className="me-1"
+                        style={{ position: 'relative', display: 'inline-block' }}
+                        onMouseEnter={() => setHoveredValiditeId(v.id)}
+                        onMouseLeave={() => setHoveredValiditeId(null)}
+                      >
+                        <CBadge size='md' color="secondary" className="me-1">{v.annee}</CBadge>
+                        <CIcon
+                          icon={cilTrash}
+                          className="text-danger"
+                          size="md"
+                          title="Supprimer"
+                          style={{
+                            position: 'absolute',
+                            top: -6,
+                            right: -6,
+                            cursor: 'pointer',
+                            opacity: hoveredValiditeId === v.id ? 1 : 0,
+                            transition: 'opacity 0.15s ease-in-out',
+                          }}
+                          onClick={() => askDeleteValidite(v)}
+                        />
+                      </span>
+                    ))
+                  ) : (
+                    '-'
+                  )}
+                </p>
+              </CRow>
+              <CRow className='mb-3'>
+                <h6 className="me-2">Finalité :</h6>
+                <div className='me-2' style={{ background: '#f8f9fa', padding: '12px', borderRadius: 8, whiteSpace: 'pre-wrap' }}>{localProcessus?.finalite || processus.finalite || '-'}</div>
+              </CRow>
+              <CRow className='mb-3'>
               {Array.isArray(responsablesGroups) && responsablesGroups.length > 0 ? (
                 responsablesGroups.map((g, gIdx) => (
                   <CCol key={gIdx} md={6} className='mb-3'>
@@ -194,53 +278,70 @@ const FicheProcessus = () => {
                   
                 </>
               )}
-              <CCol md={6} className='mb-3'>
-                <h6 className="mb-1">Finalité :</h6>
-                <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: 8, whiteSpace: 'pre-wrap' }}>{localProcessus?.finalite || processus.finalite || '-'}</div>
-              </CCol>
-              <CCol md={6} className='mb-3'>
-                <h6 className="mb-1">Contexte :</h6>
-                <div style={{ background: '#f8f9fa', padding: '12px', borderRadius: 8, whiteSpace: 'pre-wrap' }}>{localProcessus?.contexte || processus.contexte || '-'}</div>
-              </CCol>
-              <CCol md={6} className='mb-3'>
-                <h6 className="mb-1">Années de validité :</h6>
-                <p>
-                  {Array.isArray((localProcessus?.validites || processus?.validites)) && (localProcessus?.validites || processus?.validites).length > 0 ? (
-                    (localProcessus?.validites || processus?.validites).map((v) => (
-                      <span
-                        key={v.id}
-                        className="me-1"
-                        style={{ position: 'relative', display: 'inline-block' }}
-                        onMouseEnter={() => setHoveredValiditeId(v.id)}
-                        onMouseLeave={() => setHoveredValiditeId(null)}
-                      >
-                        <CBadge size='md' color="secondary" className="me-1">{v.annee}</CBadge>
-                        <CIcon
-                          icon={cilTrash}
-                          className="text-danger"
-                          size="md"
-                          title="Supprimer"
-                          style={{
-                            position: 'absolute',
-                            top: -6,
-                            right: -6,
-                            cursor: 'pointer',
-                            opacity: hoveredValiditeId === v.id ? 1 : 0,
-                            transition: 'opacity 0.15s ease-in-out',
-                          }}
-                          onClick={() => askDeleteValidite(v)}
-                        />
-                      </span>
-                    ))
-                  ) : (
-                    '-'
-                  )}
-                </p>
-              </CCol>
+              </CRow>
 
-              {/* Nouvelles sections: interactions, ressources, parties intéressées, activités (tables) */}
+              <CRow className='mb-3'>
+                <h6 className="mb-1">Activités <small className="text-muted">({(localProcessus?.activites || processus?.activites || []).length})</small> :</h6>
+                {Array.isArray((localProcessus?.activites || processus?.activites)) && (localProcessus?.activites || processus?.activites).length > 0 ? (
+                  <CTable hover responsive bordered>
+                    <CTableHead>
+                      <CTableRow>
+                        <CTableHeaderCell>Processus fournisseur</CTableHeaderCell>
+                        <CTableHeaderCell>Eléments d'entrée</CTableHeaderCell>
+                        <CTableHeaderCell>Activité</CTableHeaderCell>
+                        <CTableHeaderCell>Eléments de sortie</CTableHeaderCell>        
+                        <CTableHeaderCell>Processus client</CTableHeaderCell>
+                      </CTableRow>
+                    </CTableHead>
+                    <CTableBody>
+                      {(localProcessus?.activites || processus?.activites).map((a) => (
+                        <CTableRow key={a.id}>
+                           <CTableDataCell>{a.processusFournisseur || '-'}</CTableDataCell>
+                          <CTableDataCell>{a.elementEntrante || '-'}</CTableDataCell>
+                          <CTableDataCell>{a.descr || '-'}</CTableDataCell>                           
+                          <CTableDataCell>{a.elementSortante || '-'}</CTableDataCell>
+                           <CTableDataCell>{a.processusClient || '-'}</CTableDataCell>
+                        </CTableRow>
+                      ))}
+                    </CTableBody>
+                  </CTable>
+                ) : (
+                  '-'
+                )}
+              </CRow>
 
-              <CCol md={12} className='mb-3'>
+              <CRow className='mb-3'>
+                <h6 className="mb-1">Parties intéressées et attentes <small className="text-muted">({(localProcessus?.partieInteresseAttentes || processus?.partieInteresseAttentes || []).length})</small> :</h6>
+                {Array.isArray((localProcessus?.partieInteresseAttentes || processus?.partieInteresseAttentes)) && (localProcessus?.partieInteresseAttentes || processus?.partieInteresseAttentes).length > 0 ? (
+                  <CTable hover responsive bordered>
+                    <CTableHead>
+                      <CTableRow>
+                        <CTableHeaderCell>Parties intéressées</CTableHeaderCell>
+                        <CTableHeaderCell>Groupe</CTableHeaderCell>
+                        <CTableHeaderCell>Attentes</CTableHeaderCell>
+                      </CTableRow>
+                    </CTableHead>
+                    <CTableBody>
+                      {(localProcessus?.partieInteresseAttentes || processus?.partieInteresseAttentes).map((p) => (
+                        <CTableRow key={p.id}>
+                          <CTableDataCell>{p.partieInteresse || '-'}</CTableDataCell>
+                          <CTableDataCell>{p.groupe || '-'}</CTableDataCell>
+                          <CTableDataCell>{p.attente || '-'}</CTableDataCell>
+                        </CTableRow>
+                      ))}
+                    </CTableBody>
+                  </CTable>
+                ) : (
+                  '-'
+                )}
+              </CRow>
+
+              <CRow className='mb-3'>
+                <h6 className="me-2">Contexte :</h6>
+                <div className='me-2' style={{ background: '#f8f9fa', padding: '12px', borderRadius: 8, whiteSpace: 'pre-wrap' }}>{localProcessus?.contexte || processus.contexte || '-'}</div>
+              </CRow>
+
+              <CRow className='mb-3'>
                 <h6 className="mb-1">Interactions <small className="text-muted">({(localProcessus?.intercations || processus?.intercations || localProcessus?.interactions || processus?.interactions || []).length})</small> :</h6>
                 {Array.isArray((localProcessus?.intercations || processus?.intercations || localProcessus?.interactions || processus?.interactions)) && (localProcessus?.intercations || processus?.intercations || localProcessus?.interactions || processus?.interactions).length > 0 ? (
                   <CTable hover responsive bordered>
@@ -253,7 +354,7 @@ const FicheProcessus = () => {
                     <CTableBody>
                       {(localProcessus?.intercations || processus?.intercations || localProcessus?.interactions || processus?.interactions).map((it) => (
                         <CTableRow key={it.id}>
-                          <CTableDataCell>{it.idProcessusInteragi || '-'}</CTableDataCell>
+                          <CTableDataCell>{interactionsNames[String(it.idProcessusInteragi)] ?? (it.idProcessusInteragi || '-')}</CTableDataCell>
                           <CTableDataCell>{it.descr || '-'}</CTableDataCell>
                         </CTableRow>
                       ))}
@@ -262,9 +363,12 @@ const FicheProcessus = () => {
                 ) : (
                   '-'
                 )}
-              </CCol>
+              </CRow>
 
-              <CCol md={12} className='mb-3'>
+              {/* Nouvelles sections: interactions, ressources, parties intéressées, activités (tables) */}
+
+            
+              <CRow className='mb-3'>
                 <h6 className="mb-1">Ressources <small className="text-muted">({(localProcessus?.ressourcesProcessus || processus?.ressourcesProcessus || []).length})</small> :</h6>
                 {Array.isArray((localProcessus?.ressourcesProcessus || processus?.ressourcesProcessus)) && (localProcessus?.ressourcesProcessus || processus?.ressourcesProcessus).length > 0 ? (
                   <CTable hover responsive bordered>
@@ -286,65 +390,12 @@ const FicheProcessus = () => {
                 ) : (
                   '-'
                 )}
-              </CCol>
+              </CRow>
 
-              <CCol md={12} className='mb-3'>
-                <h6 className="mb-1">Parties intéressées & attentes <small className="text-muted">({(localProcessus?.partieInteresseAttentes || processus?.partieInteresseAttentes || []).length})</small> :</h6>
-                {Array.isArray((localProcessus?.partieInteresseAttentes || processus?.partieInteresseAttentes)) && (localProcessus?.partieInteresseAttentes || processus?.partieInteresseAttentes).length > 0 ? (
-                  <CTable hover responsive bordered>
-                    <CTableHead>
-                      <CTableRow>
-                        <CTableHeaderCell>Partie</CTableHeaderCell>
-                        <CTableHeaderCell>Groupe</CTableHeaderCell>
-                        <CTableHeaderCell>Attente</CTableHeaderCell>
-                      </CTableRow>
-                    </CTableHead>
-                    <CTableBody>
-                      {(localProcessus?.partieInteresseAttentes || processus?.partieInteresseAttentes).map((p) => (
-                        <CTableRow key={p.id}>
-                          <CTableDataCell>{p.partieInteresse || '-'}</CTableDataCell>
-                          <CTableDataCell>{p.groupe || '-'}</CTableDataCell>
-                          <CTableDataCell>{p.attente || '-'}</CTableDataCell>
-                        </CTableRow>
-                      ))}
-                    </CTableBody>
-                  </CTable>
-                ) : (
-                  '-'
-                )}
-              </CCol>
+              
 
-              <CCol md={12} className='mb-3'>
-                <h6 className="mb-1">Activités <small className="text-muted">({(localProcessus?.activites || processus?.activites || []).length})</small> :</h6>
-                {Array.isArray((localProcessus?.activites || processus?.activites)) && (localProcessus?.activites || processus?.activites).length > 0 ? (
-                  <CTable hover responsive bordered>
-                    <CTableHead>
-                      <CTableRow>
-                        <CTableHeaderCell>Fournisseur</CTableHeaderCell>
-                        <CTableHeaderCell>Entrée</CTableHeaderCell>
-                        <CTableHeaderCell>Description</CTableHeaderCell>
-                        <CTableHeaderCell>Sortie</CTableHeaderCell>        
-                        <CTableHeaderCell>Client</CTableHeaderCell>
-                        
-                      </CTableRow>
-                    </CTableHead>
-                    <CTableBody>
-                      {(localProcessus?.activites || processus?.activites).map((a) => (
-                        <CTableRow key={a.id}>
-                           <CTableDataCell>{a.processusFournisseur || '-'}</CTableDataCell>
-                          <CTableDataCell>{a.elementEntrante || '-'}</CTableDataCell>
-                          <CTableDataCell>{a.descr || '-'}</CTableDataCell>                           
-                          <CTableDataCell>{a.elementSortante || '-'}</CTableDataCell>
-                           <CTableDataCell>{a.processusClient || '-'}</CTableDataCell>
-                        </CTableRow>
-                      ))}
-                    </CTableBody>
-                  </CTable>
-                ) : (
-                  '-'
-                )}
-              </CCol>
-            </CRow>
+              
+            </>
           ) : (
             <div className="text-center py-4">
               <span>Processus introuvable.</span>

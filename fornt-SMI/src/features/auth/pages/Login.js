@@ -14,6 +14,7 @@ import {
 import myLogo from 'src/assets/images/logo.png'
 import { CAlert } from '@coreui/react'
 import { useLogin } from '../hooks/useLogin'
+import bgImage from '../../../assets/images/login_bgd.jpg'
 
 const Login = () => {
   const [matricule, setMatricule] = useState('')
@@ -27,7 +28,15 @@ const Login = () => {
   }
 
   return (
-    <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
+    <div
+      className="min-vh-100 d-flex flex-row align-items-center"
+      style={{
+        backgroundImage: `url(${bgImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
       <CContainer>
         <CRow className="justify-content-center">
           <CCol md={5} sm={12} xs={12}>

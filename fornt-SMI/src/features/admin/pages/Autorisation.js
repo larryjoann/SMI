@@ -20,21 +20,29 @@ import { CPagination, CPaginationItem } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilTrash ,cilPen , cilFilter, cilFilterX, cilPlus } from '@coreui/icons/dist/cjs'
 import { useAutorisations } from '../../../hooks/useAutorisations'
+import RoleSelect from '../../../components/champs/RoleSelect'
+import EntiteSelect from '../../../components/champs/EntiteSelect'
 
 const Autorisation = () => {
-    const { rolePermissions, loading, error, deleteRolePermission, getUniqueRoles, getUniqueEntites } = useAutorisations()
+    const { rolePermissions, loading, error, deleteRolePermission, getUniqueRoles, getUniqueEntites, fetchRolePermissions, fetchFilteredRolePermissions } = useAutorisations()
 
     const [operationName, setOperationName] = useState('')
-    const [filterRole, setFilterRole] = useState('')
-    const [filterEntite, setFilterEntite] = useState('')
+    const [filterRoleId, setFilterRoleId] = useState('')
+    const [filterEntiteId, setFilterEntiteId] = useState('')
+
+    // Applied filters only change when user clicks "Filtrer"
+    const [appliedFilterRoleId, setAppliedFilterRoleId] = useState('')
+    const [appliedFilterEntiteId, setAppliedFilterEntiteId] = useState('')
+    const [appliedOperationName, setAppliedOperationName] = useState('')
+
     const [page, setPage] = useState(1)
     const itemsPerPage = 10
 
     // Filtrer les données
     const filteredRolePermissions = rolePermissions.filter((rp) => {
-        const matchRole = !filterRole || rp.role?.nom === filterRole
-        const matchEntite = !filterEntite || rp.permission?.entite?.nom === filterEntite
-        const matchOperation = !operationName || rp.permission?.nom?.toLowerCase().includes(operationName.toLowerCase())
+        const matchRole = !appliedFilterRoleId || rp.role?.id === Number(appliedFilterRoleId)
+        const matchEntite = !appliedFilterEntiteId || rp.permission?.entite?.id === Number(appliedFilterEntiteId)
+        const matchOperation = !appliedOperationName || rp.permission?.nom?.toLowerCase().includes(appliedOperationName.toLowerCase())
         return matchRole && matchEntite && matchOperation
     })
 
@@ -48,11 +56,48 @@ const Autorisation = () => {
         }
     }
 
-    const handleClearFilters = () => {
+    const handleFilterSubmit = async (e) => {
+        e.preventDefault()
+        // derive names from currently loaded data if possible
+        let roleName = ''
+        let entiteName = ''
+        if (filterRoleId) {
+            const r = rolePermissions.find((rp) => rp.role?.id === Number(filterRoleId))
+            roleName = r?.role?.nom || ''
+        }
+        if (filterEntiteId) {
+            const r2 = rolePermissions.find((rp) => rp.permission?.entite?.id === Number(filterEntiteId))
+            entiteName = r2?.permission?.entite?.nom || ''
+        }
+        try {
+            // apply the chosen filters locally
+            setAppliedFilterRoleId(filterRoleId)
+            setAppliedFilterEntiteId(filterEntiteId)
+            setAppliedOperationName(operationName)
+
+            await fetchFilteredRolePermissions(roleName, entiteName, operationName)
+            setPage(1)
+        } catch (err) {
+            console.error('Erreur filtrage autorisations:', err)
+        }
+    }
+
+    const handleClearFilters = async () => {
         setOperationName('')
-        setFilterRole('')
-        setFilterEntite('')
+        setFilterRoleId('')
+        setFilterEntiteId('')
+
+        // clear applied filters too
+        setAppliedFilterRoleId('')
+        setAppliedFilterEntiteId('')
+        setAppliedOperationName('')
+
         setPage(1)
+        try {
+            await fetchRolePermissions()
+        } catch (err) {
+            console.error('Erreur rechargement autorisations:', err)
+        }
     }
 
     return (
@@ -68,7 +113,7 @@ const Autorisation = () => {
                         color='primary'
                         key='1'
                         className="mb-3"
-                        href='/administration/autorisation/form'
+                        href='#/administration/autorisation/form'
                     >
                         <CIcon icon={cilPlus} className="me-2" />
                         Nouvelle autorisation
@@ -81,27 +126,17 @@ const Autorisation = () => {
                     <span className='h6'>Filtre</span>
                 </CCardHeader>
                 <CCardBody className=''>
-                    <CForm className="row g-3">
+                    <CForm className="row g-3" onSubmit={handleFilterSubmit}>
                         
                         <CCol sm={3}>
                             <div className="form-floating">
-                                <CFormSelect id="filterRole" value={filterRole} onChange={(e) => setFilterRole(e.target.value)}>
-                                    <option value="">Tous</option>
-                                    {getUniqueRoles().map((roleName) => (
-                                        <option key={roleName} value={roleName}>{roleName}</option>
-                                    ))}
-                                </CFormSelect>
+                                <RoleSelect id="filterRole" placeholder="Tous" value={filterRoleId} onChange={(e) => setFilterRoleId(e.target ? e.target.value : e)} />
                                 <label htmlFor="filterRole">Role</label>
                             </div>
                         </CCol>
                         <CCol sm={3}>
                             <div className="form-floating">
-                                <CFormSelect id="filterEntite" value={filterEntite} onChange={(e) => setFilterEntite(e.target.value)}>
-                                    <option value="">Toutes</option>
-                                    {getUniqueEntites().map((entiteName) => (
-                                        <option key={entiteName} value={entiteName}>{entiteName}</option>
-                                    ))}
-                                </CFormSelect>
+                                <EntiteSelect id="filterEntite" placeholder="Toutes" value={filterEntiteId} onChange={(e) => setFilterEntiteId(e.target ? e.target.value : e)} />
                                 <label htmlFor="filterEntite">Entité</label>
                             </div>
                         </CCol>

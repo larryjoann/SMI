@@ -259,13 +259,13 @@ const FormNC = () => {
                 <CFormLabel htmlFor="curative">Pièces jointes :</CFormLabel>
                 <FileUploader files={files} setFiles={setFiles} />
               </CCol>
-              <CCol xs={12} sm={12} md={12} className='mb-3'>
+              {/* <CCol xs={12} sm={12} md={12} className='mb-3'>
                 <CFormLabel htmlFor="curative">Action curative :</CFormLabel>
                 <CFormTextarea id="curative" rows={3} value={actionCurative} onChange={e => setActionCurative(e.target.value)} invalid={!!errors['NC.ActionCurative']}/>
                 {errors['NC.ActionCurative'] && (
                   <CFormFeedback invalid>{errors['NC.ActionCurative'][0]}</CFormFeedback>
                 )}
-              </CCol>
+              </CCol> */}
             </CRow>
           </CCardBody>
         </CCard>

@@ -28,7 +28,7 @@ axiosInstance.interceptors.request.use(
         const payload = JSON.parse(atob(token.split('.')[1] || ''))
         if (payload && payload.exp && Date.now() / 1000 >= payload.exp) {
           sessionStorage.removeItem('jwt')
-          if (typeof window !== 'undefined') window.location.href = '/login'
+          if (typeof window !== 'undefined') window.location.href = '#/login'
           return Promise.reject(new Error('Token expired'))
         }
       } catch (_) {
@@ -52,13 +52,13 @@ axiosInstance.interceptors.response.use(
         // ignore
       }
       // redirect to login page
-      // if (typeof window !== 'undefined') {
-      //   window.location.href = '/login'
-      // }
+      if (typeof window !== 'undefined') {
+        window.location.href = '#/login'
+      }
     } else if (error?.response?.status === 403) {
       // redirect to access denied page
       if (typeof window !== 'undefined') {
-        window.location.href = '/403'
+        window.location.href = '#/403'
       }
     }
     return Promise.reject(error)

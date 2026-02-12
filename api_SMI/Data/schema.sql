@@ -6,23 +6,11 @@ CREATE TABLE Entite (
     nom VARCHAR(50)
 );
 
-INSERT INTO entite (nom) VALUES ('Processus');
-INSERT INTO entite (nom) VALUES ('Non-conformité');
-INSERT INTO entite (nom) VALUES ('Plan d''action');
-INSERT INTO entite (nom) VALUES ('Action');
-INSERT INTO entite (nom) VALUES ('Dashboard');
-INSERT INTO entite (nom) VALUES ('KPI');
-INSERT INTO entite (nom) VALUES ('Admin');
-
-CREATE TABLE Categorie_processus (
+CREATE TABLE Role (
     id INT IDENTITY PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL
+    nom VARCHAR(50) NOT NULL, 
+    est_automatique BIT NOT NULL DEFAULT 0
 );
-
-INSERT INTO Categorie_processus (nom) VALUES ('Management');
-INSERT INTO Categorie_processus (nom) VALUES ('Système et amélioration');
-INSERT INTO Categorie_processus (nom) VALUES ('Réalisation');
-INSERT INTO Categorie_processus (nom) VALUES ('Support');
 
 CREATE TABLE Collaborateur (
     matricule VARCHAR(50) PRIMARY KEY,
@@ -35,10 +23,15 @@ CREATE TABLE Collaborateur (
     etat INT
 );
 
-INSERT INTO Collaborateur (matricule, nom_complet, nom_affichage, departement, poste, courriel, telephone, etat)
-VALUES
-('A001', 'Dupont Jean', 'J. Dupont (DQRSE)', 'Qualité', 'Responsable Qualité', 'joannrandrianirina@gmail.com', '0123456789', 1),
-('A002', 'Martin Claire', 'C. Martin (Prod)', 'Production', 'Opératrice de production', 'randrianirina@gmail.com', '0987654321', 1);   
+-- =========================
+-- 2. Processus
+-- =========================
+
+CREATE TABLE Categorie_processus (
+    id INT IDENTITY PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL
+);
+
 
 CREATE TABLE Processus (
     id INT IDENTITY PRIMARY KEY,
@@ -66,9 +59,6 @@ CREATE TABLE Type_responsable_processus (
     CONSTRAINT UQ_Type_Responsable_Processus UNIQUE (id_role)
 );
 
-INSERT INTO Type_responsable_processus (id_role) VALUES (4); -- Pilote de processus
-INSERT INTO Type_responsable_processus (id_role) VALUES (5); -- Co-p
-
 
 CREATE TABLE Responsable_processus (
     id INT IDENTITY PRIMARY KEY,
@@ -94,12 +84,6 @@ CREATE TABLE Categorie_ressources (
     id INT IDENTITY PRIMARY KEY,
     nom VARCHAR(100) NOT NULL
 )
-
-INSERT INTO Categorie_ressources (nom) VALUES ('Humaines');
-INSERT INTO Categorie_ressources (nom) VALUES ('Matérielles');
-INSERT INTO Categorie_ressources (nom) VALUES ('Connaissance organisationnelle');
-INSERT INTO Categorie_ressources (nom) VALUES ('documentaires');
-INSERT INTO Categorie_ressources (nom) VALUES ('Naturelles');
 
 CREATE TABLE Ressource_processus (
     id INT IDENTITY PRIMARY KEY,
@@ -131,9 +115,8 @@ CREATE TABLE Activite (
 );
 
 -- =========================
--- 2. Gestion des rôles et permissions
+-- 3. Gestion des rôles et permissions
 -- =========================
-
 
 CREATE TABLE Permission (
     id INT IDENTITY PRIMARY KEY,
@@ -142,47 +125,6 @@ CREATE TABLE Permission (
     id_entite INT NOT NULL,
     FOREIGN KEY(id_entite) REFERENCES Entite(id)
 );
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Consulation tableau de bord', 'READ_TDB', 9);
-
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Consulation du cartographie', 'READ_CARTO', 1);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('CRUD de mes processus', 'CRUD_MA_PROCESSUS', 1);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('CRUD de tous les processus', 'CRUD_TOUS_PROCESSUS', 1);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Gestion des responsable processus', 'MANAGE_RESP', 1);
-
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Consultation TDB KPI', 'READ_KPI', 10);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Saisie KPI', 'CRUD_KPI', 10);
-
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Déclaration de NC', 'DECL_NC', 2);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Suivi des NC', 'SUIVI_NC', 2);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Qualification des NC', 'QUALIF_NC', 2);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Analyse des causes des NC', 'ANALYSE_NC', 2);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Verification éfficacité NC', 'VERIF_NC', 2);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Clôture des NC', 'CLOTURE_NC', 2);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Assignation des actions NC', 'ASSIGN_NC', 2);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Ajout des commentaires sur NC', 'COMMENT_NC', 2);
-
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Insertion de PA', 'INSERT_PA',3);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Suivi des PA', 'SUIVI_PA', 3);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Assignation des actions PA', 'ASSIGN_PA', 3);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Clôture des PA', 'CLOTURE_PA', 3);
-
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Suivi des actions', 'SUIVI_ACT', 4);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Mise à jour des actions', 'CRUD_ACT', 4);
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Avancement des actions', 'AVC_ACT', 4);
-
-INSERT INTO Permission (nom, reference, id_entite) VALUES ('Administration', 'ADMIN', 11);
-
-CREATE TABLE Role (
-    id INT IDENTITY PRIMARY KEY,
-    nom VARCHAR(50) NOT NULL, 
-    est_automatique BIT NOT NULL DEFAULT 0
-);
-
-INSERT INTO Role (nom, est_automatique) VALUES ('Administrateur', 0);
-INSERT INTO Role (nom, est_automatique) VALUES ('Responsable Qualité',0);
-INSERT INTO Role (nom, est_automatique) VALUES ('Pilote de processus',1);
-INSERT INTO Role (nom, est_automatique) VALUES ('Co-pilote de processus',1);
-INSERT INTO Role (nom, est_automatique) VALUES ('Collaborateur', 1);
 
 CREATE TABLE Role_permission (
     id INT IDENTITY PRIMARY KEY,
@@ -191,9 +133,6 @@ CREATE TABLE Role_permission (
     FOREIGN KEY(id_role) REFERENCES Role(id),
     FOREIGN KEY(id_permission) REFERENCES Permission(id)
 );
-
-INSERT INTO Role_permission (id_role, id_permission) VALUES (1, 2);
-INSERT INTO Role_permission (id_role, id_permission) VALUES (1, 3);
 
 CREATE TABLE Role_collaborateur (
     id INT IDENTITY PRIMARY KEY,
@@ -215,19 +154,10 @@ CREATE TABLE Lieu (
     abr VARCHAR(10) NOT NULL    
 );
 
-INSERT INTO Lieu (nom, abr) VALUES ('Tananarive', 'TNR');
-INSERT INTO Lieu (nom, abr) VALUES ('Nosy Be', 'NOS');
-
 CREATE TABLE Type_nc (
     id INT IDENTITY PRIMARY KEY,
     nom VARCHAR(50) NOT NULL
 );
-
-INSERT INTO Type_nc (nom) VALUES ('Environnement');
-INSERT INTO Type_nc (nom) VALUES ('Annomalie');
-INSERT INTO Type_nc (nom) VALUES ('Dysfonctionnement');
-INSERT INTO Type_nc (nom) VALUES ('Audit interne');
-INSERT INTO Type_nc (nom) VALUES ('Audit externe');
 
 CREATE TABLE Priorite_nc (
     id INT IDENTITY PRIMARY KEY,
@@ -235,8 +165,6 @@ CREATE TABLE Priorite_nc (
     nom VARCHAR(50),
     descr VARCHAR(MAX)
 );
-
-INSERT INTO Priorite_nc (degre,nom,descr) VALUES (1,'Haute','tres haute');
 
 CREATE TABLE Phase_nc (
     id INT IDENTITY PRIMARY KEY,
@@ -253,30 +181,6 @@ CREATE TABLE Status_nc (
     FOREIGN KEY(id_phase_nc) REFERENCES Phase_nc(id)
 );
 
-DELETE FROM Phase_nc; 
-DBCC CHECKIDENT ('Phase_nc', RESEED, 0);
-
-INSERT INTO Phase_nc (nom, ordre)
-VALUES
-('Déclaration', 1),
-('Traitement',2),
-('Cloture',3);
-
-DELETE FROM Status_nc;
-DBCC CHECKIDENT ('Status_nc', RESEED, 0);
-
-INSERT INTO Status_nc (nom, descr, color , id_phase_nc)
-VALUES
---('Ouverte', 'Non-conformité ouverte ', 'ouverte',1),
-('En qualification', 'En attente de qualification par la QUA', 'en_qualification' ,1 ),
-('A clarifier', 'Le responsable QUA demande plus d''information', 'a_clarifier',1),
-('Reçevable', 'Qualifié comme recevable par la QUA', 'recevable',1),
-('Non Recevable', 'Qualifié comme non-recevable par la QUA', 'non_recevable',1),
-('Analysé','Causes analysés', 'analysé',2),
-('Assigné','Les actions sont en cours', 'assigné',2),
-('Suspendue', 'Suspendue', 'suspendue',2),
-('Vérifié', 'Efficacité vérifié','vérifié', 3),
-('Clôturé', 'Cloturé ', 'cloturé',3);
 
 CREATE TABLE Non_conformite (
     id INT IDENTITY PRIMARY KEY,
@@ -319,12 +223,6 @@ CREATE TABLE Categorie_cause_nc (
     nom VARCHAR(100) NOT NULL
 );
 
-INSERT INTO Categorie_cause_nc (nom) VALUES ('Milieu');
-INSERT INTO Categorie_cause_nc (nom) VALUES ('Méthode');
-INSERT INTO Categorie_cause_nc (nom) VALUES ('Matériel');
-INSERT INTO Categorie_cause_nc (nom) VALUES ('Matière');
-INSERT INTO Categorie_cause_nc (nom) VALUES ('Main d''oeuvre');
-
 CREATE TABLE Cause_nc (
     id INT IDENTITY PRIMARY KEY,
     id_categorie_cause_nc INT NOT NULL,
@@ -353,15 +251,6 @@ CREATE TABLE Operation (
     nom VARCHAR(50)
 );
 
-INSERT INTO operation (nom) VALUES ('Création');
-INSERT INTO operation (nom) VALUES ('Modification');
-INSERT INTO operation (nom) VALUES ('Suppression');
-
-INSERT INTO entite (nom) VALUES ('Processus');
-INSERT INTO entite (nom) VALUES ('Non-conformité');
-INSERT INTO entite (nom) VALUES ('Plan d''action');
-INSERT INTO entite (nom) VALUES ('Action');
-
 CREATE TABLE Historique (
     id INT IDENTITY PRIMARY KEY,
     datetime DATETIME DEFAULT GETDATE(),
@@ -385,11 +274,6 @@ CREATE TABLE Status_action (
     nom VARCHAR(50),
     color VARCHAR(50),
 );
-
-INSERT INTO Status_action (nom, color) VALUES ('Backlog', 'backlog');
-INSERT INTO Status_action (nom, color) VALUES ('En cours', 'en_cours');
-INSERT INTO Status_action (nom, color) VALUES ('Terminée', 'terminée');
-INSERT INTO Status_action (nom, color) VALUES ('Suspendu', 'suspendu');
 
 CREATE TABLE Action (
     id INT IDENTITY PRIMARY KEY,
@@ -441,21 +325,11 @@ CREATE TABLE Source_PA (
     descr VARCHAR(MAX),
 );
 
-INSERT INTO Source_PA (descr) VALUES ('Audit interne');
-INSERT INTO Source_PA (descr) VALUES ('Audit externe');
-INSERT INTO Source_PA (descr) VALUES ('Revue de direction');
-
-
 CREATE TABLE Status_PA (
     id INT IDENTITY PRIMARY KEY,
     nom VARCHAR(50),
     color VARCHAR(50),
 );
-
-INSERT INTO Status_PA (nom, color) VALUES ('Ouvert', 'en_qualification');
-INSERT INTO Status_PA (nom, color) VALUES ('Assigné', 'assigné');
-INSERT INTO Status_PA (nom, color) VALUES ('Vérifié', 'vérifiéé');
-INSERT INTO Status_PA (nom, color) VALUES ('Cloturé', 'cloturé');
 
 CREATE TABLE Plan_action (
     id INT IDENTITY PRIMARY KEY,
@@ -492,4 +366,81 @@ CREATE TABLE Notification (
     FOREIGN KEY(id_entite) REFERENCES Entite(id),
     FOREIGN KEY(matricule_collaborateur) REFERENCES Collaborateur(matricule)
 );
+
+-- =========================
+-- 7. Indicateurs
+-- =========================
+
+CREATE TABLE Objectif_strategique (
+    id INT IDENTITY PRIMARY KEY,
+    descr VARCHAR(MAX)
+);
+
+CREATE TABLE Objectif (
+    id INT IDENTITY PRIMARY KEY,
+    id_processus INT NOT NULL,
+    id_objectif_strategique INT NOT NULL,
+    descr VARCHAR(MAX),
+    FOREIGN KEY(id_processus) REFERENCES Processus(id),
+    FOREIGN KEY(id_objectif_strategique) REFERENCES Objectif_strategique(id)
+);
+
+CREATE TABLE Unite_mesure (
+    id INT IDENTITY PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    abr VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE Frequence_mesure (
+    id INT IDENTITY PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    descr VARCHAR(MAX),
+    intervalle_mois INT NOT NULL
+);
+                       
+CREATE TABLE Indicateur (
+    id INT IDENTITY PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    id_objectif INT NOT NULL,
+    id_unite_mesure INT NOT NULL,
+    id_frequence_mesure INT NOT NULL,
+    source VARCHAR(MAX),
+    FOREIGN KEY(id_objectif) REFERENCES Objectif(id),
+    FOREIGN KEY(id_unite_mesure) REFERENCES Unite_mesure(id),
+    FOREIGN KEY(id_frequence_mesure) REFERENCES Frequence_mesure(id)
+);
+
+CREATE TABLE Cible_indicateur (
+    id INT IDENTITY PRIMARY KEY,
+    cible_optimale FLOAT,
+    cible_min FLOAT,
+    cible_max FLOAT,
+    cible_description VARCHAR(MAX),
+    id_indicateur INT NOT NULL,
+    FOREIGN KEY(id_indicateur) REFERENCES Indicateur(id)
+);
+
+CREATE TABLE Mesure_indicateur (
+    id INT IDENTITY PRIMARY KEY,
+    id_cible_indicateur INT NOT NULL,
+    id_indicateur INT NOT NULL,
+    date_mesure DATETIME DEFAULT GETDATE(),
+    annee INT NOT NULL CHECK (annee BETWEEN 1900 AND 9999),
+    periode INT NOT NULL,   
+    valeur FLOAT NOT NULL,
+    commentaire VARCHAR(MAX),
+    FOREIGN KEY(id_indicateur) REFERENCES Indicateur(id),
+    FOREIGN KEY(id_cible_indicateur) REFERENCES Cible_indicateur(id)
+);
+
+CREATE TABLE Validite_indicateur (
+    id INT IDENTITY PRIMARY KEY,
+    id_indicateur INT NOT NULL,
+    annee INT NOT NULL CHECK (annee BETWEEN 1900 AND 9999),
+    FOREIGN KEY (id_indicateur) REFERENCES Indicateur(id),
+    CONSTRAINT UQ_annee_dispoIndicateur_Indicateur_Annee UNIQUE (id_indicateur, annee)
+);
+
+
+
 

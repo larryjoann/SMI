@@ -56,7 +56,6 @@ const Form_indicateur = () => {
                 <CButton
                     color='secondary'
                     key='1'
-                    shape="rounded-pill"
                     className="mb-3"
                     href='#/indicateur/tableau'
                 >
@@ -77,57 +76,66 @@ const Form_indicateur = () => {
                         onSubmit={handleSubmit}
                         >
                             {/* ...existing code... */}
-                            <CCol md={4}>
-                                <CFormLabel htmlFor="validationCustom01">Email</CFormLabel>
-                                <CFormInput type="text" id="validationCustom01" defaultValue="Mark" required />
+                            <CCol xs={12}>
+                                <CFormLabel htmlFor="validationCustom01">Nom :</CFormLabel>
+                                <CFormTextarea id="validationCustom01" required />
                                 <CFormFeedback valid></CFormFeedback>
-                            </CCol>
-                            <CCol md={4}>
-                                <CFormLabel htmlFor="validationCustom02">Email</CFormLabel>
-                                <CFormInput type="text" id="validationCustom02" defaultValue="Otto" required />
-                                <CFormFeedback valid>Looks good!</CFormFeedback>
-                            </CCol>
-                            <CCol md={4}>
-                                <CFormLabel htmlFor="validationCustomUsername">Username</CFormLabel>
-                                <CInputGroup className="has-validation">
-                                <CInputGroupText id="inputGroupPrepend">@</CInputGroupText>
-                                <CFormInput
-                                    type="text"
-                                    id="validationCustomUsername"
-                                    defaultValue=""
-                                    aria-describedby="inputGroupPrepend"
-                                    required
-                                />
-                                <CFormFeedback invalid>Please choose a username.</CFormFeedback>
-                                </CInputGroup>
-                            </CCol>
-                            <CCol md={6}>
-                                <CFormLabel htmlFor="validationCustom03">City</CFormLabel>
-                                <CFormInput type="text" id="validationCustom03" required />
-                                <CFormFeedback invalid>Please provide a valid city.</CFormFeedback>
-                            </CCol>
-                            <CCol md={3}>
-                                <CFormLabel htmlFor="validationCustom04">City</CFormLabel>
+                            </CCol>            
+                            <CCol xs={12}>
+                                <CFormLabel htmlFor="validationCustom04">Objectif :</CFormLabel>
                                 <CFormSelect id="validationCustom04">
                                 <option>Achat</option>
                                 <option>Maintenance</option>
                                 </CFormSelect>
                                 <CFormFeedback invalid>Please provide a valid city.</CFormFeedback>
                             </CCol>
-                            <CCol md={3}>
-                                <CFormLabel htmlFor="validationCustom05">City</CFormLabel>
-                                <CFormInput type="text" id="validationCustom05" required />
-                                <CFormFeedback invalid>Please provide a valid zip.</CFormFeedback>
+                            <CCol xs={6}>
+                                <CFormLabel htmlFor="validationCustom04">Fréquence :</CFormLabel>
+                                <CFormSelect id="validationCustom04">
+                                <option>Achat</option>
+                                <option>Maintenance</option>
+                                </CFormSelect>
+                                <CFormFeedback invalid>Please provide a valid city.</CFormFeedback>
+                            </CCol>
+                            <CCol xs={6}>
+                                <CFormLabel htmlFor="validationCustom04">Unité de mesure :</CFormLabel>
+                                <CFormSelect id="validationCustom04">
+                                <option>Achat</option>
+                                <option>Maintenance</option>
+                                </CFormSelect>
+                                <CFormFeedback invalid>Please provide a valid city.</CFormFeedback>
+                            </CCol>                          
+                            <CCol xs={12}>
+                                <CFormLabel htmlFor="validationCustom05">Cible :</CFormLabel>
+                                <div className="border rounded p-3">
+                                    <CRow>
+                                        <CCol xs={12} className='mb-2'>
+                                            <CFormLabel htmlFor="validationCustom05Desc">Description :</CFormLabel>
+                                            <CFormTextarea id="validationCustom05Desc" rows={3} />
+                                        </CCol>
+                                        <CCol xs={3}>
+                                            <CFormLabel htmlFor="validationCustom05">Min :</CFormLabel>
+                                            <CFormInput type="text" id="validationCustom05" required />
+                                            <CFormFeedback invalid>Please provide a valid value.</CFormFeedback>
+                                        </CCol>                                        
+                                        <CCol xs={3}>
+                                            <CFormLabel htmlFor="validationCustom05">Optimal :</CFormLabel>
+                                            <CFormInput type="text" id="validationCustom05" required />
+                                            <CFormFeedback invalid>Please provide a valid value.</CFormFeedback>
+                                        </CCol>              
+                                        <CCol xs={3}>
+                                            <CFormLabel htmlFor="validationCustom05Value">Max :</CFormLabel>
+                                            <CFormInput type="number" id="validationCustom05Value" required />
+                                            <CFormFeedback invalid>Please provide a valid number.</CFormFeedback>
+                                        </CCol>
+                                    </CRow>
+                                </div>
                             </CCol>
                             <CCol xs={12}>
-                                <CFormCheck
-                                type="checkbox"
-                                id="invalidCheck"
-                                label="Agree to terms and conditions"
-                                required
-                                />
-                                <CFormFeedback invalid>You must agree before submitting.</CFormFeedback>
-                            </CCol>
+                                <CFormLabel htmlFor="validationCustom09">Source :</CFormLabel>
+                                <CFormTextarea id="validationCustom09" required />
+                                <CFormFeedback valid></CFormFeedback>
+                            </CCol>   
                             <CCol xs={12}>
                                 <CButton color="primary" type="submit">
                                 Submit form

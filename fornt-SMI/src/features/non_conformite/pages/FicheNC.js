@@ -530,7 +530,7 @@ const FicheNC = () => {
           <CCardHeader className="position-relative text-center">
                 <span className="h6 mb-0 d-block">ANALYSE DES CAUSES </span>
                 <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
-                  {currentMatricule === '00005' && (
+                  {(
                     <CButton
                       size="md"
                       onClick={() => {
@@ -569,7 +569,7 @@ const FicheNC = () => {
           <CCardHeader className="position-relative text-center">
             <span className="h6 mb-0 d-block">ACTION CORRECTIVES</span>
                 <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
-                  {currentMatricule === '00005' && (
+                  {(
                     <CButton
                       size="md"
                       onClick={() => {
@@ -685,7 +685,7 @@ const FicheNC = () => {
           <CCardHeader className="position-relative text-center">
             <span className="h6 mb-0 d-block">VÉRIFICATION EFFICACITÉ</span>
             <div style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
-              {currentMatricule === '00005' && (
+              {(
                 <CButton size="md" onClick={() => setShowVerifyModal(true)}>
                   <CIcon icon={cilCheckAlt} className="text-primary" />
                 </CButton>
@@ -791,7 +791,7 @@ const FicheNC = () => {
       <div style={{ marginTop: 'auto', position: 'sticky', bottom: 3, display: 'flex', justifyContent: 'center', zIndex: 1030, background: '#fff' }}>
         <div style={{ width: '100%', padding: '0px', display: 'flex', justifyContent: 'center' }}>
             <div style={{ display: 'flex', gap: 8 }}>
-            {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 1 && (nc.statusNc.id === 1 || nc.statusNc.id === 2) && currentMatricule === '00005' && (
+            {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 1 && (nc.statusNc.id === 1 || nc.statusNc.id === 2) && (
               <CButton
                 color='primary'
                 style={{ boxShadow: '0 6px 14px rgba(0,0,0,0.12)'}}
@@ -806,7 +806,7 @@ const FicheNC = () => {
               </CButton>
             )}
 
-            {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 1 && nc.statusNc.id === 3 && currentMatricule === '00005' && (
+            {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 1 && nc.statusNc.id === 3 && (
               <CButton
                 color='primary'
                 style={{ boxShadow: '0 6px 14px rgba(0,0,0,0.12)' }}
@@ -821,7 +821,7 @@ const FicheNC = () => {
               </CButton>
             )}
 
-            {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 2 && (nc.statusNc.id === 5) && currentMatricule === '00005' && (
+            {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 2 && (nc.statusNc.id === 5) && (
               <CButton
                 color='primary'
                 style={{ boxShadow: '0 6px 14px rgba(0,0,0,0.12)'}}
@@ -832,7 +832,7 @@ const FicheNC = () => {
               </CButton>
             )}
 
-            {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 2 && (nc.statusNc.id === 6) && allActionsComplete && currentMatricule === '00005' && (
+            {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 2 && (nc.statusNc.id === 6) && allActionsComplete && (
               <CButton
                 color='primary'
                 style={{ boxShadow: '0 6px 14px rgba(0,0,0,0.12)' }}
@@ -843,7 +843,7 @@ const FicheNC = () => {
               </CButton>
             )}
 
-            {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 3 && (nc.statusNc.id === 8) && allActionsComplete && currentMatricule === '00005' && (
+            {nc.idStatusNc != null && nc.statusNc?.idPhaseNc === 3 && (nc.statusNc.id === 8) && allActionsComplete && (
               <CButton
                 color='primary'
                 style={{ boxShadow: '0 6px 14px rgba(0,0,0,0.12)' }}
@@ -947,7 +947,6 @@ const FicheNC = () => {
           </CInputGroup>
         </div>
       </div>
-
       </div>
     </>
   )

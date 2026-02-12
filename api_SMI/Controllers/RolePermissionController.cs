@@ -1,3 +1,4 @@
+using api_SMI.Attributes;
 using api_SMI.Models;
 using api_SMI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ namespace api_SMI.Controllers
             _service = service;
         }
 
+        [RequirePermission("ADMIN")]
         [HttpGet]
         public IActionResult GetAll()
         {
